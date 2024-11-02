@@ -35,11 +35,8 @@ function App() {
         console.log('Wialon SDK not loaded.');
         return;
       }
-
-
-
       sess.initSession('https://hst-api.wialon.com');
-      const token = '8ca297495a6d20aed50815e6f79cdd3b7D935A9E0820890BD1A035F245DE85BD67A0C71F'; // Use environment variable for the token
+      const token = '8ca297495a6d20aed50815e6f79cdd3b7D935A9E0820890BD1A035F245DE85BD67A0C71F'; //check
       sess.loginToken(token, '', (code) => {
         if (code) {
           console.error('Login failed with code:', code, 'Error:', window.wialon.core.Errors.getErrorText(code));
