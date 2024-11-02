@@ -160,13 +160,13 @@ const ViolationList = () => {
 
       <Header active="violations" />
 
-      <main>
+   
         <div className="breadcrumb">
           <a onClick={() => navigate('/employer-home')}>Home</a>
           <span> / </span>
           <a onClick={() => navigate('/violations')}>Violations List</a>
         </div>
-
+   <main>
         <div className={s.container}>
           <div className={s.searchHeader}  >
             <h2 className={s.title}  >
