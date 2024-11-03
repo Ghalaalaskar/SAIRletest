@@ -455,8 +455,9 @@ const EditDriver = () => {
                       name="GPSnumber"
                       value={driverData.GPSnumber}
                       onChange={handleInputChange}
+                      className={s.select}
                     >
-                      <option value="None">None</option>
+                      <option className={s.select} value="None">None</option>
                       {availableMotorcycles.length > 0 ? (
                         availableMotorcycles.map((item) => (
                           <option key={item.id} value={item.GPSnumber}>
@@ -464,7 +465,7 @@ const EditDriver = () => {
                           </option>
                         ))
                       ) : (
-                        <option disabled>No motorcycles available</option>
+                        <option className={s.select} disabled>No motorcycles available</option>
                       )}
                     </select>
                     {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}

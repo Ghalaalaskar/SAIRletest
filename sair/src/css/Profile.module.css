@@ -119,3 +119,19 @@
   font-size: 12px; /* Make the font size smaller */
   list-style-type: none;
 }
+
+.valdationMessage {
+  color: red; 
+  margin-top: 3px; 
+}
+
+.container input, 
+.container select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #059855; /* Green border */
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease-in-out;
+  font-family: 'Open Sans';
+}
