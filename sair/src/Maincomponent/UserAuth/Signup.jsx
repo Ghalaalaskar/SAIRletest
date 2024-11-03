@@ -466,7 +466,7 @@ const SignUp = () => {
               <li style={{ color: passwordRequirements.number ? '#059855' : 'red' }}>
               Contain at least one number
               </li>
-              <li style={{ color: passwordRequirements.special ? '#059855' : 'red' }}>
+              <li style={{ color: passwordRequirements.special ? '#059855' : 'red' , marginBottom:'5px'}}>
               Contain at least one special character(!@#$%^&*)
               </li>
             </ul>
