@@ -249,7 +249,7 @@ const EditDriver = () => {
   const checkIfPhoneNumberExists = async (phoneNumber) => {
     const phoneQuery = query(
       collection(db, 'Driver'),
-      where('PhoneNumber', '==', `+966${phoneNumber}`)
+      where('PhoneNumber', '==', `${phoneNumber}`)
     );
     const querySnapshot = await getDocs(phoneQuery);
     return !querySnapshot.empty; // Returns true if exists
@@ -268,7 +268,10 @@ const EditDriver = () => {
   const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     const phoneRegex1 = /^\+96605\d{8}$/;
-
+  // Check if the phone number starts with +966
+  if (PhoneNumber === '+966') {
+    return 'Please enter driver phone number'; // Custom message for exact match
+  }
     if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
       return null;
     } else {
@@ -285,17 +288,17 @@ const EditDriver = () => {
     const newValidationMessages = {};
 
     if (!Fname) {
-      newValidationMessages.Fname = 'Please enter first name';
+      newValidationMessages.Fname = 'Please enter first name.';
       isValid = false;
     }
 
     if (!Lname) {
-      newValidationMessages.Lname = 'Please enter last name';
+      newValidationMessages.Lname = 'Please enter last name.';
       isValid = false;
     }
 
     if (!PhoneNumber) {
-      newValidationMessages.PhoneNumber = 'Please enter phone number';
+      newValidationMessages.PhoneNumber = 'Please enter phone number.';
       isValid = false;
     } else {
       const phoneValidation = validatePhoneNumber(PhoneNumber);
@@ -306,11 +309,11 @@ const EditDriver = () => {
     }
 
     if (!DriverID) {
-      newValidationMessages.DriverID = 'Please enter driver ID';
+      newValidationMessages.DriverID = 'Please enter driver ID.';
       isValid = false;
     } else {
       if (DriverID.length !== 10) {
-        newValidationMessages.DriverID = 'Driver ID must be 10 digits';
+        newValidationMessages.DriverID = 'Driver ID must be 10 digits.';
         isValid = false;
       }
     }
