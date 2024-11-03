@@ -385,8 +385,8 @@ const SignUp = () => {
               required
               //style={{ borderColor: getBorderColor('commercialNumber') }}
             />
-            {missingFields['commercialNumber'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['commercialNumber']}</p>}
-            {validationMessages.commercialNumberError && <p style={{ color: 'red',fontSize:'14px'}}>{validationMessages.commercialNumberError}</p>}
+            {missingFields['commercialNumber'] && <p style={{ color: 'red' }}>{missingFields['commercialNumber']}</p>}
+            {validationMessages.commercialNumberError && <p style={{ color: 'red'}}>{validationMessages.commercialNumberError}</p>}
           </div>
 
           <div className={s.profileField}>
@@ -399,7 +399,7 @@ const SignUp = () => {
               required
               //style={{ borderColor: getBorderColor('CompanyName') }}
             />
-            {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['CompanyName']}</p>}
+            {missingFields['CompanyName'] && <p style={{ color: 'red' }}>{missingFields['CompanyName']}</p>}
           </div>
           <div className={s.profileField}>
             <label>Phone Number</label>
@@ -413,8 +413,8 @@ const SignUp = () => {
               required
               //style={{ borderColor: getBorderColor('PhoneNumber') }}
             />
-            {missingFields['PhoneNumber'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['PhoneNumber']}</p>}
-            {validationMessages.phoneError && <p style={{ color: 'red', fontSize:'14px' }}>{validationMessages.phoneError}</p>}
+            {missingFields['PhoneNumber'] && <p style={{ color: 'red' }}>{missingFields['PhoneNumber']}</p>}
+            {validationMessages.phoneError && <p style={{ color: 'red' }}>{validationMessages.phoneError}</p>}
           </div>
           <div className={s.profileField}>
             <label>Company Email</label>
@@ -426,8 +426,8 @@ const SignUp = () => {
               required
               //style={{ borderColor: getBorderColor('CompanyEmail') }}
             />
-            {missingFields['CompanyEmail'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['CompanyEmail']}</p>}           
-            {validationMessages.emailError && <p style={{ color: 'red', fontSize:'14px' }}>{validationMessages.emailError}</p>}
+            {missingFields['CompanyEmail'] && <p style={{ color: 'red' }}>{missingFields['CompanyEmail']}</p>}           
+            {validationMessages.emailError && <p style={{ color: 'red' }}>{validationMessages.emailError}</p>}
             
           </div>
 
@@ -449,7 +449,7 @@ const SignUp = () => {
             >
               <i className={showPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
             </span> 
-            {missingFields['Password'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['Password']}</p>}
+            {missingFields['Password'] && <p style={{ color: 'red' }}>{missingFields['Password']}</p>}
 
             </div>
           <div  >
@@ -488,7 +488,7 @@ const SignUp = () => {
             >
               <i className={showConfirmNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
             </span>
-            {missingFields['confirmPassword'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['confirmPassword']}</p>}
+            {missingFields['confirmPassword'] && <p style={{ color: 'red' }}>{missingFields['confirmPassword']}</p>}
           </div>
           <div style={{ marginTop: '20px', textAlign: 'center', position: 'relative' }}>
             <a

@@ -476,7 +476,6 @@ const Profile = () => {
                 disabled={!editMode}
                 readOnly
               />
-             {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['CompanyName']}</p>}
 
             </div>
           </div>
@@ -494,8 +493,8 @@ const Profile = () => {
                 pattern="\+9665\d{8}"
                 required
               />
-              {missingFields['PhoneNumber'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['PhoneNumber']}</p>}
-              {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px',fontSize: '14px' }}>{validationMessages.phoneError}</p>}
+              {missingFields['PhoneNumber'] && <p style={{ color: 'red' }}>{missingFields['PhoneNumber']}</p>}
+              {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
            
             <div>
@@ -567,7 +566,7 @@ const Profile = () => {
                   <span onClick={() => togglePasswordVisibility('new')} className={s.togglePasswordVisibility}>
                     <i className={showNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
-                  {missingFields['newPassword'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['newPassword']}</p>}
+                  {missingFields['newPassword'] && <p style={{ color: 'red' }}>{missingFields['newPassword']}</p>}
                   <div className={s.passwordRequirements}>
                   <ul style={{fontSize:'14px',marginLeft:'10px' ,marginTop:'12px'}}>
                   <li style={{ color: passwordRequirements.length ? '#059855' : 'red' }}>
@@ -603,7 +602,7 @@ const Profile = () => {
                   <span onClick={() => togglePasswordVisibility('confirm')} className={s.togglePasswordVisibility}>
                     <i className={showConfirmNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
-                  {missingFields['confirmNewPassword'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['confirmNewPassword']}</p>}
+                  {missingFields['confirmNewPassword'] && <p style={{ color: 'red' }}>{missingFields['confirmNewPassword']}</p>}
                   {validationMessages.confirmNewPasswordError && (
                     <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.confirmNewPasswordError}</p>
                   )}
