@@ -261,14 +261,24 @@ const Profile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const newMissingFields = {};
+    if (Employer.newPassword || Employer.confirmNewPassword) {
+      if (!Employer.newPassword) {
+        newMissingFields.newPassword = 'Please enter your new password';
+      }
+      if (!Employer.confirmNewPassword) {
+        newMissingFields.confirmNewPassword = 'Please confirm your new password';
+      }
+    }
+  
+    // Check for other required fields like CompanyName and PhoneNumber
     ['CompanyName', 'PhoneNumber'].forEach((field) => {
       if (!Employer[field] || (field === 'PhoneNumber' && Employer.PhoneNumber === '+966')) {
         newMissingFields[field] = `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
       }
     });
-
+  
+    // If there are missing fields, set them and stop form submission
     if (Object.keys(newMissingFields).length > 0) {
       setMissingFields(newMissingFields);
       setLoading(false);
@@ -304,23 +314,6 @@ const Profile = () => {
     }
       // Validate new password and confirm password
       if (Employer.newPassword || Employer.confirmNewPassword) {
-
-        const requiredFields = [ 'newPassword', 'confirmNewPassword'];
-        const newMissingFields = {};
-    
-        requiredFields.forEach((field) => {
-         if (!Employer[field] ) {
-           // Custom message for 'confirmPassword', other fields get a standard message
-           newMissingFields[field] = field === 'confirmPassword'
-          ? 'Please enter your password'
-          : `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
-      }
-       });
-    
-        if (Object.keys(newMissingFields).length > 0) {
-          setMissingFields(newMissingFields);
-          return; // Stop sign-up if there are missing fields
-        }
   
         // Check if passwords match
         if (Employer.newPassword !== Employer.confirmNewPassword) {
@@ -374,6 +367,7 @@ const Profile = () => {
   const handleCancel = () => {
     setEmployer(originalEmployerData); // Restore original data
     setEditMode(false); // Exit edit mode
+    setMissingFields({});
     setValidationMessages({ // Clear validation messages
       phoneError: '',
       commercialNumberError: '',
@@ -388,6 +382,7 @@ const Profile = () => {
 
 
     });
+
     // Reset password requirements to default (all false)
     setPasswordRequirements({
       length: false,
@@ -444,7 +439,7 @@ const Profile = () => {
         <span> / </span>
         <a onClick={() => navigate('/employee-profile')}>Profile</a>
       </div>
-
+<div className={s.forme}>
       <main className={s.container}>
         <form onSubmit={handleSave} noValidate>
           <h2 className='title'>My Profile</h2>
@@ -470,7 +465,7 @@ const Profile = () => {
                 disabled={!editMode}
                 required
               />
-             {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['CompanyName']}</p>}
+             {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['CompanyName']}</p>}
 
             </div>
           </div>
@@ -488,8 +483,8 @@ const Profile = () => {
                 pattern="\+9665\d{8}"
                 required
               />
-              {missingFields['PhoneNumber'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['PhoneNumber']}</p>}
-              {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
+              {missingFields['PhoneNumber'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['PhoneNumber']}</p>}
+              {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px',fontSize: '14px' }}>{validationMessages.phoneError}</p>}
             </div>
            
             <div>
@@ -561,9 +556,9 @@ const Profile = () => {
                   <span onClick={() => togglePasswordVisibility('new')} className={s.togglePasswordVisibility}>
                     <i className={showNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
-                  {missingFields['newPassword'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['newPassword']}</p>}
+                  {missingFields['newPassword'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['newPassword']}</p>}
                   <div className={s.passwordRequirements}>
-                  <ul style={{fontSize:'15px',marginLeft:'10px' ,marginTop:'12px'}}>
+                  <ul style={{fontSize:'14px',marginLeft:'10px' ,marginTop:'12px'}}>
                   <li style={{ color: passwordRequirements.length ? '#059855' : 'red' }}>
                 Contain at least 8 characters
               </li>
@@ -597,7 +592,7 @@ const Profile = () => {
                   <span onClick={() => togglePasswordVisibility('confirm')} className={s.togglePasswordVisibility}>
                     <i className={showConfirmNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
-                  {missingFields['confirmNewPassword'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['confirmNewPassword']}</p>}
+                  {missingFields['confirmNewPassword'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['confirmNewPassword']}</p>}
                   {validationMessages.confirmNewPasswordError && (
                     <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.confirmNewPasswordError}</p>
                   )}
@@ -636,7 +631,7 @@ const Profile = () => {
         )}
 
 
-      </main></div>
+      </main></div></div>
   );
 };
 
