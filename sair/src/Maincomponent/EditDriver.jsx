@@ -3,12 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, setDoc, query, collection, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown } from 'antd';
+
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import SAIRLogo from '../images/SAIRlogo.png';
 import logoutIcon from '../images/logout.png';
 import { UserOutlined, DownOutlined } from '@ant-design/icons';
 import Header from './Header';
+
+import s from '../css/Profile.module.css';
 
 const EditDriver = () => {
   const { driverId } = useParams();
@@ -25,6 +28,16 @@ const EditDriver = () => {
   const [companyName, setCompanyName] = useState('');
   const [phoneValidationMessage, setPhoneValidationMessage] = useState('');
 
+  // Update state structure to match AddDriver
+  const [validationMessages, setValidationMessages] = useState({
+    Fname: '',
+    Lname: '',
+    PhoneNumber: '',
+    Email: '',
+    DriverID: '',
+    GPSnumber: ''
+  });
+
   const employerUID = sessionStorage.getItem('employerUID');
   // Fetch the driver's data based on driverId
   useEffect(() => {
@@ -36,6 +49,8 @@ const EditDriver = () => {
           const driverData = driverDoc.data();
 
           const companyName = await fetchCompanyName(employerUID);
+
+          console.log('Driver data:', driverData);
 
           setDriverData({
             ...driverData,
@@ -240,14 +255,6 @@ const EditDriver = () => {
     return !querySnapshot.empty; // Returns true if exists
   };
 
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      navigate('/'); // Redirect to login page
-    }).catch((error) => {
-      console.error('Error LOGGING out:', error);
-    });
-  };
-
   // Effect to fetch company name on component mount
   useEffect(() => {
     const getCompanyName = async () => {
@@ -257,6 +264,98 @@ const EditDriver = () => {
     getCompanyName();
   }, [employerUID]);
 
+  // Update validation function
+  const validatePhoneNumber = (PhoneNumber) => {
+    const phoneRegex = /^\+9665\d{8}$/;
+    const phoneRegex1 = /^\+96605\d{8}$/;
+
+    if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
+      return null;
+    } else {
+      return 'Phone number must start with +9665 and be followed by 8 digits.';
+    }
+  };
+
+  // Update submit handler 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { Fname, Lname, PhoneNumber, DriverID, GPSnumber } = driverData;
+    console.log("subbb", driverData);
+    let isValid = true;
+    const newValidationMessages = {};
+
+    if (!Fname) {
+      newValidationMessages.Fname = 'Please enter first name';
+      isValid = false;
+    }
+
+    if (!Lname) {
+      newValidationMessages.Lname = 'Please enter last name';
+      isValid = false;
+    }
+
+    if (!PhoneNumber) {
+      newValidationMessages.PhoneNumber = 'Please enter phone number';
+      isValid = false;
+    } else {
+      const phoneValidation = validatePhoneNumber(PhoneNumber);
+      if (phoneValidation) {
+        newValidationMessages.PhoneNumber = phoneValidation;
+        isValid = false;
+      }
+    }
+
+    if (!DriverID) {
+      newValidationMessages.DriverID = 'Please enter driver ID';
+      isValid = false;
+    } else {
+      if (DriverID.length !== 10) {
+        newValidationMessages.DriverID = 'Driver ID must be 10 digits';
+        isValid = false;
+      }
+    }
+
+    setValidationMessages(newValidationMessages);
+
+    if (isValid) {
+      handleUpdateDriver(driverData);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setValidationMessages((prev) => ({
+      ...prev,
+      [e.target.name]: ''
+    })); // Remove the validation message when the user starts typing
+    const { name, value } = e.target;
+    setDriverData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    let newPhoneNumber = e.target.value;
+    if (newPhoneNumber.startsWith('+966')) {
+      setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
+    } else {
+      newPhoneNumber = '+966' + newPhoneNumber.slice(3);
+      setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
+    }
+
+    let phoneError = '';
+    if (newPhoneNumber.length > 4) {
+      const validationResult = validatePhoneNumber(newPhoneNumber);
+      if (validationResult) {
+        phoneError = validationResult;
+      }
+    }
+
+    setValidationMessages(prev => ({
+      ...prev,
+      PhoneNumber: phoneError
+    }));
+  };
 
   const menu = (
     <Menu style={{ fontSize: '15px' }}>
@@ -272,9 +371,9 @@ const EditDriver = () => {
 
   return (
     <div className="Header">
-     
+
       <Header active="driverslist" />
-      
+
       <div className="breadcrumb">
         <a onClick={() => navigate('/employer-home')}>Home</a>
         <span> / </span>
@@ -282,257 +381,104 @@ const EditDriver = () => {
         <span> / </span>
         <a onClick={() => navigate(`/edit-driver/${driverId}`)}>Edit Driver</a>
       </div>
-      <div>
-        <div className="driver-list-header-container">
-        </div>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center' 
-        }}>
-          <Card style={{ width: '900px', height: 'auto' }}>
+      <main>
+        <div  >
+          <div className={s.container}>
             <h2 className='title'>Edit Driver</h2>
             {isLoading ? (
               <p>   </p>
             ) : (
-              <Form
-                layout="vertical"
-                onFinish={handleUpdateDriver}
-                initialValues={driverData}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                  marginBottom: '20px',
-                  fontFamily: 'Open Sans',
-                }}
-              >
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          First Name
-                        </span>
-                      }
+              <form onSubmit={handleSubmit}>
+                <div className={s.formRow}>
+                  <div>
+                    <label>First Name</label>
+                    <input
+                      type="text"
                       name="Fname"
-                      rules={[{ required: true, message: 'First name is required.' }]}
-                    >
-                      <Input style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                      }} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          Last Name
-                        </span>
-                      }
+                      value={driverData.Fname}
+                      onChange={handleInputChange}
+                    />
+                    {validationMessages.Fname && <p className={s.valdationMessage}>{validationMessages.Fname}</p>}
+                  </div>
+
+                  <div>
+                    <label>Last Name</label>
+                    <input
+                      type="text"
                       name="Lname"
-                      rules={[{ required: true, message: 'Last name is required.' }]}
-                    >
-                      <Input style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                      }} />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          Phone Number
-                        </span>
-                      }
+                      value={driverData.Lname}
+                      onChange={handleInputChange}
+                    />
+                    {validationMessages.Lname && <p className={s.valdationMessage}>{validationMessages.Lname}</p>}
+                  </div>
+                </div>
+
+                <div className={s.formRow}>
+                  <div>
+                    <label>Phone Number</label>
+                    <input
                       name="PhoneNumber"
-                      rules={[{ required: true, message: 'Phone Number is required.' },
-                      {
-                        validator: (_, value) => {
-                          if (!value) return Promise.resolve(); // Skip if not required
-                          // Validate that the phone number starts with '5' and is 9 digits long
-                          if (!/^5\d{8}$/.test(value)) {
-                            return Promise.reject(new Error('Phone number must start with 5 and be 9 digits long.'));
-                          }
-                          return Promise.resolve();
-                        }
-                      }
-                      ]} // Keep required rule
-                    >
-                      <div style={{ position: 'relative' }}>
-                        <span style={{
-                          position: 'absolute',
-                          left: '10px',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          color: '#000',
-                          fontSize: '14px',
-                          padding: '8px',
-                          fontFamily: 'Open Sans',
-                          pointerEvents: 'none',
-                          zIndex: 1
-                        }}>
-                          +966
-                        </span>
-                        <Input
-                          maxLength={9}  // Only allow 9 digits (after +966)
-                          style={{
-                            width: '100%',
-                            paddingLeft: '50px', // Leave space for +966
-                            border: '1px solid #059855',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            transition: 'border-color 0.3s ease-in-out',
-                            fontFamily: 'Open Sans',
-                            height: '43px',
-                          }}
-                          onFocus={(e) => e.target.style.borderColor = '#1c7a50'}
-                          onBlur={(e) => e.target.style.borderColor = '#059855'}
-                          defaultValue={driverData.PhoneNumber ? driverData.PhoneNumber.slice(4) : ''}
-                        />
-                      </div>
-                    </Form.Item>
-                  </Col>
+                      value={driverData.PhoneNumber}
+                      placeholder="+966"
+                      onChange={handlePhoneNumberChange}
+                    />
+                    {validationMessages.PhoneNumber && <p className={s.valdationMessage}>{validationMessages.PhoneNumber}</p>}
+                  </div>
 
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          Email
-                        </span>
-                      }
+                  <div>
+                    <label>Email</label>
+                    <input
                       name="Email"
-                      rules={[{ required: true, message: 'Email is required.' }]}
-                    >
-                      <Input style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                      }} disabled />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          Driver ID (National ID / Residency Number)
-                        </span>
-                      }
-                      name="DriverID"
-                      rules={[{ required: true, message: 'Driver ID is required.' }]}
-                    >
-                      <Input maxLength={10}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          border: '1px solid #059855',
-                          borderRadius: '8px',
-                          fontSize: '14px',
-                        }} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{
-                          display: 'block',
-                          marginBottom: '5px',
-                          fontWeight: 'bold',
-                          color: '#059855',
-                          fontFamily: 'Open Sans',
-                          fontSize: '16px'
-                        }}>
-                          GPS Number
-                        </span>
-                      }
-                      name="GPSnumber"
-                      rules={[{ required: true, message: 'GPS number is required or You can choose None.' }]}
-                    >
-                      <Select
-                        placeholder="Select a motorcycle"
-                        style={{
-                          width: '100%',
-                          height: '45px',
-                          border: '0.5px solid #059855',
-                          borderRadius: '8px',
-                          fontSize: '14px',
-                          transition: 'border-color',
-                          fontFamily: 'Open Sans',
-                        }}
-                        dropdownStyle={{
-                          boxShadow: 'none',
-                        }}
-                        onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                        onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                      >
-                        <Select.Option value={null}>None</Select.Option>
-                        {availableMotorcycles.map((item) => (
-                          <Select.Option key={item.id} value={item.GPSnumber}>
-                            {item.GPSnumber}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
+                      value={driverData.Email}
+                      disabled
+                      className={s.disabledInput}
+                    />
+                  </div>
+                </div>
 
-                <Form.Item>
-                  <Button style={{ backgroundColor: "#059855" }} type="primary" htmlType="submit">
+                <div className={s.formRow}>
+                  <div>
+                    <label>Driver ID (National ID / Residency Number)</label>
+                    <input
+                      type="text"
+                      name="DriverID"
+                      maxLength={10}
+                      value={driverData.DriverID}
+                      onChange={handleInputChange}
+                    />
+                    {validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
+                  </div>
+
+                  <div>
+                    <label>GPS Number</label>
+                    <select
+                      name="GPSnumber"
+                      value={driverData.GPSnumber}
+                      onChange={handleInputChange}
+                    >
+                      <option value="None">None</option>
+                      {availableMotorcycles.length > 0 ? (
+                        availableMotorcycles.map((item) => (
+                          <option key={item.id} value={item.GPSnumber}>
+                            {item.GPSnumber}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>No motorcycles available</option>
+                      )}
+                    </select>
+                    {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <button type="submit" className={s.editBtn}>
                     Update Driver
-                  </Button>
-                </Form.Item>
-              </Form>
+                  </button>
+                </div>
+              </form>
             )}
-          </Card>
+          </div>
         </div>
         {isNotificationVisible && (
           <div className={`notification-popup ${isSuccess ? 'success' : 'error'}`}>
@@ -541,7 +487,7 @@ const EditDriver = () => {
             <p>{notificationMessage}</p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
