@@ -9,8 +9,10 @@ import s from '../css/Header.module.css';
 
 const Header = ({ active }) => {
   const navigate = useNavigate();
-  const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState(
+    sessionStorage.getItem('companyName') || '' // Load from sessionStorage initially
+  );
+    const [modalVisible, setModalVisible] = useState(false);
 
   const showModal = () => {
     setModalVisible(true);
@@ -40,14 +42,16 @@ const Header = ({ active }) => {
   useEffect(() => {
     const fetchUserName = async () => {
       const employerUID = sessionStorage.getItem('employerUID');
-      if (employerUID) {
+      
+      if (employerUID && !currentEmployerCompanyName) {
+        // Only fetch if there's a UID and no name in sessionStorage
         try {
           const userDocRef = doc(db, 'Employer', employerUID);
           const docSnap = await getDoc(userDocRef);
           if (docSnap.exists()) {
             const employerData = docSnap.data();
-            console.log('Employer Data:', employerData);
             setCurrentEmployerCompanyName(employerData.CompanyName);
+            sessionStorage.setItem('companyName', employerData.CompanyName); // Cache it for next load
           } else {
             console.log('No such document!');
           }
@@ -58,8 +62,8 @@ const Header = ({ active }) => {
     };
 
     fetchUserName();
-  }, []);
-
+  }, [currentEmployerCompanyName]);
+  
   const navItems = [
     { path: 'employer-home', label: 'Home' },
     { path: 'violations', label: 'Violations List' },

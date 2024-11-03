@@ -35,7 +35,7 @@ function App() {
         return;
       }
       sess.initSession('https://hst-api.wialon.com');
-      const token = '8ca297495a6d20aed50815e6f79cdd3b7D935A9E0820890BD1A035F245DE85BD67A0C71F'; //check
+      const token = '8ca297495a6d20aed50815e6f79cdd3b2D6292586C51CF2BE801FC0E4C312A5474C9BB71'; //check
       sess.loginToken(token, '', (code) => {
         if (code) {
           console.error('Login failed with code:', code, 'Error:', window.wialon.core.Errors.getErrorText(code));
