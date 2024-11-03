@@ -213,8 +213,8 @@ const Login = () => {
         Welcome to SAIR!
       </h1>
 
-      <label >
-        Please Select your Role
+      <label style={{ fontSize: '18px' }}>
+      Please Select your Role
         <select
           id='roleSelect'
           onChange={handleRoleChange}
