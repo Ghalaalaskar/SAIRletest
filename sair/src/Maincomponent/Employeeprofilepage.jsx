@@ -23,6 +23,7 @@ const Profile = () => {
 
   const [originalEmployerData, setOriginalEmployerData] = useState({});
   const [editMode, setEditMode] = useState(false);
+  const [missingFields, setMissingFields] = useState({});
   const [validationMessages, setValidationMessages] = useState({
     phoneError: '',
     commercialNumberError: '',
@@ -74,6 +75,15 @@ const Profile = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEmployer({ ...Employer, [name]: value });
+     // Clear the missing field error as soon as the user fills it
+     if (value.trim() !== '' && missingFields[name]) {
+      console.log(missingFields);
+      setMissingFields((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
     setValidationMessages((prev) => ({
       ...prev,
       currentPasswordError: '',
@@ -84,54 +94,56 @@ const Profile = () => {
 
 
     switch (name) {
-      case 'PhoneNumber':
-        setValidationMessages((prev) => ({ ...prev, phoneError: validatePhoneNumber(value) }));
-        break;
-      case 'commercialNumber':
-        setValidationMessages((prev) => ({ ...prev, commercialNumberError: validateCommercialNumber(value) }));
-        break;
-      case 'CompanyEmail':
-        setValidationMessages((prev) => ({ ...prev, emailError: validateEmail(value) }));
-        break;
       case 'newPassword':
-        setPasswordRequirements({
+        const updatedRequirements = {
           length: value.length >= 8,
           uppercase: /[A-Z]/.test(value),
           lowercase: /[a-z]/.test(value),
           number: /\d/.test(value),
           special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
-        });
+        };
+    
+        // Update password requirements state
+        setPasswordRequirements(updatedRequirements);
+    
+        // Check if all requirements are met
+        const allRequirementsMet = Object.values(updatedRequirements).every(Boolean);
+    
+        setValidationMessages((prev) => ({
+          ...prev,
+          passwordError: allRequirementsMet ? '' : 'Password does not meet the requirements.',
+        }));
         break;
       default:
         break;
     }
-  };
-
-  const handleChange2 = (e) => {
-    const { value } = e.target;
-
-    // Update the confirm password field in the Employer state
-    setEmployer(prev => ({ ...prev, confirmNewPassword: value }));
-
-    // Check if newPassword and confirmNewPassword match
-    if (Employer.newPassword === value) {
-      // Clear the error message if they match
-      setValidationMessages(prev => ({
-        ...prev,
-        confirmNewPasswordError: ''
-      }));
-    } else {
-      // Set the error message if they don't match
-      setValidationMessages(prev => ({
-        ...prev,
-        confirmNewPasswordError: 'Passwords do not match.'
-      }));
+    if (value.trim() === '' && !['Password'].includes(name)) {
+      setValidationMessages((prev) => ({ ...prev, [`${name}Error`]: '' }));
     }
   };
+
+  // const handleChange2 = (e) => {
+  //   const { value } = e.target;
+
+  //   // Update the confirm password field in the Employer state
+  //   setEmployer(prev => ({ ...prev, confirmNewPassword: value }));
+
+  //   // Check if newPassword and confirmNewPassword match
+    
+  // };
 
 
   const handlePhoneNumberChange = (e) => {
     console.log(e.target.value);
+    const { name, value } = e.target;
+    // Clear the missing field error as soon as the user fills it
+    if (value.trim() !== '' && missingFields[name]) {
+      setMissingFields((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
     let newPhoneNumber = e.target.value;
     if (newPhoneNumber.startsWith('+966')) {
       setEmployer({ ...Employer, PhoneNumber: newPhoneNumber }); // Store only the digits
@@ -164,9 +176,6 @@ const Profile = () => {
     }));//removed when empty 
   };
 
-  const handleFocus = (e) => {
-    e.target.setSelectionRange(Employer.PhoneNumber.length, Employer.PhoneNumber.length);
-  };
 
 
   const validatePhoneNumber = (phoneNumber) => {
@@ -183,15 +192,6 @@ const Profile = () => {
     }
   };
 
-  const validateCommercialNumber = (number) => {
-    const numberRegex = /^\d{10}$/;
-    return numberRegex.test(number) ? '' : 'Commercial number must be exactly 10 digits long.';
-  };
-
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) ? '' : 'Please enter a valid email address.';
-  };
 
   const handleVerifyCurrentPassword2 = async (e) => {
     console.log(e.target.value);
@@ -199,11 +199,11 @@ const Profile = () => {
     if (!e.target.value) {
       setValidationMessages((prev) => ({
         ...prev,
-        currentPasswordEmpty: 'Please enter your current password to verify.',
+        currentPasswordEmpty: '',
         currentPasswordError: '',
         currentPasswordsuccess: '',
       }));
-      return;
+      
     }
     else if (e.target.value.length >= 8) {
       console.log(e.target.value.length);
@@ -220,7 +220,15 @@ const Profile = () => {
           currentPasswordError: '',
           currentPasswordEmpty: '',
           currentPasswordsuccess: 'Current password verified successfully',
+         
         }));
+        setTimeout(() => {
+          setValidationMessages((prev) => ({
+            ...prev,
+            currentPasswordsuccess: '',
+          }));
+        }, 5000); // 10 seconds in milliseconds
+
       } catch (error) {
         console.error("Error verifying current password:", error);
 
@@ -247,73 +255,31 @@ const Profile = () => {
         currentPasswordsuccess: '',
       }));
     }
-
-
   };
-  const handleVerifyCurrentPassword = async () => {
-    console.log(Employer.currentPassword);
-    if (!Employer.currentPassword) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        currentPasswordEmpty: 'Please enter your current password to verify.',
-        currentPasswordError: '',
-        currentPasswordsuccess: '',
-      }));
-      return;
-    }
-    else if (Employer.currentPassword.length >= 10) {
-      console.log(Employer.currentPassword.length);
-      const auth = getAuth();
-      const user = auth.currentUser;
 
-      try {
-        const credential = EmailAuthProvider.credential(
-          user.email,
-          Employer.currentPassword
-        );
-
-        await reauthenticateWithCredential(user, credential);
-        setCurrentPassValid(true);
-        setValidationMessages((prev) => ({
-          ...prev,
-          currentPasswordError: '',
-          currentPasswordEmpty: '',
-          currentPasswordsuccess: 'Current password verified successfully',
-        }));
-      } catch (error) {
-        console.error("Error verifying current password:", error);
-        setCurrentPassValid(false);
-        setValidationMessages((prev) => ({
-          ...prev,
-          currentPasswordError: 'Incorrect current password. Please try again.',
-          currentPasswordEmpty: '',
-          currentPasswordsuccess: '',
-        }));
-      }
-    }
-
-    else {
-      setValidationMessages((prev) => ({
-        ...prev,
-        currentPasswordError: 'Incorrect current password. Please try again.',
-        currentPasswordEmpty: '',
-        currentPasswordsuccess: '',
-      }));
-    }
-  };
+ 
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setValidationMessages((prev) => ({
-      ...prev,
-      currentPasswordError: '',
-      currentPasswordEmpty: '',
-      currentPasswordsuccess: '',
-      confirmNewPasswordError: '',
-    }));
-    setShowCurrentPassword(false);
-    setShowNewPassword(false);
-    setShowConfirmNewPassword(false);
+
+    const newMissingFields = {};
+    ['CompanyName', 'PhoneNumber'].forEach((field) => {
+      if (!Employer[field] || (field === 'PhoneNumber' && Employer.PhoneNumber === '+966')) {
+        newMissingFields[field] = `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+      }
+    });
+
+    if (Object.keys(newMissingFields).length > 0) {
+      setMissingFields(newMissingFields);
+      setLoading(false);
+      return;
+    }
+
+    if (Object.values(validationMessages).some((msg) => msg)) {
+      setLoading(false);
+      return;
+    }
+
     const employerUID = sessionStorage.getItem('employerUID');
     const docRef = doc(db, 'Employer', employerUID);
     const currentData = await getDoc(docRef);
@@ -321,7 +287,6 @@ const Profile = () => {
     if (currentData.exists()) {
       const existingPhoneNumber = currentData.data().PhoneNumber;
 
-      // Only check for duplicate if the new phone number is different from the existing one
       if (Employer.PhoneNumber && Employer.PhoneNumber !== existingPhoneNumber) {
         const existingUserQuery1 = await getDocs(query(
           collection(db, 'Employer'),
@@ -337,55 +302,40 @@ const Profile = () => {
         }
       }
     }
+      // Validate new password and confirm password
+      if (Employer.newPassword || Employer.confirmNewPassword) {
 
-    // Validate new password and confirm password
-    if (Employer.newPassword || Employer.confirmNewPassword) {
-      // Check if passwords match
-      if (Employer.newPassword !== Employer.confirmNewPassword) {
-        setValidationMessages(prev => ({
-          ...prev,
-          confirmNewPasswordError: 'Passwords do not match.',
-        }));
+        const requiredFields = [ 'newPassword', 'confirmNewPassword'];
+        const newMissingFields = {};
+    
+        requiredFields.forEach((field) => {
+         if (!Employer[field] ) {
+           // Custom message for 'confirmPassword', other fields get a standard message
+           newMissingFields[field] = field === 'confirmPassword'
+          ? 'Please enter your password'
+          : `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+      }
+       });
+    
+        if (Object.keys(newMissingFields).length > 0) {
+          setMissingFields(newMissingFields);
+          return; // Stop sign-up if there are missing fields
+        }
+  
+        // Check if passwords match
+        if (Employer.newPassword !== Employer.confirmNewPassword) {
+          setPopupMessage("Passwords do not match.");
+        setPopupImage(errorImage);
+        setPopupVisible(true);
         setLoading(false);
         return;
+        }
       }
-    }
-    // Check if password meets all requirements
-    if (
-      !passwordRequirements.length ||
-      !passwordRequirements.uppercase ||
-      !passwordRequirements.lowercase ||
-      !passwordRequirements.number ||
-      !passwordRequirements.special
-    ) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        passwordError: 'Password does not meet the requirements.',
-      }));
-      setLoading(false);
-      return;
-    }
 
-
-
-
-
-    if (Object.values(validationMessages).some((msg) => msg)) {
-      setLoading(false);
-      return;
-    }
-
-    // const employerUID = sessionStorage.getItem('employerUID');
     const auth = getAuth();
     const user = auth.currentUser;
 
-    setCurrentPassValid(false);
-
     try {
-
-
-      // Update Firestore document first
-      const docRef = doc(db, 'Employer', employerUID);
       const updateData = { ...Employer };
       delete updateData.currentPassword;
       delete updateData.newPassword;
@@ -393,33 +343,23 @@ const Profile = () => {
 
       await updateDoc(docRef, updateData);
 
-
-
-      // Re-authenticate if a new password is provided
-      if (Employer.newPassword) {
-        const credential = EmailAuthProvider.credential(
-          user.email,
-          Employer.currentPassword // Use current password for re-authentication
-        );
-
-        // Re-authenticate and update the password
+      if (Employer.newPassword && user) {
+        const credential = EmailAuthProvider.credential(user.email, Employer.currentPassword);
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, Employer.newPassword);
       }
-
-      // Clear the current password in the form's state
-      setEmployer((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmNewPassword: ""
-      }));
 
       setPopupMessage('Information Updated successfully.');
       setPopupImage(successImage);
       setPopupVisible(true);
       setEditMode(false);
 
+      setEmployer((prev) => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: ""
+      }));
     } catch (error) {
       console.error('Error updating profile:', error);
       setPopupMessage('Failed to update profile.');
@@ -429,6 +369,7 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
 
   const handleCancel = () => {
     setEmployer(originalEmployerData); // Restore original data
@@ -505,7 +446,7 @@ const Profile = () => {
       </div>
 
       <main className={s.container}>
-        <form onSubmit={handleSave}>
+        <form onSubmit={handleSave} noValidate>
           <h2 className='title'>My Profile</h2>
 
           <div className={s.formRow}>
@@ -520,6 +461,22 @@ const Profile = () => {
               />
             </div>
             <div>
+              <label className={s.profileLabel}>Company Name</label>
+              <input
+                type="text"
+                name="CompanyName"
+                value={Employer.CompanyName}
+                onChange={handleChange}
+                disabled={!editMode}
+                required
+              />
+             {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['CompanyName']}</p>}
+
+            </div>
+          </div>
+
+          <div className={s.formRow}>
+          <div>
               <label className={s.profileLabel}  >Phone Number</label>
               <input
                 type="tel"
@@ -529,25 +486,12 @@ const Profile = () => {
                 onChange={handlePhoneNumberChange}
                 disabled={!editMode}
                 pattern="\+9665\d{8}"
-                readOnly
+                required
               />
+              {missingFields['PhoneNumber'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['PhoneNumber']}</p>}
               {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
-          </div>
-
-          <div className={s.formRow}>
-
-            <div>
-              <label className={s.profileLabel}>Company Name</label>
-              <input
-                type="text"
-                name="CompanyName"
-                value={Employer.CompanyName}
-                onChange={handleChange}
-                disabled={!editMode}
-                readOnly
-              />
-            </div>
+           
             <div>
               <label className={s.profileLabel}>Company Email</label>
               <input
@@ -558,7 +502,6 @@ const Profile = () => {
                 disabled={!editMode}
                 readOnly
               />
-              {validationMessages.emailError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.emailError}</p>}
             </div>
           </div>
 
@@ -618,13 +561,24 @@ const Profile = () => {
                   <span onClick={() => togglePasswordVisibility('new')} className={s.togglePasswordVisibility}>
                     <i className={showNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
+                  {missingFields['newPassword'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['newPassword']}</p>}
                   <div className={s.passwordRequirements}>
-                    <ul>
-                      <li style={{ color: passwordRequirements.length ? '#059855' : 'red' }}>At least 8 characters</li>
-                      <li style={{ color: passwordRequirements.uppercase ? '#059855' : 'red' }}>At least one uppercase letter</li>
-                      <li style={{ color: passwordRequirements.lowercase ? '#059855' : 'red' }}>At least one lowercase letter</li>
-                      <li style={{ color: passwordRequirements.number ? '#059855' : 'red' }}>At least one number</li>
-                      <li style={{ color: passwordRequirements.special ? '#059855' : 'red' }}>At least one special character</li>
+                  <ul style={{fontSize:'15px',marginLeft:'10px' ,marginTop:'12px'}}>
+                  <li style={{ color: passwordRequirements.length ? '#059855' : 'red' }}>
+                Contain at least 8 characters
+              </li>
+              <li style={{ color: passwordRequirements.uppercase ? '#059855' : 'red' }}>
+                Contain at least one uppercase letter
+              </li>
+              <li style={{ color: passwordRequirements.lowercase ? '#059855' : 'red' }}>
+              Contain at least one lowercase letter
+              </li>
+              <li style={{ color: passwordRequirements.number ? '#059855' : 'red' }}>
+              Contain at least one number
+              </li>
+              <li style={{ color: passwordRequirements.special ? '#059855' : 'red' }}>
+              Contain at least one special character(!@#$%^&*)
+              </li>
                     </ul>
                   </div>
                 </div>
@@ -636,13 +590,14 @@ const Profile = () => {
                     type={showConfirmNewPassword ? "text" : "password"}
                     name="confirmNewPassword"
                     // value={Employer.confirmNewPassword}
-                    onChange={handleChange2}
+                    onChange={handleChange}
                     disabled={!currentPassValid}
                     className='confPass'
                   />
                   <span onClick={() => togglePasswordVisibility('confirm')} className={s.togglePasswordVisibility}>
                     <i className={showConfirmNewPassword ? 'far fa-eye' : 'far fa-eye-slash'}></i>
                   </span>
+                  {missingFields['confirmNewPassword'] && <p style={{ color: 'red', fontSize: '15px' }}>{missingFields['confirmNewPassword']}</p>}
                   {validationMessages.confirmNewPasswordError && (
                     <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.confirmNewPasswordError}</p>
                   )}

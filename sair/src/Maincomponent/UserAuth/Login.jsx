@@ -346,7 +346,7 @@ const Login = () => {
               className={s.forget}
               id='forget'
               onClick={() => navigate('/ForgotPassword')}
-              style={{ cursor: 'pointer' }}
+             
             >
               Forget password?
             </a>
@@ -355,7 +355,7 @@ const Login = () => {
               <a
                 className={s.signupLink}
                 onClick={() => navigate('/Signup')}
-                style={{ cursor: 'pointer' }}
+              
               >
                 Don't have a employer account? Sign up here
               </a>

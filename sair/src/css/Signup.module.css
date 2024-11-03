@@ -103,7 +103,7 @@
 }
 
 .passwordVisibilityToggle {
-  position: absolute;
+  position: relative;
   top: 50%;
   right: 12px;
   /* transform: translateY(-50%); */
@@ -112,6 +112,7 @@
   color: gray;
   position: 'absolute';
   font-family: 'Open Sans';
+  margin-left: -18px;
 }
 
 .submitButton {
@@ -130,6 +131,7 @@
   margin-bottom: 20px;
   font-weight: bold;
   font-family: 'Open Sans';
+  margin-left: -136px;
 }
 
 .submitButton:hover {
@@ -143,6 +145,8 @@
   margin-top: 10px;
   font-family: 'Open Sans';
 }
+
+
 
 .profileField  label {
   margin-bottom: 6px;
