@@ -12,15 +12,8 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import {
-  Form,
-  Input,
   Button,
-  Card,
-  Row,
-  Col,
-  Select,
   message,
-  Menu,
 } from 'antd';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
@@ -30,17 +23,80 @@ import { sendEmail } from '../utils/email';
 
 import Header from './Header';
 
+import s from "../css/Profile.module.css"
 
 const AddDriver = () => {
   const navigate = useNavigate();
-  const [form] = Form.useForm();
   const [availableMotorcycles, setAvailableMotorcycles] = useState([]);
   const [Employer, setEmployer] = useState({ CompanyName: '' });
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState('');
-  const [driverIdError, setDriverIdError] = useState('');
+  const [validationMessages, setValidationMessages] = useState({
+    Fname: '',
+    Lname: '',
+    PhoneNumber: '',
+    Email: '',
+    DriverID: '',
+    GPSnumber: ''
+  });
 
+  const [driver, setDriver] = useState({
+    Fname: '',
+    Lname: '',
+    PhoneNumber: '',
+    Email: '',
+    DriverID: '',
+    GPSnumber: ''
+  });
+
+  const handleInputChange = (e) => {
+
+    setValidationMessages((prev) => ({
+      ...prev,
+      [e.target.name]: ''
+    })); // Remove the validation message when the user starts typing
+
+    const { name, value } = e.target;
+    setDriver(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    console.log(e.target.value);
+    let newPhoneNumber = e.target.value;
+    if (newPhoneNumber.startsWith('+966')) {
+      setDriver({ ...driver, PhoneNumber: newPhoneNumber }); // Store only the digits
+    }
+    else {
+      newPhoneNumber = '+966' + newPhoneNumber.slice(3);
+      setDriver({ ...driver, PhoneNumber: newPhoneNumber }); // Store only the digits
+    }
+    let phoneError = '';
+    if (newPhoneNumber.length > 4) {
+      if (validatePhoneNumber(newPhoneNumber) === '') {
+        phoneError = '';
+      }
+      else if (validatePhoneNumber(newPhoneNumber) === '0') {
+        phoneError = '';
+        var str = newPhoneNumber + "";
+        str = str.substring(str.indexOf('5'));
+        var st = '+966' + str;
+        setDriver({ ...driver, PhoneNumber: st });
+
+      }
+      else {
+        phoneError = validatePhoneNumber(newPhoneNumber);
+      }
+    }
+
+    setValidationMessages((prev) => ({
+      ...prev,
+      phoneError: phoneError
+    }));//removed when empty 
+  };
 
   useEffect(() => {
     const employerUID = sessionStorage.getItem('employerUID');
@@ -80,9 +136,10 @@ const AddDriver = () => {
   }, [Employer]);
 
   const handleAddDriver = async (values) => {
+    console.log('Adding driver:', values);
     try {
       const formattedPhoneNumber = `+966${values.PhoneNumber}`;
-      const gpsNumber = values.GPSnumber === "None" ? null : values.GPSnumber;
+      const GPSnumber = values.GPSnumber === "None" ? null : values.GPSnumber;
 
       // Check if the phone number already exists
       const phoneQuery = query(
@@ -128,10 +185,10 @@ const AddDriver = () => {
       const newDriver = {
         ...values,
         PhoneNumber: formattedPhoneNumber,
-        GPSnumber: gpsNumber,
+        GPSnumber: GPSnumber,
         CompanyName: Employer.CompanyName,
         isDefaultPassword: true,
-        available: gpsNumber === null,
+        available: GPSnumber === null,
         UID: user.uid
       };
 
@@ -139,10 +196,10 @@ const AddDriver = () => {
       await addDoc(collection(db, 'Driver'), newDriver);
 
       // If a motorcycle is assigned, update its availability and DriverID
-      if (gpsNumber) {
+      if (GPSnumber) {
         const q = query(
           collection(db, 'Motorcycle'),
-          where('GPSnumber', '==', gpsNumber)
+          where('GPSnumber', '==', GPSnumber)
         );
         const querySnapshot = await getDocs(q);
 
@@ -155,11 +212,11 @@ const AddDriver = () => {
             DriverID: values.DriverID // Set the DriverID to the driver's ID from the form
           });
         } else {
-          console.error(`No motorcycle found with GPS number: ${gpsNumber}`);
+          console.error(`No motorcycle found with GPS number: ${GPSnumber}`);
         }
       }
 
-      // Send welcome email
+      // Send welcome Email
       const response = await sendEmail({
         email: values.Email,
         subject: 'Welcome to SAIR!',
@@ -197,34 +254,89 @@ const AddDriver = () => {
     }
   };
 
-  const handleLogout = () => {
-    auth.signOut()
-      .then(() => navigate('/'))
-      .catch((error) => console.error('Error LOGGING out:', error));
+  const validatePhoneNumber = (PhoneNumber) => {
+    const phoneRegex = /^\+9665\d{8}$/; // Example for a specific format
+    const phoneRegex1 = /^\+96605\d{8}$/; // Example for a specific format
+    if (phoneRegex.test(PhoneNumber)) {
+      return null;
+    } 
+    else {
+      return 'Phone number must start with +9665 and be followed by 8 digits.';
+    }
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('submitting :', driver);
+    const { Fname, Lname, PhoneNumber, Email, DriverID, GPSnumber } = driver;
+
+    // Validate the form
+    let isValid = true;
+    const newValidationMessages = {}
+
+    if (!Fname) {
+      newValidationMessages.Fname = 'Please enter driver first name.';
+      isValid = false;
+    }
+
+    if (!Lname) {
+      newValidationMessages.Lname = 'Please enter driver last name.';
+      isValid = false;
+    }
+
+    if (!PhoneNumber) {
+      newValidationMessages.PhoneNumber = 'Please enter driver phone number.';
+      isValid = false;
+    }
+    else {
+      const phoneValidation = validatePhoneNumber(PhoneNumber);
+      if (phoneValidation) {
+        console.log('phoneValidation:', phoneValidation);
+        newValidationMessages.PhoneNumber = phoneValidation;
+        isValid = false;
+      }
+    }
+
+    if (!Email) {
+      newValidationMessages.Email = 'Please enter driver email.';
+      isValid = false;
+    } else {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(Email)) {
+        newValidationMessages.Email = 'Please enter a valid Email address.';
+        isValid = false;
+      }
+    }
+
+    if (!DriverID) {
+      newValidationMessages.DriverID = 'Please enter driver ID';
+      isValid = false;
+    } else {
+      if (DriverID.length !== 10) {
+        newValidationMessages.DriverID = 'Driver ID must be 10 digits';
+        isValid = false;
+      }
+    }
+
+    // if (!GPSnumber) {
+    //   newValidationMessages.GPSnumber = 'Please enter GPS number';
+    //   isValid = false;
+    // }
+
+    setValidationMessages(newValidationMessages);
+
+    if (isValid) {
+      handleAddDriver(driver);
+    }
+  }
 
   const handleClosePopup = () => {
     setPopupVisible(false);
   };
 
-  const handleNavigation = (path) => {
-    navigate(path); // Navigate to the specified path
-  };
-
-  const menu = (
-    <Menu style={{ fontSize: '15px' }}>
-      <Menu.Item key="profile" onClick={() => navigate('/employee-profile')}>
-        Profile
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={() => { auth.signOut(); navigate('/'); }} style={{ color: 'red' }}>
-        Logout
-      </Menu.Item>
-    </Menu>
-  );
-
-
   return (
-    <div className="Header">
+    <div>
+
       <Header active="driverslist" />
 
       <div className="breadcrumb">
@@ -235,317 +347,106 @@ const AddDriver = () => {
         <a onClick={() => navigate('/add-driver')}>Add Driver</a>
       </div>
 
-      <div>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <Card
-            style={{ width: '900px', height: '450px' }}>
-            <h2 className='title'>Add Driver</h2>
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleAddDriver}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-                marginBottom: '20px',
-                fontFamily: 'Open Sans',
-              }}
-            >
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        marginLeft: '0',
-                        marginTop: '0',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        First Name
-                      </span>
-                    }
-                    name="Fname"
-                    rules={[{ required: true, message: 'First name is required.' }]}
-                  >
-                    <Input
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855', // Green border
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        transition: 'border-color 0.3s ease-in-out',
-                        fontFamily: 'Open Sans',
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                      onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                    />
-                  </Form.Item>
-                </Col>
+      <main className={s.container}>
+        <h2 className='title'>Add Driver</h2>
+        <form onSubmit={handleSubmit} >
+          <div className={s.formRow}>
+            <div>
+              <label>First Name</label>
+              <input
+                type="text"
+                name="Fname"
+                value={driver.Fname}
+                onChange={handleInputChange}
+              />
+              {validationMessages.Fname && <p className={s.valdationMessage}>{validationMessages.Fname}</p>}
+            </div>
 
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        marginLeft: '0',
-                        marginTop: '0',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        Last Name
-                      </span>
-                    }
-                    name="Lname"
-                    rules={[{ required: true, message: 'Last name is required.' }]}
-                  >
-                    <Input
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855', // Green border
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        transition: 'border-color 0.3s ease-in-out',
-                        fontFamily: 'Open Sans',
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                      onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        Phone Number
-                      </span>
-                    }
-                    name="PhoneNumber"
-                    rules={[
-                      { required: true, message: 'Please enter phone number' },
-                      {
-                        validator: (_, value) => {
-                          if (  value.length !== 9) {
-                            return Promise.reject(new Error('Phone number must be 9 digits long (after +966).'));
-                          }
-                          // Check if the value is numeric
-                          if (!/^\d{9}$/.test(value)) {
-                            return Promise.reject(new Error('Phone number must contain only digits.'));
-                          }
-                          // Check if it starts with 5 (assuming you want it to start with 5)
-                          if (!/^5\d{8}$/.test(value)) {
-                            return Promise.reject(new Error('Phone number must start with 5 and be followed by 8 digits.'));
-                          }
-                          return Promise.resolve();
-                        },
-                      },
-                    ]}
-                  >
-                    <div style={{ position: 'relative' }}>
-                      <span style={{
-                        position: 'absolute',
-                        left: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: '#000',
-                        fontSize: '14px',
-                        padding: '8px',
-                        marginBottom: "100px",
-                        fontFamily: 'Open Sans',
-                        pointerEvents: 'none',
-                        zIndex: 1
-                      }}>
-                        +966
-                      </span>
-                      <Input
-                        maxLength={9}  //Only allow 9 digits (after +966)
-                        //placeholder="Enter your phone number"
-                        style={{
-                          width: '100%',
-                          paddingLeft: '50px', // Adjust padding to leave space for +966
-                          border: '1px solid #059855', // Green border
-                          borderRadius: '8px',
-                          fontSize: '14px',
-                          transition: 'border-color 0.3s ease-in-out',
-                          fontFamily: 'Open Sans',
-                          height: '43px',
-                        }}
-                        onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                        onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                      />
-                    </div>
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        marginLeft: '0',
-                        marginTop: '0',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        Email
-                      </span>
-                    }
-                    name="Email"
-                    rules={[{ required: true, message: 'Email is required' }, {
-                      type: 'email', message: 'Please enter a valid email address.',
-                    },]}
-                  >
-                    <Input
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855', // Green border
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        transition: 'border-color 0.3s ease-in-out',
-                        fontFamily: 'Open Sans',
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                      onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        marginLeft: '0',
-                        marginTop: '0',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        Driver ID (National ID / Residency Number)
-                      </span>
-                    }
-                    name="DriverID"
-                    rules={[
-                      { required: true, message: '' },
-                      {
-                        validator: (_, value) => {
-                          if (!value) {
-                            return Promise.reject(new Error('Driver ID is required.'));
-                          }
-                          if (!/^\d{10}$/.test(value)) {
-                            return Promise.reject(new Error('Driver ID must be exactly 10 digits long and contain only digits.'));
-                          }
-                          return Promise.resolve();
-                        },
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #059855', // Green border
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        transition: 'border-color 0.3s ease-in-out',
-                        fontFamily: 'Open Sans',
-                      }}
-                      maxLength={10} // Set the maximum length to 10
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#1c7a50'; // Darker green on focus
-                      }}
-                      onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label={
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '5px',
-                        fontWeight: 'bold',
-                        color: '#059855',
-                        marginLeft: '0',
-                        marginTop: '0',
-                        fontFamily: 'Open Sans',
-                        fontSize: '16px'
-                      }}>
-                        GPS Number
-                      </span>
-                    }
-                    name="GPSnumber"
-                    rules={[{ required: true, message: 'GPS Number is required or you can choose None.' }]}
-                  >
-                    <Select
-                      placeholder="Select a motorcycle or None"
-                      style={{
-                        width: '100%',
-                        height: '45px',
-                        border: '0.5px solid #059855', // Green border
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        transition: 'border-color',
-                        fontFamily: 'Open Sans',
-                      }}
-                      dropdownStyle={{
-                        boxShadow: 'none',
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#1c7a50'} // Darker green on focus
-                      onBlur={(e) => e.target.style.borderColor = '#059855'} // Revert border color
-                    >
-                      <Select.Option value="None">None</Select.Option>
-                      {availableMotorcycles.length > 0 ? (
-                        availableMotorcycles.map((item) => (
-                          <Select.Option key={item.id} value={item.GPSnumber}>
-                            {item.GPSnumber}
-                          </Select.Option>
-                        ))
-                      ) : (
-                        <Select.Option disabled>No motorcycles available</Select.Option>
-                      )}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item>
-                <Button style={{ backgroundColor: "#059855" }} type="primary" htmlType="submit">
-                  Add Driver
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </div>
+            <div>
+              <label>Last Name</label>
+              <input
+                type="text"
+                name="Lname"
+                value={driver.Lname}
+                onChange={handleInputChange}
+              />
+              {validationMessages.Lname && <p className={s.valdationMessage}>{validationMessages.Lname}</p>}
+            </div>
+          </div>
+          <div className={s.formRow}>
+            <div>
+              <label >
+                Phone Number
+              </label>
+              <input 
+                name="PhoneNumber" 
+                value={driver.PhoneNumber}
+                placeholder="+966" 
+                onChange={handlePhoneNumberChange}  
+              />
+              {validationMessages.PhoneNumber && <p className={s.valdationMessage}>{validationMessages.PhoneNumber}</p>}
 
-      </div>
+            </div>
+            <div>
+              <label>
+                Email
+              </label>
+              <input 
+                name="Email"
+                value={driver.Email}
+                onChange={handleInputChange}
+              />
+              {validationMessages.Email && <p className={s.valdationMessage}>{validationMessages.Email}</p>}
+            </div>
+          </div>
+          <div className={s.formRow}>
+            <div>
+              <label>
+                Driver ID (National ID / Residency Number)
+              </label>
+              <input
+                type="text"
+                name="DriverID"
+                maxLength={10}
+                value={driver.DriverID}
+                onChange={handleInputChange}
+              />
+              {validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
+            </div>
+            <div>
+              <label>
+                GPS Number
+              </label>
+              <select
+                name="GPSnumber"
+                value={driver.GPSnumber}
+                onChange={handleInputChange}
+              >
+                <option value="" disabled>Select a Motorcycle</option>
+                <option value="None">None</option>
+                {availableMotorcycles.length > 0 ? (
+                  availableMotorcycles.map((item) => (
+                    <option key={item.id} value={item.GPSnumber}>
+                      {item.GPSnumber}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No motorcycles available</option>
+                )}
+              </select>
+              {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}
+            </div>
+          </div>
+
+          <div> 
+            <button type="submit" className={s.editBtn}>
+              Add Driver
+            </button> 
+          </div>
+        </form>
+
+      </main>
+
       {popupVisible && (
         <div className="popup">
           <button className="close-btn" onClick={handleClosePopup}>×</button>
@@ -553,6 +454,7 @@ const AddDriver = () => {
           <p>{popupMessage}</p>
         </div>
       )}
+
     </div>
   );
 };

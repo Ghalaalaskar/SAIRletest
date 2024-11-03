@@ -7,7 +7,7 @@ import PencilIcon from '../images/pencil.png';
 import EyeIcon from '../images/eye.png';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
-import { Button, Table } from 'antd';
+import { Button, Table, Modal  } from 'antd';
 
 import Header from './Header';
 
@@ -36,14 +36,6 @@ const MotorcycleList = () => {
 
   const navigate = useNavigate();
   const employerUID = sessionStorage.getItem('employerUID');
-
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      navigate('/');
-    }).catch((error) => {
-      console.error('Error logging out:', error);
-    });
-  };
 
 
   useEffect(() => {
@@ -216,9 +208,6 @@ const MotorcycleList = () => {
     },
   ];
 
-  const handleNavigation = (path) => {
-    navigate(path); // Navigate to the specified path
-  };
 
   return (
     <>
@@ -231,7 +220,7 @@ const MotorcycleList = () => {
         <a onClick={() => navigate('/motorcycleslist')}>Motorcycles List</a>
       </div>
 
-      <main  >
+      <main>
         <div className={s.container} >
           <h2 className='title'>Motorcycles List</h2>
           <div className={s.searchInputs}>
@@ -281,65 +270,86 @@ const MotorcycleList = () => {
           pagination={{ pageSize: 5 }}
         />
 
-        {isAddPopupVisible && (
-          <div className="popup-container">
-            <div className="popup-content">
-              <span className="close-popup-btn" onClick={() => setIsAddPopupVisible(false)}>&times;</span>
-              <h3>Add Motorcycle</h3>
-              <form onSubmit={handleAddMotorcycleSubmit}>
-                <input
-                  type="text"
-                  placeholder='GPS Number'
-                  value={newMotorcycle.GPSnumber}
-                  onChange={(e) => setNewMotorcycle((prevState) => ({
-                    ...prevState,
-                    GPSnumber: e.target.value,
-                  }))}
-                />
-                <input
-                  type="text"
-                  placeholder=' Motorcycle License Plate'
-                  value={newMotorcycle.LicensePlate}
-                  onChange={(e) => setNewMotorcycle((prevState) => ({
-                    ...prevState,
-                    LicensePlate: e.target.value,
-                  }))}
-                />
-                <select
-                  value={newMotorcycle.DriverID || ''}
-                  onChange={(e) => setNewMotorcycle((prevState) => ({
-                    ...prevState,
-                    DriverID: e.target.value === 'None' ? null : e.target.value
-                  }))}>
-                  <option value="None">None</option>
-                  {driverData.map(driver => (
-                    <option key={driver.id} value={driver.id}>{driver.DriverID}</option>
-                  ))}
-                </select>
-                <button type="submit">Add</button>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Add Motorcycle Modal */}
+        <Modal
+        style={{ top: '10%' }}
+          className={s.modal}
+          title="Add Motorcycle"
+          visible={isAddPopupVisible}
+          onCancel={() => setIsAddPopupVisible(false)}
+          footer={null}
+        >
+          <form onSubmit={handleAddMotorcycleSubmit}>
+            <input
+              type="text"
+              placeholder='GPS Number'
+              value={newMotorcycle.GPSnumber}
+              onChange={(e) => setNewMotorcycle((prevState) => ({
+                ...prevState,
+                GPSnumber: e.target.value,
+              }))}
+            />
+            <input
+              type="text"
+              placeholder='Motorcycle License Plate'
+              value={newMotorcycle.LicensePlate}
+              onChange={(e) => setNewMotorcycle((prevState) => ({
+                ...prevState,
+                LicensePlate: e.target.value,
+              }))}
+            />
+            <select
+              value={newMotorcycle.DriverID || ''}
+              onChange={(e) => setNewMotorcycle((prevState) => ({
+                ...prevState,
+                DriverID: e.target.value === 'None' ? null : e.target.value
+              }))}>
+              <option value="None">None</option>
+              {driverData.map(driver => (
+                <option key={driver.id} value={driver.id}>{driver.DriverID}</option>
+              ))}
+            </select>
+            <Button type="primary" htmlType="submit">Add</Button>
+          </form>
+        </Modal>
 
-        {isDeletePopupVisible && (
-          <div id="delete" className="popup-container">
-            <div>
-              <span className="delete-close-popup-btn" onClick={() => setIsDeletePopupVisible(false)}>&times;</span>
-              <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
-              <button id="YES" onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>Yes</button>
-              <button id="NO" onClick={() => setIsDeletePopupVisible(false)}>No</button>
-            </div>
-          </div>
-        )}
 
-        {isNotificationVisible && (
-          <div className={`notification-popup ${isSuccess ? 'success' : 'error'}`}>
-            <span className="close-popup-btn" onClick={() => setIsNotificationVisible(false)}>&times;</span>
-            <img src={isSuccess ? successImage : errorImage} alt={isSuccess ? 'Success' : 'Error'} />
-            <p>{notificationMessage}</p>
-          </div>
-        )}
+       {/* Delete Motorcycle Modal */}
+       <Modal
+       style={{ top: '38%' }}
+          className={s.modal}
+          title="Confirm Deletion"
+          visible={isDeletePopupVisible}
+          onCancel={() => setIsDeletePopupVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setIsDeletePopupVisible(false)}>
+              No
+            </Button>,
+            <Button style={{ backgroundColor: 'red', color: 'white' }} key="submit" type="primary" onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>
+              Yes
+            </Button>,
+          ]}
+        >
+          <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
+        </Modal>
+
+{/* Notification Modal */}
+    <Modal className={s.modal}
+    style={{ top: '38%' }}
+          title={isSuccess ? 'Success' : 'Error'}
+          visible={isNotificationVisible}
+          onCancel={() => setIsNotificationVisible(false)}
+          footer={null}
+        >
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+    <img 
+      src={isSuccess ? successImage : errorImage} 
+      alt={isSuccess ? 'Success' : 'Error'} 
+      style={{ width: '30%' }} 
+    />
+  </div>
+          <p style={{textAlign:'center'}}>{notificationMessage}</p>
+        </Modal>
       </main>
     </>
   );
