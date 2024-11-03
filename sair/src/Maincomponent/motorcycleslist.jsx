@@ -336,7 +336,6 @@ const MotorcycleList = () => {
 {/* Notification Modal */}
     <Modal className={s.modal}
     style={{ top: '38%' }}
-          title={isSuccess ? 'Success' : 'Error'}
           visible={isNotificationVisible}
           onCancel={() => setIsNotificationVisible(false)}
           footer={null}
