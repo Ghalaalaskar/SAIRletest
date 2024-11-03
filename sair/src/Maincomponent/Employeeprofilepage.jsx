@@ -364,8 +364,19 @@ const Profile = () => {
   };
 
 
-  const handleCancel = () => {
-    setEmployer(originalEmployerData); // Restore original data
+  const handleCancel = async () => {
+    //setEmployer(originalEmployerData); // Restore original data
+    const employerUID = sessionStorage.getItem('employerUID');
+    const docRef = doc(db, 'Employer', employerUID);
+    
+    // Fetch the latest data from the database
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const latestData = docSnap.data();
+      setEmployer(latestData); // Restore the latest data
+      setOriginalEmployerData(latestData); // Update original data to latest from DB
+    }
+  
     setEditMode(false); // Exit edit mode
     setMissingFields({});
     setValidationMessages({ // Clear validation messages
@@ -463,7 +474,7 @@ const Profile = () => {
                 value={Employer.CompanyName}
                 onChange={handleChange}
                 disabled={!editMode}
-                required
+                readOnly
               />
              {missingFields['CompanyName'] && <p style={{ color: 'red', fontSize: '14px' }}>{missingFields['CompanyName']}</p>}
 
