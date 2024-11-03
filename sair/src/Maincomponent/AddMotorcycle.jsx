@@ -63,6 +63,25 @@ const AddMotorcycle = () => {
         return;
       }
 
+      const generateMotorcycleID = async (gpsNumber) => {
+        let uniqueID = '';
+        let isUnique = false;
+    
+        while (!isUnique) {
+          const randomDigits = Math.floor(100 + Math.random() * 900).toString(); // Generates a random number between 100 and 999
+          uniqueID = `${gpsNumber}${randomDigits}`; // Concatenates the GPS number with the random digits
+    
+          const q = query(collection(db, 'Motorcycle'), where('MotorcycleID', '==', uniqueID));
+          const querySnapshot = await getDocs(q);
+    
+          if (querySnapshot.empty) {
+            isUnique = true; // If no existing IDs match, this ID is unique
+          }
+        }
+    
+        return uniqueID; // Returns the unique ID
+      };
+
       // Check if license plate already exists
       const plateQuery = query(
         collection(db, 'Motorcycle'),
@@ -76,9 +95,10 @@ const AddMotorcycle = () => {
         setPopupVisible(true);
         return;
       }
-
+    const motorcycleID = await generateMotorcycleID(values.GPSnumber);
       const newMotorcycle = {
         ...values,
+        MotorcycleID: motorcycleID,
         CompanyName: Employer.CompanyName,
         available: true
       };
@@ -128,11 +148,6 @@ const AddMotorcycle = () => {
       isValid = false;
     }
 
-    // if (!DriverID) {
-    //   newValidationMessages.DriverID = 'Please enter driver ID';
-    //   isValid = false;
-    // }
-
     setValidationMessages(newValidationMessages);
 
     if (isValid) {
@@ -151,6 +166,8 @@ const AddMotorcycle = () => {
       const docSnap = await getDoc(employerDocRef);
 
       if (docSnap.exists()) {
+        const employerData = docSnap.data();
+        setEmployer({ CompanyName: employerData.CompanyName });
         const { CompanyName } = docSnap.data();
         const dq = query(collection(db, 'Driver'), where('CompanyName', '==', CompanyName), where('available', '==', true));
 

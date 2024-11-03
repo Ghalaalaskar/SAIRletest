@@ -268,7 +268,10 @@ const EditDriver = () => {
   const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     const phoneRegex1 = /^\+96605\d{8}$/;
-
+  // Check if the phone number starts with +966
+  if (PhoneNumber.startsWith('+966')) {
+    return 'Please enter driver phone number.'; // Custom message if it starts with +966
+  }
     if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
       return null;
     } else {
