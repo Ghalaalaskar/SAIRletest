@@ -17,7 +17,7 @@ const EmployeeHome = () => {
 
   return (
     <div style={styles}> 
-      <Header active="home" /> 
+      <Header active="employer-home" /> 
       <main>
         <div className={s.homeContainer}>
           <div className={s.textBox}>

@@ -20,7 +20,7 @@
 }
 
 .searchContainer {
-  padding: 10px 12px;
+  padding: 5px 12px;
   border-radius: 999999px;
   margin: 0 3px;
   border: 2px solid #059855;
@@ -65,8 +65,8 @@
   cursor: pointer;
   margin-right: 18px;
   padding: 20px 10px;
-  width: 150px;
-  height: 40px;
+  width: 180px;
+  height: 45px;
   font-family: 'Open Sans';
 }
 
