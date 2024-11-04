@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, setDoc, query, collection, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown } from 'antd';
+import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown , Modal} from 'antd';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import SAIRLogo from '../images/SAIRlogo.png';
@@ -511,13 +511,21 @@ const EditDriver = () => {
             )}
           </div>
         </div>
-        {isNotificationVisible && (
-          <div className={`notification-popup ${isSuccess ? 'success' : 'error'}`}>
-            <span className="close-popup-btn" onClick={() => setIsNotificationVisible(false)}>&times;</span>
-            <img src={isSuccess ? successImage : errorImage} alt={isSuccess ? 'Success' : 'Error'} />
-            <p>{notificationMessage}</p>
-          </div>
-        )}
+        <Modal
+      visible={isNotificationVisible}
+      onCancel={() => setIsNotificationVisible(false)}
+      footer={null} // No footer buttons
+      style={{ top: '38%' }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <img
+          src={isSuccess ? successImage : errorImage}
+          alt={isSuccess ? 'Success' : 'Error'}
+          style={{ width: '30%' }}
+        />
+        <p>{notificationMessage}</p>
+      </div>
+    </Modal>
       </main>
     </div>
   );

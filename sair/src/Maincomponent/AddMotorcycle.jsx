@@ -6,6 +6,7 @@ import Header from './Header';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import s from "../css/Profile.module.css";
+import {Modal} from 'antd';
 
 const AddMotorcycle = () => {
   const navigate = useNavigate();
@@ -294,13 +295,25 @@ const AddMotorcycle = () => {
         </form>
       </main>
 
-      {popupVisible && (
-        <div className="popup">
-          <button className="close-btn" onClick={handleClosePopup}>×</button>
-          <img src={popupImage} alt="Popup" />
-          <p>{popupMessage}</p>
-        </div>
-      )}
+      javascript
+
+Copy
+import { Modal } from 'antd';
+
+{popupVisible && (
+  <Modal
+    title={null} // No title since it's a simple image notification
+    visible={popupVisible}
+    onCancel={handleClosePopup}
+    footer={null}
+    style={{ top: '38%' }} // Center the modal vertically
+  >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <img src={popupImage} alt="Popup" style={{ width: '30%' }} />
+      <p style={{ fontSize: '20px', fontFamily: 'Open Sans' }}>{popupMessage}</p>
+    </div>
+  </Modal>
+)}
     </div>
   );
 };

@@ -21,7 +21,7 @@ import errorImage from '../images/Error.png';
 import { useNavigate } from 'react-router-dom';
 import { generateRandomPassword } from '../utils/common';
 import { sendEmail } from '../utils/email';
-
+import {Modal} from 'antd';
 import Header from './Header';
 import s from "../css/Profile.module.css";
 
@@ -410,12 +410,19 @@ const AddDriver = () => {
       </main>
 
       {popupVisible && (
-        <div className="popup">
-          <button className="close-btn" onClick={handleClosePopup}>×</button>
-          <img src={popupImage} alt="Popup" />
-          <p>{popupMessage}</p>
-        </div>
-      )}
+  <Modal
+    title={null} // No title for this image notification
+    visible={popupVisible}
+    onCancel={handleClosePopup}
+    footer={null}
+    style={{ top: '38%' }} // Center the modal vertically
+  >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <img src={popupImage} alt="Popup" style={{ width: '30%' }} />
+      <p style={{ fontSize: '20px', fontFamily: 'Open Sans' }}>{popupMessage}</p>
+    </div>
+  </Modal>
+)}
     </div>
   );
 };

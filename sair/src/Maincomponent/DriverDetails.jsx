@@ -3,7 +3,7 @@ import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firesto
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase'; 
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Menu } from 'antd'; 
+import { Button, Dropdown, Menu, Modal } from 'antd'; 
 import Header from './Header';
 
 
@@ -235,54 +235,28 @@ Email</h3>
           </>
         ) : null}
       </main>
-
       {isPopupVisible && (
-        <div className="popup-container" style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'auto',
-          height: 'auto',
-          backgroundColor: 'var(--primary)',
-          color: '#059855',
-          boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.2)',
-          padding: '10px',
-          minWidth: '230px',
-          height: '180px',
-          fontFamily: 'Open Sans',
-        }}>
-          <span
-            className="close-popup-btn1"
-            onClick={() => setIsPopupVisible(false)}
-            style={{
-              position: 'absolute',
-              top: '100px',
-              right: '10px',
-              cursor: 'pointer',
-              fontSize: '20px',
-              color: '#FF0000',
-            }}
-          >
-            &times;
-          </span>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: '5px'
-          }}>
-            {/* SVG for the "No" icon */}
-            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#FF0000" strokeWidth="2" />
-              <line x1="8" y1="8" x2="16" y2="16" stroke="#FF0000" strokeWidth="2" />
-              <line x1="8" y1="16" x2="16" y2="8" stroke="#FF0000" strokeWidth="2" />
-            </svg>
-            <p style={{ fontSize: '20px', fontFamily: 'Open Sans', marginTop: '20px' }}>This driver has no violations.</p>
-          </div>
-        </div>
-      )}
+  <Modal
+    title={null} // No title since it's a notification modal
+    visible={isPopupVisible}
+    onCancel={() => setIsPopupVisible(false)}
+    footer={null}
+    style={{ top: '38%' }} // Center the modal vertically
+  >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+
+      {/* SVG for the "No" icon */}
+      <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#FF0000" strokeWidth="2" />
+        <line x1="8" y1="8" x2="16" y2="16" stroke="#FF0000" strokeWidth="2" />
+        <line x1="8" y1="16" x2="16" y2="8" stroke="#FF0000" strokeWidth="2" />
+      </svg>
+      <p style={{ fontSize: '20px', fontFamily: 'Open Sans', marginTop: '20px' }}>
+        This driver has no violations.
+      </p>
+    </div>
+  </Modal>
+)}
 
     </div>
   );

@@ -314,41 +314,41 @@ const MotorcycleList = () => {
         </Modal>
 
 
-       {/* Delete Motorcycle Modal */}
-       <Modal
-       style={{ top: '38%' }}
-          className={s.modal}
-          title="Confirm Deletion"
-          visible={isDeletePopupVisible}
-          onCancel={() => setIsDeletePopupVisible(false)}
-          footer={[
-            <Button key="back" onClick={() => setIsDeletePopupVisible(false)}>
-              No
-            </Button>,
-            <Button style={{ backgroundColor: 'red', color: 'white' }} key="submit" type="primary" onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>
-              Yes
-            </Button>,
-          ]}
-        >
-          <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
-        </Modal>
+{/* Delete Motorcycle Modal */}
+<Modal
+  style={{ top: '38%' }}
+  title="Confirm Deletion"
+  visible={isDeletePopupVisible}
+  onCancel={() => setIsDeletePopupVisible(false)}
+  footer={null}
+>
+  <div style={{ textAlign: 'center' }}>
+    <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
+    <Button type="primary" danger onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>
+      Yes
+    </Button>
+    <Button onClick={() => setIsDeletePopupVisible(false)} style={{ marginLeft: '8px' }}>
+      No
+    </Button>
+  </div>
+</Modal>
 
 {/* Notification Modal */}
-    <Modal className={s.modal}
-    style={{ top: '38%' }}
-          visible={isNotificationVisible}
-          onCancel={() => setIsNotificationVisible(false)}
-          footer={null}
-        >
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-    <img 
-      src={isSuccess ? successImage : errorImage} 
-      alt={isSuccess ? 'Success' : 'Error'} 
-      style={{ width: '30%' }} 
+<Modal
+  visible={isNotificationVisible}
+  onCancel={() => setIsNotificationVisible(false)}
+  footer={null}
+  style={{ top: '38%' }}
+>
+  <div style={{ textAlign: 'center' }}>
+    <img
+      src={isSuccess ? successImage : errorImage}
+      alt={isSuccess ? 'Success' : 'Error'}
+      style={{ width: '30%', marginBottom: '16px' }}
     />
+    <p>{notificationMessage}</p>
   </div>
-          <p style={{textAlign:'center'}}>{notificationMessage}</p>
-        </Modal>
+</Modal>
       </main>
     </>
   );

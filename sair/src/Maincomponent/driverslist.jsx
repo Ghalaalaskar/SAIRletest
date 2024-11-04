@@ -10,14 +10,13 @@ import EyeIcon from '../images/eye.png';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import { SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
-import { Button, Table, } from 'antd';
+import { Button, Table, Modal } from 'antd';
 import Header from './Header';
 
 import s from "../css/DriverList.module.css";
 
 const DriverList = () => {
   const [driverData, setDriverData] = useState([]);
-  const [isAddPopupVisible, setIsAddPopupVisible] = useState(false);
   const [driverToRemove, setDriverToRemove] = useState(null);
   const [isDeletePopupVisible, setIsDeletePopupVisible] = useState(false);
   const [availableMotorcycles, setAvailableMotorcycles] = useState([]);
@@ -25,7 +24,6 @@ const DriverList = () => {
   const [notificationMessage, setNotificationMessage] = useState('');
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(true);
-  const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
   const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState('');
 
   const navigate = useNavigate();
@@ -179,17 +177,17 @@ const DriverList = () => {
           }
         }
 
-        setIsDeleteSuccess(true);
+        setIsSuccess(true);
         setNotificationMessage('Driver deleted successfully!');
         setIsNotificationVisible(true);
       } else {
-        setIsDeleteSuccess(false);
+        setIsSuccess(false);
         setNotificationMessage('Driver not found.');
         setIsNotificationVisible(true);
       }
     } catch (error) {
       console.error('Error deleting driver:', error);
-      setIsDeleteSuccess(false);
+      setIsSuccess(false);
       setNotificationMessage('Error deleting driver. Please try again.');
       setIsNotificationVisible(true);
     }
@@ -214,10 +212,8 @@ const DriverList = () => {
     });
   };
 
-
   return (
-    <div >
-
+    <div>
       <Header active="driverslist" />
 
       <div className="breadcrumb" style={{ marginRight: '100px' }}>
@@ -226,7 +222,7 @@ const DriverList = () => {
         <a onClick={() => navigate('/driverslist')}>Driver List</a>
       </div>
 
-      <main  >
+      <main>
         <div className={s.container}>
           <h2 className={s.title}>Driver List</h2>
 
@@ -259,24 +255,41 @@ const DriverList = () => {
           style={{ width: '1200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto' }}
         />
 
-        {isDeletePopupVisible && (
-          <div id="delete" className="popup-container">
-            <div>
-              <span className="delete-close-popup-btn" onClick={() => setIsDeletePopupVisible(false)}>&times;</span>
-              <p>Are you sure you want to delete {driverToRemove?.Fname}?</p>
-              <button id="YES" onClick={() => handleDeleteDriver(driverToRemove.id)}>Yes</button>
-              <button id="NO" onClick={() => setIsDeletePopupVisible(false)}>No</button>
-            </div>
+        {/* Delete Confirmation Modal */}
+        <Modal
+          visible={isDeletePopupVisible}
+          onCancel={() => setIsDeletePopupVisible(false)}
+          footer={null}
+          title="Confirm Deletion"
+          style={{top:'38%'}}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <p>Are you sure you want to delete {driverToRemove?.Fname}?</p>
+            <Button type="primary" danger onClick={() => handleDeleteDriver(driverToRemove.id)}>
+              Yes
+            </Button>
+            <Button onClick={() => setIsDeletePopupVisible(false)} style={{ marginLeft: '8px' }}>
+              No
+            </Button>
           </div>
-        )}
+        </Modal>
 
-        {isNotificationVisible && (
-          <div className={`notification-popup ${isSuccess ? 'success' : 'error'}`}>
-            <span className="close-popup-btn" onClick={() => setIsNotificationVisible(false)}>&times;</span>
-            <img src={isSuccess ? successImage : errorImage} alt={isSuccess ? 'Success' : 'Error'} />
+        {/* Notification Modal */}
+        <Modal
+          visible={isNotificationVisible}
+          onCancel={() => setIsNotificationVisible(false)}
+          footer={null}
+          style={{top:'38%'}}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <img
+              src={isSuccess ? successImage : errorImage}
+              alt={isSuccess ? 'Success' : 'Error'}
+              style={{ width: '30%' }}
+            />
             <p>{notificationMessage}</p>
           </div>
-        )}
+        </Modal>
       </main>
     </div>
   );

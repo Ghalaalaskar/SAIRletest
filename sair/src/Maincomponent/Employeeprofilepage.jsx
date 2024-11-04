@@ -634,14 +634,18 @@ const Profile = () => {
           }
         </form>
 
-        {popupVisible && (
-          <div className="popup">
-            <button className="close-btn" onClick={handleClosePopup}>×</button>
-            <img src={popupImage} alt="Popup" />
-            <p>{popupMessage}</p>
-          </div>
-        )}
+        <Modal
+        visible={popupVisible}
+        onCancel={handleClosePopup}
+        footer={null} 
+        style={{ top: '38%' }}
+      >
+        <div style={{ textAlign: 'center' }}>
 
+          <img src={popupImage} alt="Popup" style={{ width: '30%' }}  />
+          <p>{popupMessage}</p>
+        </div>
+      </Modal>
 
       </main></div></div>
   );
