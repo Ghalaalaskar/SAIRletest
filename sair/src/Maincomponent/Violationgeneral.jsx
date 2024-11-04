@@ -240,7 +240,7 @@ Motorcycle Speed</h3>
             />
           )}
         </div>
-        <div style={{ marginBottom: '100px' }}>
+        <div style={{ marginBottom: '70px' }}>
           <Button onClick={goBack} style={{
             float: 'right', marginBottom: '100px', width: 'auto',
             height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
