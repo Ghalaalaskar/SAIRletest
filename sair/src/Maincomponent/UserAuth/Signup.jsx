@@ -35,8 +35,6 @@ const SignUp = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(true);
   const [showConfirmNewPassword, setshowConfirmNewPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('+966');
   const [showPassword, setShowPassword] = useState(false);
