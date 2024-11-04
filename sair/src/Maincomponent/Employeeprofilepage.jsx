@@ -65,8 +65,7 @@ const Profile = () => {
         setEmployer(data);
         setOriginalEmployerData(data); // Store original data for cancel functionality
       } else {
-        setIsSuccess(false);
-      setNotificationMessage('Employer not found!');
+        setPopupMessage('Employer not found');
       }
     };
 
