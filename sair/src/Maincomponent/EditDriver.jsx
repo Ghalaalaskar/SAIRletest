@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, setDoc, query, collection, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown } from 'antd';
-
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import SAIRLogo from '../images/SAIRlogo.png';
@@ -125,6 +124,22 @@ const EditDriver = () => {
     }, 2000); // Hide after 5 seconds
   };
 
+   // Validate phone number
+   const validatePhoneNumber = (PhoneNumber) => {
+    const phoneRegex = /^\+9665\d{8}$/;
+    const phoneRegex1 = /^\+96605\d{8}$/;
+    if (PhoneNumber === '+966') {
+      return 'Please enter driver phone number'; // Custom message for exact match
+    }
+    if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
+      return null; // Valid phone number
+    } else {
+      return 'Phone number must start with +9665 and be followed by 8 digits.';
+    }
+  };
+
+
+
   // Handle driver update
   const handleUpdateDriver = async (values) => {
     try {
@@ -140,17 +155,17 @@ const EditDriver = () => {
         await updateViolations(originalDriverID, values.DriverID);
       }
 
-      // New phone number with prefix
-      const newPhoneNumber = `+966${values.PhoneNumber}`;
+     // New phone number with prefix
+    const newPhoneNumber = values.PhoneNumber;
 
-      // Only check for duplication if the phone number has changed
-      if (newPhoneNumber !== originalPhoneNumber) {
-        const phoneNumberExists = await checkIfPhoneNumberExists(values.PhoneNumber);
-        if (phoneNumberExists) {
-          showNotification('Phone number already exists.', false);
-          return;
-        }
+    // Only check for duplication if the phone number has changed
+    if (newPhoneNumber !== originalPhoneNumber) {
+      const phoneNumberExists = await checkIfPhoneNumberExists(newPhoneNumber.slice(4)); // Remove +966 for the check
+      if (phoneNumberExists) {
+        showNotification('Phone number already exists.', false);
+        return;
       }
+    }
 
       const driverDocRef = doc(db, 'Driver', driverId);
       const updatedData = {
@@ -264,20 +279,7 @@ const EditDriver = () => {
     getCompanyName();
   }, [employerUID]);
 
-  // Update validation function
-  const validatePhoneNumber = (PhoneNumber) => {
-    const phoneRegex = /^\+9665\d{8}$/;
-    const phoneRegex1 = /^\+96605\d{8}$/;
-  // Check if the phone number starts with +966
-  if (PhoneNumber === '+966') {
-    return 'Please enter driver phone number'; // Custom message for exact match
-  }
-    if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
-      return null;
-    } else {
-      return 'Phone number must start with +9665 and be followed by 8 digits.';
-    }
-  };
+  
 
   // Update submit handler 
   const handleSubmit = (e) => {
@@ -297,8 +299,9 @@ const EditDriver = () => {
       isValid = false;
     }
 
-    if (!PhoneNumber) {
-      newValidationMessages.PhoneNumber = 'Please enter phone number.';
+    // Phone number validation only checks for emptiness here
+    if (!PhoneNumber ||PhoneNumber == '+966') {
+      newValidationMessages.PhoneNumber = 'Please enter driver phone number';
       isValid = false;
     } else {
       const phoneValidation = validatePhoneNumber(PhoneNumber);
@@ -309,14 +312,13 @@ const EditDriver = () => {
     }
 
     if (!DriverID) {
-      newValidationMessages.DriverID = 'Please enter driver ID.';
+      newValidationMessages.DriverID = 'Please enter driver ID';
       isValid = false;
-    } else {
-      if (DriverID.length !== 10) {
-        newValidationMessages.DriverID = 'Driver ID must be 10 digits.';
-        isValid = false;
-      }
+    } else if (DriverID.length !== 10) {
+      newValidationMessages.DriverID = 'Driver ID must be 10 digits';
+      isValid = false;
     }
+
 
     setValidationMessages(newValidationMessages);
 
@@ -325,27 +327,52 @@ const EditDriver = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    setValidationMessages((prev) => ({
-      ...prev,
-      [e.target.name]: ''
-    })); // Remove the validation message when the user starts typing
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setDriverData(prev => ({
       ...prev,
       [name]: value
     }));
+  
+    // Remove validation message when user starts typing
+    setValidationMessages(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+  
+    // Check uniqueness when Driver ID changes
+    if (name === 'DriverID') {
+      if (value.length !== 10) {
+        setValidationMessages(prev => ({
+          ...prev,
+          DriverID: 'Driver ID must be 10 digits.'
+        }));
+      } else if (value !== originalDriverID) {
+        const exists = await checkIfDriverIdExists(value);
+        if (exists) {
+          setValidationMessages(prev => ({
+            ...prev,
+            DriverID: 'Driver ID already exists.'
+          }));
+        }
+      }
+    }
   };
+  
+  
 
   const handlePhoneNumberChange = (e) => {
     let newPhoneNumber = e.target.value;
+    
+    // Ensure the phone number has the correct format
     if (newPhoneNumber.startsWith('+966')) {
       setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
     } else {
       newPhoneNumber = '+966' + newPhoneNumber.slice(3);
       setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
     }
-
+  
+    // Validate phone number only if it has more than 4 characters
     let phoneError = '';
     if (newPhoneNumber.length > 4) {
       const validationResult = validatePhoneNumber(newPhoneNumber);
@@ -353,7 +380,7 @@ const EditDriver = () => {
         phoneError = validationResult;
       }
     }
-
+  
     setValidationMessages(prev => ({
       ...prev,
       PhoneNumber: phoneError
