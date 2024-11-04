@@ -7,7 +7,7 @@ import errorImage from '../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
 import Header from "./Header" 
-import {  Modal  } from 'antd';
+
 import s from "../css/Profile.module.css"
 
 const Profile = () => {
@@ -24,8 +24,6 @@ const Profile = () => {
   const [originalEmployerData, setOriginalEmployerData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [missingFields, setMissingFields] = useState({});
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(true);
   const [validationMessages, setValidationMessages] = useState({
     phoneError: '',
     commercialNumberError: '',
@@ -67,8 +65,7 @@ const Profile = () => {
         setEmployer(data);
         setOriginalEmployerData(data); // Store original data for cancel functionality
       } else {
-        setIsSuccess(false);
-      setNotificationMessage('Employer not found!');
+        setPopupMessage('Employer not found');
       }
     };
 
@@ -306,9 +303,10 @@ const Profile = () => {
           where('PhoneNumber', '==', Employer.PhoneNumber)
         ));
 
-        if (!existingUserQuery1.empty) {   
-          setIsSuccess(true);
-          setNotificationMessage('The phone number is already used. Please use a correct number.');
+        if (!existingUserQuery1.empty) {
+          setPopupMessage("The phone number is already used. Please use a correct number.");
+          setPopupImage(errorImage);
+          setPopupVisible(true);
           setLoading(false);
           return;
         }
