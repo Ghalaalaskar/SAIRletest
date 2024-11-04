@@ -7,7 +7,8 @@ import {
   query,
   where,
   doc,
-  getDoc, getDocs,
+  getDoc,
+  getDocs,
   updateDoc,
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
@@ -22,8 +23,7 @@ import { generateRandomPassword } from '../utils/common';
 import { sendEmail } from '../utils/email';
 
 import Header from './Header';
-
-import s from "../css/Profile.module.css"
+import s from "../css/Profile.module.css";
 
 const AddDriver = () => {
   const navigate = useNavigate();
@@ -51,51 +51,62 @@ const AddDriver = () => {
   });
 
   const handleInputChange = (e) => {
-
-    setValidationMessages((prev) => ({
-      ...prev,
-      [e.target.name]: ''
-    })); // Remove the validation message when the user starts typing
-
     const { name, value } = e.target;
     setDriver(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Remove validation message for the field being edited
+    setValidationMessages((prev) => ({
+      ...prev,
+      [name]: ''
+    }));
+
+    // Real-time validation for email and driver ID
+    if (name === 'Email') {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(value)) {
+        setValidationMessages((prev) => ({
+          ...prev,
+          Email: 'Please enter a valid Email'
+        }));
+      }
+    }
+
+    if (name === 'DriverID') {
+      if (value.length !== 0 && value.length !== 10) {
+        setValidationMessages((prev) => ({
+          ...prev,
+          DriverID: 'Driver ID must be 10 digits'
+        }));
+      } else {
+        setValidationMessages((prev) => ({
+          ...prev,
+          DriverID: ''
+        }));
+      }
+    }
   };
 
   const handlePhoneNumberChange = (e) => {
-    console.log(e.target.value);
     let newPhoneNumber = e.target.value;
     if (newPhoneNumber.startsWith('+966')) {
-      setDriver({ ...driver, PhoneNumber: newPhoneNumber }); // Store only the digits
-    }
-    else {
+      setDriver({ ...driver, PhoneNumber: newPhoneNumber });
+    } else {
       newPhoneNumber = '+966' + newPhoneNumber.slice(3);
-      setDriver({ ...driver, PhoneNumber: newPhoneNumber }); // Store only the digits
+      setDriver({ ...driver, PhoneNumber: newPhoneNumber });
     }
+
     let phoneError = '';
     if (newPhoneNumber.length > 4) {
-      if (validatePhoneNumber(newPhoneNumber) === '') {
-        phoneError = '';
-      }
-      else if (validatePhoneNumber(newPhoneNumber) === '0') {
-        phoneError = '';
-        var str = newPhoneNumber + "";
-        str = str.substring(str.indexOf('5'));
-        var st = '+966' + str;
-        setDriver({ ...driver, PhoneNumber: st });
-
-      }
-      else {
-        phoneError = validatePhoneNumber(newPhoneNumber);
-      }
+      phoneError = validatePhoneNumber(newPhoneNumber);
     }
 
     setValidationMessages((prev) => ({
       ...prev,
-      phoneError: phoneError
-    }));//removed when empty 
+      PhoneNumber: phoneError
+    }));
   };
 
   useEffect(() => {
@@ -122,7 +133,6 @@ const AddDriver = () => {
           where('available', '==', true)
         );
         const unsubscribe = onSnapshot(motorcycleQuery, (snapshot) => {
-          console.log("Motorcycle snapshot:", snapshot.docs); // Debug log
           const bikes = snapshot.docs.map((doc) => ({
             id: doc.id,
             GPSnumber: doc.data().GPSnumber,
@@ -136,12 +146,10 @@ const AddDriver = () => {
   }, [Employer]);
 
   const handleAddDriver = async (values) => {
-    console.log('Adding driver:', values);
     try {
       const formattedPhoneNumber = `+966${values.PhoneNumber}`;
       const GPSnumber = values.GPSnumber === "None" ? null : values.GPSnumber;
 
-      // Check if the phone number already exists
       const phoneQuery = query(
         collection(db, 'Driver'),
         where('PhoneNumber', '==', formattedPhoneNumber),
@@ -152,27 +160,23 @@ const AddDriver = () => {
         setPopupMessage("Phone number already exists.");
         setPopupImage(errorImage);
         setPopupVisible(true);
-        return; // Exit the function early
+        return;
       }
 
-      // Check if the Driver ID already exists
       const driverIdQuery = query(
         collection(db, 'Driver'),
         where('DriverID', '==', values.DriverID),
-        where('CompanyName', '==', Employer.CompanyName) // Check for the same company
+        where('CompanyName', '==', Employer.CompanyName)
       );
       const driverIdSnapshot = await getDocs(driverIdQuery);
       if (!driverIdSnapshot.empty) {
         setPopupMessage("Driver ID already exists.");
         setPopupImage(errorImage);
         setPopupVisible(true);
-        return; // Exit the function early
+        return;
       }
 
-      // Generate random password
       const generatedPassword = generateRandomPassword();
-
-      // Create the user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         values.Email,
@@ -180,8 +184,6 @@ const AddDriver = () => {
       );
 
       const user = userCredential.user;
-
-      // Prepare the new driver object
       const newDriver = {
         ...values,
         PhoneNumber: formattedPhoneNumber,
@@ -192,31 +194,23 @@ const AddDriver = () => {
         UID: user.uid
       };
 
-      // Store the new driver in Firestore
       await addDoc(collection(db, 'Driver'), newDriver);
 
-      // If a motorcycle is assigned, update its availability and DriverID
       if (GPSnumber) {
         const q = query(
           collection(db, 'Motorcycle'),
           where('GPSnumber', '==', GPSnumber)
         );
         const querySnapshot = await getDocs(q);
-
         if (!querySnapshot.empty) {
-          const motorcycleDocRef = querySnapshot.docs[0].ref; // Get the document reference
-
-          // Update the motorcycle document
+          const motorcycleDocRef = querySnapshot.docs[0].ref;
           await updateDoc(motorcycleDocRef, {
-            available: false, // Set motorcycle's available field to false
-            DriverID: values.DriverID // Set the DriverID to the driver's ID from the form
+            available: false,
+            DriverID: values.DriverID
           });
-        } else {
-          console.error(`No motorcycle found with GPS number: ${GPSnumber}`);
         }
       }
 
-      // Send welcome Email
       const response = await sendEmail({
         email: values.Email,
         subject: 'Welcome to SAIR!',
@@ -245,30 +239,24 @@ const AddDriver = () => {
       setPopupVisible(true);
     } catch (error) {
       console.error('Error adding driver:', error);
-      setPopupMessage("Driver Email Already exist.", false);
+      setPopupMessage("Driver Email Already exist.");
       setPopupVisible(true);
       setPopupImage(errorImage);
-      //notification.error({
-      //    message: 'Driver Email Already exist.',
-      //});
     }
   };
 
   const validatePhoneNumber = (PhoneNumber) => {
-    const phoneRegex = /^\+9665\d{8}$/; // Example for a specific format
-    const phoneRegex1 = /^\+96605\d{8}$/; // Example for a specific format
-    if (phoneRegex.test(PhoneNumber)) {
+    const phoneRegex = /^\+9665\d{8}$/;
+    const phoneRegex1 = /^\+96605\d{8}$/;
+    if (phoneRegex.test(PhoneNumber) || phoneRegex1.test(PhoneNumber)) {
       return null;
     } 
-    else {
-      return 'Phone number must start with +9665 and be followed by 8 digits.';
-    }
+    return 'Phone number must start with +9665 and be followed by 8 digits.';
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('submitting :', driver);
-    const { Fname, Lname, PhoneNumber, Email, DriverID, GPSnumber } = driver;
+    const { Fname, Lname, PhoneNumber, Email, DriverID } = driver;
 
     // Validate the form
     let isValid = true;
@@ -284,51 +272,37 @@ const AddDriver = () => {
       isValid = false;
     }
 
-    if (!PhoneNumber) {
-      newValidationMessages.PhoneNumber = 'Please enter driver phone number.';
+    // Phone number validation only checks for emptiness here
+    if (!PhoneNumber ||PhoneNumber == '+966') {
+      newValidationMessages.PhoneNumber = 'Please enter driver phone number';
       isValid = false;
-    }
-    else {
+    } else {
       const phoneValidation = validatePhoneNumber(PhoneNumber);
       if (phoneValidation) {
-        console.log('phoneValidation:', phoneValidation);
         newValidationMessages.PhoneNumber = phoneValidation;
         isValid = false;
       }
     }
 
     if (!Email) {
-      newValidationMessages.Email = 'Please enter driver email.';
+      newValidationMessages.Email = 'Please enter Email';
       isValid = false;
-    } else {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(Email)) {
-        newValidationMessages.Email = 'Please enter a valid Email address.';
-        isValid = false;
-      }
     }
 
     if (!DriverID) {
       newValidationMessages.DriverID = 'Please enter driver ID';
       isValid = false;
-    } else {
-      if (DriverID.length !== 10) {
-        newValidationMessages.DriverID = 'Driver ID must be 10 digits';
-        isValid = false;
-      }
+    } else if (DriverID.length !== 10) {
+      newValidationMessages.DriverID = 'Driver ID must be 10 digits';
+      isValid = false;
     }
-
-    // if (!GPSnumber) {
-    //   newValidationMessages.GPSnumber = 'Please enter GPS number';
-    //   isValid = false;
-    // }
 
     setValidationMessages(newValidationMessages);
 
     if (isValid) {
       handleAddDriver(driver);
     }
-  }
+  };
 
   const handleClosePopup = () => {
     setPopupVisible(false);
@@ -336,9 +310,7 @@ const AddDriver = () => {
 
   return (
     <div>
-
       <Header active="driverslist" />
-
       <div className="breadcrumb">
         <a onClick={() => navigate('/employer-home')}>Home</a>
         <span> / </span>
@@ -349,7 +321,7 @@ const AddDriver = () => {
 
       <main className={s.container}>
         <h2 className='title'>Add Driver</h2>
-        <form onSubmit={handleSubmit} >
+        <form onSubmit={handleSubmit}>
           <div className={s.formRow}>
             <div>
               <label>First Name</label>
@@ -375,9 +347,7 @@ const AddDriver = () => {
           </div>
           <div className={s.formRow}>
             <div>
-              <label >
-                Phone Number
-              </label>
+              <label>Phone Number</label>
               <input 
                 name="PhoneNumber" 
                 value={driver.PhoneNumber}
@@ -385,12 +355,9 @@ const AddDriver = () => {
                 onChange={handlePhoneNumberChange}  
               />
               {validationMessages.PhoneNumber && <p className={s.valdationMessage}>{validationMessages.PhoneNumber}</p>}
-
             </div>
             <div>
-              <label>
-                Email
-              </label>
+              <label>Email</label>
               <input 
                 name="Email"
                 value={driver.Email}
@@ -401,9 +368,7 @@ const AddDriver = () => {
           </div>
           <div className={s.formRow}>
             <div>
-              <label>
-                Driver ID (National ID / Residency Number)
-              </label>
+              <label>Driver ID (National ID / Residency Number)</label>
               <input
                 type="text"
                 name="DriverID"
@@ -414,9 +379,7 @@ const AddDriver = () => {
               {validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
             </div>
             <div>
-              <label>
-                GPS Number
-              </label>
+              <label>GPS Number</label>
               <select
                 name="GPSnumber"
                 value={driver.GPSnumber}
@@ -444,7 +407,6 @@ const AddDriver = () => {
             </button> 
           </div>
         </form>
-
       </main>
 
       {popupVisible && (
@@ -454,7 +416,6 @@ const AddDriver = () => {
           <p>{popupMessage}</p>
         </div>
       )}
-
     </div>
   );
 };
