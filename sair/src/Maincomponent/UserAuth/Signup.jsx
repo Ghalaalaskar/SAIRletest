@@ -6,13 +6,15 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
 import backgroundImage from '../../images/sairbackground.png';
-
+import axios from 'axios';
 import { getDocs, query, collection, where } from 'firebase/firestore';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import s from '../../css/Signup.module.css';
 
 const SignUp = () => {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
   const [user, setUser] = useState({
     commercialNumber: '',
     PhoneNumber: '',
@@ -46,6 +48,32 @@ const SignUp = () => {
     special: false,
   });
   const navigate = useNavigate();
+
+
+  const fetchRegistrationInfo = async (commercialnumber) => {
+    try {
+       const API_KEY='mR4OUYCzGADE0t6bCXYUNAxGFBU2ShNQ';
+        const response = await axios.get(
+          `https://api.wathq.sa/v5/commercialregistration/info/${commercialnumber}`, 
+            {
+                headers: {
+                    'accept': 'application/json',
+                    'apiKey':API_KEY ,
+                },
+            }
+        );
+        if (response.data.crNumber) {
+          return 1; // It's a valid registration response
+      } else {
+          return 0;
+      }
+  } catch (error) {
+      // Handle other errors, such as network issues or unexpected responses
+      return 0;
+  }
+};
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -243,6 +271,18 @@ const SignUp = () => {
     }
 
     try {
+      // Check if the commercialNumber invalid
+      const isValid = await fetchRegistrationInfo(user.commercialNumber);
+      if(isValid===0){
+        setPopupMessage("The commercial number is invalid.");
+        setPopupImage(errorImage);
+        setPopupVisible(true);
+        setLoading(false);
+        return; // Prevent sign-up if commercial number not exist in the wathq api
+      }
+      
+      
+
       // Check if the commercialNumber already exists
       const existingUserQuery = await getDocs(query(collection(db, 'Employer'), where('commercialNumber', '==', user.commercialNumber)));
 
