@@ -53,8 +53,8 @@ export const monitorUnits = (sess, fetchInterval) => {
           }
           const loadedUnits = sess.getItems('avl_unit');
           if (loadedUnits) {
-            await processUnits1(loadedUnits);
-            await processUnits2(loadedUnits);
+            //await processUnits1(loadedUnits);
+            //await processUnits2(loadedUnits);
     
           } else {
             console.log('No units found.');

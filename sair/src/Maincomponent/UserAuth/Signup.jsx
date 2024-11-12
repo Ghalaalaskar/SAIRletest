@@ -287,9 +287,13 @@ const SignUp = () => {
       const existingUserQuery = await getDocs(query(collection(db, 'Employer'), where('commercialNumber', '==', user.commercialNumber)));
 
       if (!existingUserQuery.empty) {
-        setPopupMessage("The commercial number is already used. Please use a correct number.");
+        setPopupMessage("The commercial number is already registered. You will be redirected to log in page.");
         setPopupImage(errorImage);
         setPopupVisible(true);
+        setTimeout(() => {
+          setPopupVisible(false);
+          navigate('/');
+        }, 6000);
         setLoading(false);
         return; // Prevent sign-up if commercial number exists
       }
