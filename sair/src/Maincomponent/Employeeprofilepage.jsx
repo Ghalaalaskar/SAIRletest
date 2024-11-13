@@ -9,8 +9,11 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import Header from "./Header" 
 import { Modal } from 'antd';
 import s from "../css/Profile.module.css"
+import { useContext } from 'react';
+import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 
 const Profile = () => {
+  const { setShortCompanyName } = useContext(ShortCompanyNameContext);
   const [Employer, setEmployer] = useState({
     commercialNumber: '',
     PhoneNumber: '',
@@ -336,7 +339,8 @@ const Profile = () => {
       delete updateData.confirmNewPassword;
 
       await updateDoc(docRef, updateData);
-
+      // Update the global short company name after successful save
+      setShortCompanyName(Employer.ShortCompanyName);
       if (Employer.newPassword && user) {
         const credential = EmailAuthProvider.credential(user.email, Employer.currentPassword);
         await reauthenticateWithCredential(user, credential);
