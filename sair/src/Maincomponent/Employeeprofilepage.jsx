@@ -7,7 +7,7 @@ import errorImage from '../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
 import Header from "./Header" 
-
+import {Modal} from 'antd';
 import s from "../css/Profile.module.css"
 
 const Profile = () => {
@@ -19,6 +19,7 @@ const Profile = () => {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
+    ShortCompanyName:'',
   });
 
   const [originalEmployerData, setOriginalEmployerData] = useState({});
@@ -304,7 +305,7 @@ const Profile = () => {
         ));
 
         if (!existingUserQuery1.empty) {
-          setPopupMessage("The phone number is already used. Please use a correct number.");
+          setPopupMessage("The phone number is already used. Please use a new number.");
           setPopupImage(errorImage);
           setPopupVisible(true);
           setLoading(false);
@@ -497,6 +498,18 @@ const Profile = () => {
               {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
            
+            <div>
+            <label className={s.profileLabel}>Short Company Name</label> 
+            <input
+              type="text"
+              name="ShortCompanyName"
+              onChange={handleChange}
+              disabled={!editMode}
+              value={`${Employer.ShortCompanyName}`}
+            />
+          </div></div>
+
+          <div className={s.formRow}>
             <div>
               <label className={s.profileLabel}>Company Email</label>
               <input

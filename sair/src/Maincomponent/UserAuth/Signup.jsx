@@ -15,6 +15,7 @@ import s from '../../css/Signup.module.css';
 const SignUp = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [isCompanyNameReadOnly, setIsCompanyNameReadOnly] = useState(false);
   const [user, setUser] = useState({
     commercialNumber: '',
     PhoneNumber: '',
@@ -23,6 +24,7 @@ const SignUp = () => {
     Password: '',
     confirmPassword: '',
     confirmPasswordError: '',
+    ShortCompanyName:'',
   });
   const [missingFields, setMissingFields] = useState({});
   const [validationMessages, setValidationMessages] = useState({
@@ -39,6 +41,7 @@ const SignUp = () => {
   const [popupImage, setPopupImage] = useState('');
   const [showConfirmNewPassword, setshowConfirmNewPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('+966');
+  const [showConfirmButtons, setShowConfirmButtons] = useState(false); // To show "Yes" and "No" buttons
   const [showPassword, setShowPassword] = useState(false);
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
@@ -63,7 +66,7 @@ const SignUp = () => {
             }
         );
         if (response.data.crNumber) {
-          return 1; // It's a valid registration response
+          return response.data.crName; // It's a valid registration response
       } else {
           return 0;
       }
@@ -75,7 +78,7 @@ const SignUp = () => {
 
 
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
       // Clear the missing field error as soon as the user fills it
@@ -94,6 +97,30 @@ const SignUp = () => {
         ...prev,
         commercialNumberError: value === '' ? '' : commercialNumberError,
       }));
+
+      if (value === '' || commercialNumberError) {
+        setUser((prev) => ({ ...prev, CompanyName: '' }));
+        setIsCompanyNameReadOnly(false);
+      }
+
+      if (!commercialNumberError) {
+        const companyName = await fetchRegistrationInfo(value);
+        if (companyName !== 0) {
+          setUser((prev) => ({ ...prev, CompanyName: companyName })); // Update with fetched name
+          setIsCompanyNameReadOnly(true); // Set CompanyName field to read-only
+          
+          // Remove CompanyName from missingFields when read-only
+          setMissingFields((prev) => {
+              const updated = { ...prev };
+              delete updated.CompanyName;
+              return updated;
+          });
+      } else {
+          setUser((prev) => ({ ...prev, CompanyName: '' })); // Clear if not valid
+          setIsCompanyNameReadOnly(false);
+      }
+      }
+
     } else if (name === 'CompanyEmail') {
       const emailError = validateEmail(value);
       setValidationMessages((prev) => ({
@@ -101,6 +128,7 @@ const SignUp = () => {
         emailError: value === '' ? '' : emailError,
       }));
     }
+    
 
     if (name === 'Password') {
       // Calculate password requirements
@@ -183,17 +211,6 @@ const SignUp = () => {
     }));
   };
 
-  const handleFocus = (e) => {
-    e.target.setSelectionRange(user.PhoneNumber.length, user.PhoneNumber.length);
-  };
-
-
-  const handleClick = (e) => {
-    // If the user clicks inside the input, ensure the cursor stays after the prefix
-    if (e.target.selectionStart < 4) {
-      e.target.setSelectionRange(user.PhoneNumber.length, user.PhoneNumber.length);
-    }
-  };
 
   const validatePhoneNumber = (phoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/; // Example for a specific format
@@ -287,21 +304,17 @@ const SignUp = () => {
       const existingUserQuery = await getDocs(query(collection(db, 'Employer'), where('commercialNumber', '==', user.commercialNumber)));
 
       if (!existingUserQuery.empty) {
-        setPopupMessage("The commercial number is already registered. You will be redirected to log in page.");
+        setPopupMessage("The commercial number is already used. Do you want to go to the log in page?");
         setPopupImage(errorImage);
         setPopupVisible(true);
-        setTimeout(() => {
-          setPopupVisible(false);
-          navigate('/');
-        }, 6000);
-        setLoading(false);
+        setShowConfirmButtons(true);
         return; // Prevent sign-up if commercial number exists
       }
 
       const existingUserQuery1 = await getDocs(query(collection(db, 'Employer'), where('PhoneNumber', '==', user.PhoneNumber)));
 
       if (!existingUserQuery1.empty) {
-        setPopupMessage("The phone number is already used. Please use a correct number.");
+        setPopupMessage("The phone number is already used. Please use a new number.");
         setPopupImage(errorImage);
         setPopupVisible(true);
         setLoading(false);
@@ -321,6 +334,7 @@ const SignUp = () => {
         commercialNumber: user.commercialNumber,
         PhoneNumber: user.PhoneNumber,
         CompanyName: user.CompanyName,
+        ShortCompanyName:user.ShortCompanyName,
         CompanyEmail: user.CompanyEmail,
         uid: newUser.uid,
       });
@@ -346,9 +360,18 @@ const SignUp = () => {
       setLoading(false);
     }
   };
+  const handleYes = () => {
+    setPopupVisible(false);
+    navigate('/');
+  };
 
+  const handleNo = () => {
+    setPopupVisible(false);
+    setShowConfirmButtons(false);
+  };
   const handleClosePopup = () => {
     setPopupVisible(false);
+    setShowConfirmButtons(false);
   };
 
 
@@ -434,17 +457,29 @@ const SignUp = () => {
           </div>
 
           <div className={s.profileField}>
-            <label>Company Name</label>
+            <label>Company Name</label> 
             <input
               type="text"
               name="CompanyName"
               value={user.CompanyName}
               onChange={handleChange}
+              readOnly={isCompanyNameReadOnly}
               required
               //style={{ borderColor: getBorderColor('CompanyName') }}
             />
             {missingFields['CompanyName'] && <p style={{ color: 'red' , marginTop: '3px'}}>{missingFields['CompanyName']}</p>}
           </div>
+
+          <div className={s.profileField}>
+            <label>Short Company Name</label> 
+            <input
+              type="text"
+              name="ShortCompanyName"
+              onChange={handleChange}
+              value={user.ShortCompanyName}
+            />
+          </div>
+
           <div className={s.profileField}>
             <label>Phone Number</label>
             <input
@@ -556,6 +591,57 @@ const SignUp = () => {
             <button className="close-btn" onClick={handleClosePopup}>×</button>
             <img src={popupImage} alt="Popup" />
             <p>{popupMessage}</p>
+            {showConfirmButtons && (
+            <div style={{ display: 'flex', gap: '10px', marginLeft: '-101px' }}>
+            <button  
+                style={{
+                    borderRadius: '14px',
+                    backgroundColor: '#059855',
+                    border: 'none',
+                    padding: '8px',
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    textAlign: 'center',
+                    marginTop: '12px',
+                    width: '87px',
+                    height: '36px',
+                    transition: 'background-color 0.3s ease',
+                    marginBottom: '10px',
+                    fontWeight: 'bold',
+                    fontFamily: 'Open Sans',
+                    marginLeft:'140px',
+                }}  
+                onClick={handleYes}
+            >
+                Yes
+            </button>
+            <button 
+                style={{
+                    borderRadius: '14px',
+                    backgroundColor: '#059855',
+                    border: 'none',
+                    padding: '8px',
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    textAlign: 'center',
+                    marginTop: '12px',
+                    width: '87px',
+                    height: '36px',
+                    transition: 'background-color 0.3s ease',
+                    marginBottom: '10px',
+                    fontWeight: 'bold',
+                    fontFamily: 'Open Sans',
+                    
+                }}  
+                onClick={handleNo}
+            >
+                No
+            </button>
+        </div>
+        
+      ) }
           </div>
         )}
       </div>

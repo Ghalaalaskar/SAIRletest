@@ -43,6 +43,26 @@
   font-family: 'Open Sans';
 
 }
+.yes{
+  border-radius: 18px;
+  background-color: #059855;
+  border: none;
+  padding: 10px 20px;
+  font-size: 10px;
+  cursor: pointer;
+  color: white;
+  text-align: center; 
+  margin-top: 10px;
+  width: 50px;
+  height: 50px;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-family: 'Open Sans';
+  margin-left: -100px;
+}
+
+
 
 .loginContainer input:hover {
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);

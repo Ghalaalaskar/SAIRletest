@@ -10,7 +10,7 @@ import s from '../css/Header.module.css';
 const Header = ({ active }) => {
   const navigate = useNavigate();
   const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState(
-    sessionStorage.getItem('companyName') || '' // Load from sessionStorage initially
+    sessionStorage.getItem('ShortCompanyName') || '' // Load from sessionStorage initially
   );
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -50,8 +50,8 @@ const Header = ({ active }) => {
           const docSnap = await getDoc(userDocRef);
           if (docSnap.exists()) {
             const employerData = docSnap.data();
-            setCurrentEmployerCompanyName(employerData.CompanyName);
-            sessionStorage.setItem('companyName', employerData.CompanyName); // Cache it for next load
+            setCurrentEmployerCompanyName(employerData.ShortCompanyName);
+            sessionStorage.setItem('ShortCompanyName', employerData.ShortCompanyName); // Cache it for next load
           } else {
             console.log('No such document!');
           }
