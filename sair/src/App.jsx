@@ -29,37 +29,31 @@ import VMotorcycle from './Maincomponent/VMotorcycle'
 
 
 import "./css/common.css"
-// import './App.css';
-// import 'antd/dist/reset.css';
+
 
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
-    console.log('Session:', sess);
 
     const initSession = () => {
-      if (!window.wialon) {
-        console.log('Wialon SDK not loaded.');
-        return;
-      }
-      sess.initSession('https://hst-api.wialon.com');
-      const token = '8ca297495a6d20aed50815e6f79cdd3b2D6292586C51CF2BE801FC0E4C312A5474C9BB71'; //check
-      sess.loginToken(token, '', (code) => {
-        if (code) {
-          console.error('Login failed with code:', code, 'Error:', window.wialon.core.Errors.getErrorText(code));
-          return;
-        }
-        console.log('Session:', sess);
-        // Start monitoring units
-        // Start monitoring units continuously
-        monitorUnits(sess, 10000); // 10 seconds fetch interval
-      });
-    };
+     if (!window.wialon) {
+       return;
+     }
+     sess.initSession('https://hst-api.wialon.com');
+     const token = '8ca297495a6d20aed50815e6f79cdd3b2D6292586C51CF2BE801FC0E4C312A5474C9BB71'; 
+     sess.loginToken(token, '', (code) => {
+     if (code) {
+       return;
+     }
+       // Start monitoring units continuously
+     monitorUnits(sess, 10000); // 10 seconds fetch interval
+     //checkCrash(sess, 10000);// 10 second fetch interval
 
-
-    // Initialize session
+  });
+};
+   // Initialize session
     initSession();
-  }, []); // Empty dependency array ensures effect runs only once
+ }, []); 
 
 
 
