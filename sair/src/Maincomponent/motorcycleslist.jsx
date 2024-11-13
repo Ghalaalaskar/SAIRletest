@@ -246,6 +246,7 @@ const handleAddMotorcycleSubmit = async (e) => {
             style={{ cursor: 'pointer' }}
             src={PencilIcon}
             alt="Edit"
+            onClick={() => navigate(`/edit-motorcycle/${record.id}`)}
           />
         </div>
       ),

@@ -281,7 +281,7 @@ const EditDriver = () => {
   // Update submit handler 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Submitting driver event :', e );
+    console.log('Submitting driver event :', e);
     const { Fname, Lname, PhoneNumber, DriverID } = driverData;
 
     let isValid = true;
@@ -328,32 +328,29 @@ const EditDriver = () => {
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
 
-// Update the driverData with the new GPS number
-  if (name === 'GPSnumber') {
-    setDriverData(prev => ({
-      ...prev,
-      GPSnumber: value
-    }));
+    // Update the driverData with the new GPS number
+    if (name === 'GPSnumber') {
+      setDriverData(prev => ({
+        ...prev,
+        GPSnumber: value
+      }));
 
-    // If GPS number is set to "None", fetch available motorcycles again
-    if (value === 'None') {
-      await fetchAvailableMotorcycles(companyName);
+      // If GPS number is set to "None", fetch available motorcycles again
+      if (value === 'None') {
+        await fetchAvailableMotorcycles(companyName);
+      }
     } else {
-      // If changing to a valid GPS number, fetch available motorcycles
-      await fetchAvailableMotorcycles(companyName);
+      setDriverData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
-  } else {
-    setDriverData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }
 
-  // Clear validation messages if necessary
-  setValidationMessages(prev => ({
-    ...prev,
-    [name]: ''
-  }));
+    // Clear validation messages if necessary
+    setValidationMessages(prev => ({
+      ...prev,
+      [name]: ''
+    }));
 
 
     // Check uniqueness when Driver ID changes
@@ -402,7 +399,7 @@ const EditDriver = () => {
       PhoneNumber: phoneError
     }));
   };
- 
+
 
 
   return (
@@ -484,7 +481,7 @@ const EditDriver = () => {
                     />
                     {validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
                   </div>
-
+                 { console.log("oldgps number",oldDriverData.GPSnumber, "new gps number", driverData.GPSnumber)}
                   <div>
                     <label>GPS Number</label>
                     <select
@@ -494,18 +491,19 @@ const EditDriver = () => {
                       className={s.select}
                     >
                       {/* Show the currently assigned GPS number if available */}
-                      {driverData.GPSnumber && (
-                        <option value={driverData.GPSnumber}>
-                          {driverData.GPSnumber}
+                      {oldDriverData.GPSnumber && (
+                        <option value={oldDriverData.GPSnumber}>
+                          {oldDriverData.GPSnumber}
                         </option>
                       )}
                       {/* Add "None" option only if it is not already selected */}
-                      {driverData.GPSnumber !== 'None' && (
+                      {oldDriverData.GPSnumber !== 'None' && (
                         <option value="None">None</option>
                       )}
-                      {/* Render available motorcycles, including the currently selected GPS number */}
+                      {/* Render available motorcycles, excluding the currently selected GPS number */}
                       {availableMotorcycles.length > 0 ? (
-                       availableMotorcycles.map((item) => (
+                        availableMotorcycles 
+                          .map((item) => (
                             <option key={item.id} value={item.GPSnumber}>
                               {item.GPSnumber}
                             </option>

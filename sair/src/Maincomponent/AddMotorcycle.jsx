@@ -247,7 +247,7 @@ const generateMotorcycleID = async (gpsNumber) => {
               {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}
             </div>
             <div>
-              <label>Model</label>
+              <label>Motorcycle Model</label>
               <input
                 type="text"
                 name="Model"
@@ -262,7 +262,7 @@ const generateMotorcycleID = async (gpsNumber) => {
 
           <div className={s.formRow}>
             <div>
-              <label>Type</label>
+              <label>Motorcycle Type</label>
               <input
                 type="text"
                 name="Type"
@@ -273,7 +273,7 @@ const generateMotorcycleID = async (gpsNumber) => {
             </div>
 
             <div>
-              <label>Brand</label>
+              <label>Motorcycle Brand</label>
               <input
                 type="text"
                 name="Brand"
@@ -286,7 +286,7 @@ const generateMotorcycleID = async (gpsNumber) => {
 
           <div className={s.formRow}>
             <div>
-              <label>License Plate</label>
+              <label>Motorcycle License Plate</label>
               <input
                 type="text"
                 name="LicensePlate"
