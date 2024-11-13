@@ -327,22 +327,17 @@ const generateMotorcycleID = async (gpsNumber) => {
         </form>
       </main>
 
-      javascript
-
-Copy
-import { Modal } from 'antd';
 
 {popupVisible && (
   <Modal
     title={null} // No title since it's a simple image notification
     visible={popupVisible}
     onCancel={handleClosePopup}
-    footer={null}
+    footer={<p style={{ textAlign:'center' }}>{popupMessage}</p>}
     style={{ top: '38%' }} // Center the modal vertically
   >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <img src={popupImage} alt="Popup" style={{ width: '30%' }} />
-      <p style={{ fontSize: '20px', fontFamily: 'Open Sans' }}>{popupMessage}</p>
+      <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />
     </div>
   </Modal>
 )}

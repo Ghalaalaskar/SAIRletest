@@ -119,7 +119,7 @@ const Header = ({ active }) => {
           <Button key="cancel" onClick={handleCancel}>
             Cancel
           </Button>,
-          <Button key="logout" onClick={handleLogout} style={{ backgroundColor: 'red', color: 'white' }}>
+          <Button key="logout" onClick={handleLogout} style={{ backgroundColor: '#FF6666', color: 'white' }}>
             Logout
           </Button>,
         ]}

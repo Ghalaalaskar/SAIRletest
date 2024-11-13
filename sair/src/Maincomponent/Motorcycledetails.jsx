@@ -210,7 +210,7 @@ Email</h3>
           style={{ top: '38%' }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <img src={X} alt="No Violations" width="100" height="100" />
+            <img src={X} alt="No Violations"style={{ width: '20%', marginBottom: '16px' }} />
           </div>
         </Modal>
       )}

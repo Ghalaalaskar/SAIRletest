@@ -282,16 +282,16 @@ const DriverList = () => {
         <Modal
           visible={isNotificationVisible}
           onCancel={() => setIsNotificationVisible(false)}
-          footer={null}
+          footer={<p style={{textAlign:'center'}}>{notificationMessage}</p>}
           style={{top:'38%'}}
         >
           <div style={{ textAlign: 'center' }}>
             <img
               src={isSuccess ? successImage : errorImage}
               alt={isSuccess ? 'Success' : 'Error'}
-              style={{ width: '30%' }}
+              style={{ width: '20%', marginBottom: '16px' }}
             />
-            <p>{notificationMessage}</p>
+            
           </div>
         </Modal>
       </main>

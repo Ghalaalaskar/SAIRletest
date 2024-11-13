@@ -5,8 +5,8 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
-import backgroundImage from '../../images/sairbackground.png';
-import { Form } from 'antd';
+import backgroundImage from '../../images/sairbackgroundL.png';
+import { Form, Modal } from 'antd';
 import s from '../../css/Login.module.css';
 // import '@fortawesome/fontawesome-free/css/all.min.css';
 // import '../../App.css';
@@ -204,15 +204,16 @@ const Login = () => {
       <div>
         <img
           src={backgroundImage}
-          alt='Top Right'
+          alt='sair'
           className={s.rightImage}
+          
         />
       </div>
 
       <h1  >
         Welcome to SAIR!
       </h1>
-
+<div style={{marginTop:'50px'}}>
       <label style={{ fontSize: '18px' }}>
       Please Select your Role
         <select
@@ -366,16 +367,25 @@ const Login = () => {
           </button>
         </Form>
       </div>
-
+      </div>
       {popupVisible && (
-        <div className='popup'>
-          <button className='close-btn' onClick={handleClosePopup}>
-            ×
-          </button>
-          <img src={popupImage} alt='Popup' />
-          <p>{popupMessage}</p>
-        </div>
-      )}
+    <Modal
+    visible={popupVisible}
+    onCancel={handleClosePopup}
+    footer={<p style={{textAlign:'center'}}>{popupMessage}</p>} 
+    style={{ top: '38%' }} 
+    bodyStyle={{ textAlign: 'center' }} // Center text in modal body
+  >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <img
+        src={popupImage}
+        alt='Popup'
+        style={{ width: '20%', marginBottom: '16px' }} // Adjusted to match the modal style
+      />
+      
+    </div>
+  </Modal>
+)}
     </div>
   );
 };

@@ -427,12 +427,12 @@ const AddDriver = () => {
     title={null} // No title for this image notification
     visible={popupVisible}
     onCancel={handleClosePopup}
-    footer={null}
+    footer={<p style={{ textAlign:'center'}}>{popupMessage}</p>}
     style={{ top: '38%' }} // Center the modal vertically
   >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-      <img src={popupImage} alt="Popup" style={{ width: '30%' }} />
-      <p style={{ fontSize: '20px', fontFamily: 'Open Sans' }}>{popupMessage}</p>
+      <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />
+      
     </div>
   </Modal>
 )}

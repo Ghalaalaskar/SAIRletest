@@ -7,6 +7,7 @@ import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
 import s from "../../css/ForgotPassword.module.css"
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { Modal } from 'antd';
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState('');
@@ -125,14 +126,16 @@ const ForgetPassword = () => {
       </div>
 
       {popupVisible && (
-        <div className="popup">
-          <button
-            onClick={() => setPopupVisible(false)}
-            style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', cursor: 'pointer' }}
-          ><i className="fas fa-times"></i></button>
-          <img src={popupImage} alt="Popup" />
-          <p>{popupMessage}</p>
-        </div>
+    <Modal
+    visible={popupVisible}
+    onCancel={() => setPopupVisible(false)}
+    footer={<p style={{textAlign:'center'}}>{popupMessage}</p>}
+    style={{ top: '38%' }}
+    bodyStyle={{ textAlign: 'center' }}
+  >
+    <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />
+    
+  </Modal>
       )}
     </div>
   );

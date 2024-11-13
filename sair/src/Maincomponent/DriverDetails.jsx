@@ -199,10 +199,7 @@ Email</h3>
         <path d="M14.5 16L18 16" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M2 9H22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
       </svg>Motorcycle License Plate</h3>
-                                    <p style={{fontSize:'18px', marginLeft:'45px'}}>{motorcycle.LicensePlate}</p> 
-
-
-                                    
+                                    <p style={{fontSize:'18px', marginLeft:'45px'}}>{motorcycle.LicensePlate}</p>   
                                     <hr />
                                 </div>
               ))
@@ -247,7 +244,7 @@ Email</h3>
   >
 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
     
-<img src={X} alt="No Violations" width="100" height="100" />
+<img src={X} alt="No Violations" style={{ width: '20%', marginBottom: '16px' }} />
 
   </div>
   </Modal>
