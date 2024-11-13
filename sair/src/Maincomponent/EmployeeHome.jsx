@@ -44,7 +44,7 @@ const EmployeeHome = () => {
               <img
                 src={Mision} // Changed to Mision for consistency
                 alt="Mission"
-                style={{ width: '70px', height: 'auto', marginRight: '10px', marginTop: '-35px' }}
+                style={{ width: '70px', height: 'auto', marginRight: '10px', marginTop: '-10px' }}
               />
               <h1 style={{ color: '#059855', fontWeight: 'bold' }}>SAIR Mission</h1>
             </div>

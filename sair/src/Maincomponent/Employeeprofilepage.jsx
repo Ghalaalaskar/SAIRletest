@@ -7,7 +7,7 @@ import errorImage from '../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
 import Header from "./Header" 
-import {Modal} from 'antd';
+import { Modal } from 'antd';
 import s from "../css/Profile.module.css"
 
 const Profile = () => {
@@ -648,13 +648,13 @@ const Profile = () => {
         <Modal
         visible={popupVisible}
         onCancel={handleClosePopup}
-        footer={null} 
+        footer={<p style={{ textAlign: 'center' }}> {popupMessage}</p>} 
         style={{ top: '38%' }}
       >
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-          <img src={popupImage} alt="Popup" style={{ width: '30%' }}  />
-          <p>{popupMessage}</p>
+          <img src={popupImage} alt="Popup" style={{width: '20%', marginBottom: '16px'  }}  />
+          
         </div>
       </Modal>
 

@@ -28,11 +28,10 @@
 
 .rightImage {
   position: absolute;
-  top: -3px;
+  top: 0;
   right: 0;
   width: 725px;
-  /* Adjust width as per your needs */
-  height: 690px;
+  height: auto;
   /* Maintain aspect ratio */
 } 
 .loginContainer .error-message.visible {
@@ -93,7 +92,7 @@
 .formContainer {
   max-height: 400px; 
   font-family: 'Open Sans';
-
+  margin-top: 20px;
 }
 
 .passwordContainer {

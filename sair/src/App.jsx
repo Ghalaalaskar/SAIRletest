@@ -19,6 +19,14 @@ import EditMotorcycle from './Maincomponent/EditMotorcycle';
 import DriverDetails from './Maincomponent/DriverDetails';
 import React, { useEffect } from 'react';
 import { monitorUnits } from './Maincomponent/monitorUnits';
+import VDriver from './Maincomponent/VDriver';
+import CrashGeneral from './Maincomponent/CrashGeneral';
+import ComplaintGeneral from './Maincomponent/ComplaintGeneral'
+import MotorcycleDetails from './Maincomponent/Motorcycledetails'
+import { LoadScript } from '@react-google-maps/api';
+import VMotorcycle from './Maincomponent/VMotorcycle'
+
+
 
 import "./css/common.css"
 
@@ -51,6 +59,11 @@ function App() {
 
 
   return (
+
+    <LoadScript
+    googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc"
+    onError={(e) => console.error('Error loading maps', e)}
+  >
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
@@ -66,12 +79,18 @@ function App() {
         <Route path="/edit-driver/:driverId" element={<EditDriver />} />
         <Route path="/add-driver" element={<AddDriver />} />
         <Route path="/violation/general/:violationId" element={<ViolationGeneral />} />
-        <Route path="/violation/detail/:driverId" element={<ViolationDetail />} />
+        <Route path="/violation/detail/:violationId" element={<ViolationDetail />} />
         <Route path="/edit-motorcycle/:motorcycleId" element={<EditMotorcycle />} />
         <Route path="/add-motorcycle" element={<AddMotorcycle />} />
         <Route path="/driver-details/:driverId" element={<DriverDetails />} />
+        <Route path="/drivers/:driverId/violations" element={<VDriver />} />
+        <Route path="/crash/general/:crashId" element={<CrashGeneral />} />
+        <Route path="/complaint/general/:complaintId" element={<ComplaintGeneral />} />
+        <Route path="/motorcycle-details/:motorcycleId" element={<MotorcycleDetails />} />
+        <Route path="/motorcycle/:motorcycleId/violations" element={<VMotorcycle />} />
       </Routes>
     </Router>
+    </LoadScript>
   );
 }
 
