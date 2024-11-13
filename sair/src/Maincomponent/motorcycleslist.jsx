@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { collection, doc, onSnapshot, deleteDoc, addDoc, getDoc, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, deleteDoc, addDoc, getDoc, query, where, updateDoc, getDocs } from 'firebase/firestore';
 import TrashIcon from '../images/Trash.png';
 import PencilIcon from '../images/pencil.png';
 import EyeIcon from '../images/eye.png';
@@ -51,19 +51,21 @@ const MotorcycleList = () => {
     };
 
 
-    const fetchMotorcycles = () => {
-      const motorcycleCollection = query(
-        collection(db, 'Motorcycle'),
-        where('CompanyName', '==', currentEmployerCompanyName)
-      );
-      const unsubscribe = onSnapshot(motorcycleCollection, (snapshot) => {
-        const motorcycleList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setMotorcycleData(motorcycleList);
-      });
-      return () => unsubscribe();
+    const fetchMotorcycles = async () => {
+      if (currentEmployerCompanyName) {
+        const motorcycleCollection = query(
+          collection(db, 'Motorcycle'),
+          where('CompanyName', '==', currentEmployerCompanyName)
+        );
+        const unsubscribe = onSnapshot(motorcycleCollection, (snapshot) => {
+          const motorcycleList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setMotorcycleData(motorcycleList);
+        });
+        return () => unsubscribe();
+      }
     };
 
     const fetchDrivers = () => {
@@ -90,52 +92,89 @@ const MotorcycleList = () => {
 
   const handleDeleteMotorcycle = async (motorcycleId) => {
     try {
-      await deleteDoc(doc(db, 'Motorcycle', motorcycleId));
-      setIsSuccess(true);
-      setNotificationMessage('Motorcycle deleted successfully!');
+        // Reference to the motorcycle document
+        const motorcycleDocRef = doc(db, 'Motorcycle', motorcycleId);
+        const motorcycleDoc = await getDoc(motorcycleDocRef);
+
+        if (motorcycleDoc.exists()) {
+            const motorcycleData = motorcycleDoc.data();
+            const driverId = motorcycleData.DriverID; // Use the correct field name for DriverID
+
+            // Delete the motorcycle document
+            await deleteDoc(motorcycleDocRef);
+
+            // If there is a DriverID, update the corresponding driver
+            if (driverId) {
+                // Fetch driver based on the unique DriverID field
+                const driverQuery = query(collection(db, 'Driver'), where('DriverID', '==', driverId));
+                const driverSnapshot = await getDocs(driverQuery);
+
+                if (!driverSnapshot.empty) {
+                    const driverDocRef = doc(db, 'Driver', driverSnapshot.docs[0].id); // Get the document ID of the first matching driver
+                    await updateDoc(driverDocRef, {
+                        available: true, // Set driver as available
+                        GPSnumber: null  // Clear the GPS number
+                    });
+                } else {
+                    console.error(`No driver found with ID ${driverId}`);
+                    setIsSuccess(false);
+                    setNotificationMessage(`No driver found with ID ${driverId}`);
+                }
+            }
+
+            setIsSuccess(true);
+            setNotificationMessage('Motorcycle deleted successfully!');
+        } else {
+            setIsSuccess(false);
+            setNotificationMessage('Motorcycle not found.');
+        }
     } catch (error) {
-      console.error('Error deleting motorcycle:', error);
-      setIsSuccess(false);
-      setNotificationMessage('Error deleting motorcycle. Please try again.');
+        console.error('Error deleting motorcycle:', error);
+        setIsSuccess(false);
+        setNotificationMessage('Error deleting motorcycle. Please try again.');
     }
+
     setIsNotificationVisible(true);
     setIsDeletePopupVisible(false);
-  };
+};
 
-  const handleAddMotorcycleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newMotorcycle.GPSnumber || !newMotorcycle.LicensePlate) {
-      setIsSuccess(false);
-      setNotificationMessage('Please fill in all required fields');
-      setIsNotificationVisible(true);
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, 'Motorcycle'), {
-        MotorcycleID: newMotorcycle.MotorcycleID,
-        GPSnumber: newMotorcycle.GPSnumber,
-        LicensePlate: newMotorcycle.LicensePlate,
-        DriverID: newMotorcycle.DriverID || null,
-        CompanyName: companyName,
-      });
-      setIsSuccess(true);
-      setNotificationMessage('Motorcycle added successfully!');
-      setIsAddPopupVisible(false);
-    } catch (error) {
-      console.error('Error saving motorcycle:', error);
-      setIsSuccess(false);
-      setNotificationMessage(`Error saving motorcycle: ${error.message}`);
-    }
-
+const handleAddMotorcycleSubmit = async (e) => {
+  e.preventDefault();
+  if (!newMotorcycle.GPSnumber || !newMotorcycle.LicensePlate) {
+    setIsSuccess(false);
+    setNotificationMessage('Please fill in all required fields');
     setIsNotificationVisible(true);
-    setNewMotorcycle({
-      MotorcycleID: '',
-      GPSnumber: '',
-      LicensePlate: '',
-      DriverID: null,
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'Motorcycle'), {
+      MotorcycleID: newMotorcycle.MotorcycleID,
+      GPSnumber: newMotorcycle.GPSnumber,
+      LicensePlate: newMotorcycle.LicensePlate,
+      DriverID: newMotorcycle.DriverID || null,
+      CompanyName: currentEmployerCompanyName, // Use the current company's name
     });
-  };
+    setIsSuccess(true);
+    setNotificationMessage('Motorcycle added successfully!');
+    setIsAddPopupVisible(false);
+    setTimeout(() => {
+      navigate('/motorcycleslist'); // Adjust the path as needed
+    }, 2000);
+  } catch (error) {
+    console.error('Error saving motorcycle:', error);
+    setIsSuccess(false);
+    setNotificationMessage(`Error saving motorcycle: ${error.message}`);
+  }
+
+  setIsNotificationVisible(true);
+  setNewMotorcycle({
+    MotorcycleID: '',
+    GPSnumber: '',
+    LicensePlate: '',
+    DriverID: null,
+  });
+};
 
   const filteredData = motorcycleData.filter((motorcycle) => {
     const searchLower = searchQuery.toLowerCase().trim();
@@ -148,6 +187,10 @@ const MotorcycleList = () => {
     );
   });
 
+  const viewMotorcycleDetails = (motorcycleID) => {
+    console.log('Navigating to details for motorcycle ID:', motorcycleID);
+    navigate(`/motorcycle-details/${motorcycleID}`); // Adjust the path as needed
+  };
 
   const columns = [
     {
@@ -183,6 +226,7 @@ const MotorcycleList = () => {
           style={{ cursor: 'pointer' }}
           src={EyeIcon}
           alt="Details"
+          onClick={() => viewMotorcycleDetails(record.id)} 
         />
       ),
     },
@@ -320,16 +364,17 @@ const MotorcycleList = () => {
   title="Confirm Deletion"
   visible={isDeletePopupVisible}
   onCancel={() => setIsDeletePopupVisible(false)}
-  footer={null}
->
-  <div style={{ textAlign: 'center' }}>
-    <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
-    <Button type="primary" danger onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>
-      Yes
-    </Button>
-    <Button onClick={() => setIsDeletePopupVisible(false)} style={{ marginLeft: '8px' }}>
+  footer={[
+    <Button key="no" onClick={() => setIsDeletePopupVisible(false)}>
       No
-    </Button>
+    </Button>,
+    <Button key="yes" type="primary" danger onClick={() => handleDeleteMotorcycle(motorcycleToRemove.id)}>
+      Yes
+    </Button>,
+  ]}
+>
+  <div>
+    <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
   </div>
 </Modal>
 
@@ -337,16 +382,16 @@ const MotorcycleList = () => {
 <Modal
   visible={isNotificationVisible}
   onCancel={() => setIsNotificationVisible(false)}
-  footer={null}
+  footer={<p style={{ textAlign: 'center' }}> {notificationMessage}</p>}
   style={{ top: '38%' }}
 >
-  <div style={{ textAlign: 'center' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
     <img
       src={isSuccess ? successImage : errorImage}
       alt={isSuccess ? 'Success' : 'Error'}
-      style={{ width: '30%', marginBottom: '16px' }}
+      style={{ width: '20%', marginBottom: '16px' }}
     />
-    <p>{notificationMessage}</p>
+  
   </div>
 </Modal>
       </main>

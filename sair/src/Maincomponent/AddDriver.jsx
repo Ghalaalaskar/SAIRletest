@@ -89,6 +89,8 @@ const AddDriver = () => {
     }
   };
 
+  
+
   const handlePhoneNumberChange = (e) => {
     let newPhoneNumber = e.target.value;
     if (newPhoneNumber.startsWith('+966')) {
@@ -237,6 +239,11 @@ const AddDriver = () => {
       }
 
       setPopupVisible(true);
+
+      setTimeout(() => {
+        navigate('/driverslist'); // Adjust the path as needed
+      }, 2000);
+      
     } catch (error) {
       console.error('Error adding driver:', error);
       setPopupMessage("Driver Email Already exist.");
@@ -296,6 +303,12 @@ const AddDriver = () => {
       newValidationMessages.DriverID = 'Driver ID must be 10 digits';
       isValid = false;
     }
+
+    if (driver.GPSnumber === "" ) {
+      newValidationMessages.GPSnumber = 'Please choose a motorcycle';
+      isValid = false;
+    }
+
 
     setValidationMessages(newValidationMessages);
 
@@ -381,22 +394,22 @@ const AddDriver = () => {
             <div>
               <label>GPS Number</label>
               <select
-                name="GPSnumber"
-                value={driver.GPSnumber}
-                onChange={handleInputChange}
-              >
-                <option value="" disabled>Select a Motorcycle</option>
-                <option value="None">None</option>
-                {availableMotorcycles.length > 0 ? (
-                  availableMotorcycles.map((item) => (
-                    <option key={item.id} value={item.GPSnumber}>
-                      {item.GPSnumber}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No motorcycles available</option>
-                )}
-              </select>
+  name="GPSnumber"
+  value={driver.GPSnumber}
+  onChange={handleInputChange}
+>
+  <option value="" disabled>Select a Motorcycle</option>
+  <option value="None">None</option>
+  {availableMotorcycles.length > 0 ? (
+    availableMotorcycles.map((item) => (
+      <option key={item.id} value={item.GPSnumber}>
+        {item.GPSnumber}
+      </option>
+    ))
+  ) : (
+    <option disabled>No motorcycles available</option>
+  )}
+</select>
               {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, onSnapshot, doc, getDoc , updateDoc} from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -50,72 +50,100 @@ const AddMotorcycle = () => {
 
   const handleAddMotorcycle = async (values) => {
     try {
-      // Check if GPS number already exists
-      const gpsQuery = query(
-        collection(db, 'Motorcycle'),
-        where('GPSnumber', '==', values.GPSnumber),
-        where('CompanyName', '==', Employer.CompanyName)
-      );
-      const gpsSnapshot = await getDocs(gpsQuery);
-      if (!gpsSnapshot.empty) {
-        setPopupMessage("GPS number already exists.");
-        setPopupImage(errorImage);
-        setPopupVisible(true);
-        return;
-      }
-
-      const generateMotorcycleID = async (gpsNumber) => {
-        let uniqueID = '';
-        let isUnique = false;
-    
-        while (!isUnique) {
-          const randomDigits = Math.floor(100 + Math.random() * 900).toString(); // Generates a random number between 100 and 999
-          uniqueID = `${gpsNumber}${randomDigits}`; // Concatenates the GPS number with the random digits
-    
-          const q = query(collection(db, 'Motorcycle'), where('MotorcycleID', '==', uniqueID));
-          const querySnapshot = await getDocs(q);
-    
-          if (querySnapshot.empty) {
-            isUnique = true; // If no existing IDs match, this ID is unique
-          }
+        // Check if GPS number already exists
+        const gpsQuery = query(
+            collection(db, 'Motorcycle'),
+            where('GPSnumber', '==', values.GPSnumber),
+            where('CompanyName', '==', Employer.CompanyName)
+        );
+        const gpsSnapshot = await getDocs(gpsQuery);
+        if (!gpsSnapshot.empty) {
+            setPopupMessage("GPS number already exists.");
+            setPopupImage(errorImage);
+            setPopupVisible(true);
+            return;
         }
-    
-        return uniqueID; // Returns the unique ID
-      };
 
-      // Check if license plate already exists
-      const plateQuery = query(
-        collection(db, 'Motorcycle'),
-        where('LicensePlate', '==', values.LicensePlate),
-        where('CompanyName', '==', Employer.CompanyName)
-      );
-      const plateSnapshot = await getDocs(plateQuery);
-      if (!plateSnapshot.empty) {
-        setPopupMessage("License plate already exists.");
+        // Check if license plate already exists
+        const plateQuery = query(
+            collection(db, 'Motorcycle'),
+            where('LicensePlate', '==', values.LicensePlate),
+            where('CompanyName', '==', Employer.CompanyName)
+        );
+        const plateSnapshot = await getDocs(plateQuery);
+        if (!plateSnapshot.empty) {
+            setPopupMessage("License plate already exists.");
+            setPopupImage(errorImage);
+            setPopupVisible(true);
+            return;
+        }
+
+        // Generate a unique MotorcycleID
+        const motorcycleID = await generateMotorcycleID(values.GPSnumber);
+        const newMotorcycle = {
+            ...values,
+            MotorcycleID: motorcycleID,
+            CompanyName: Employer.CompanyName,
+            DriverID: values.DriverID === "None" ? null : values.DriverID,
+            available: values.DriverID === "None" ? true : false,
+        };
+
+        // Add the new motorcycle
+        await addDoc(collection(db, 'Motorcycle'), newMotorcycle);
+        setPopupMessage("Motorcycle added successfully!");
+        setPopupImage(successImage);
+        setPopupVisible(true);
+
+        // Update the driver if a DriverID is assigned
+        if (newMotorcycle.DriverID) {
+            // Fetch driver based on the unique DriverID field
+            const driverQuery = query(collection(db, 'Driver'), where('DriverID', '==', newMotorcycle.DriverID));
+            const driverSnapshot = await getDocs(driverQuery);
+
+            if (!driverSnapshot.empty) {
+                const driverDocRef = doc(db, 'Driver', driverSnapshot.docs[0].id); // Get the document ID of the first matching driver
+                await updateDoc(driverDocRef, {
+                    GPSnumber: values.GPSnumber,
+                    available: false
+                });
+            } else {
+                console.error(`No driver found with ID ${newMotorcycle.DriverID}`);
+                setPopupMessage(`No driver found with ID ${newMotorcycle.DriverID}`);
+                setPopupImage(errorImage);
+                setPopupVisible(true);
+            }
+        }
+        // Redirect after a short delay only if added successfully
+        setTimeout(() => {
+          navigate('/motorcycleslist'); // Change this to your desired route
+      }, 2000); // Delay of 2000 milliseconds (2 seconds)
+    } catch (error) {
+        console.error('Error adding motorcycle:', error);
+        setPopupMessage(`Error adding motorcycle: ${error.message}`);
         setPopupImage(errorImage);
         setPopupVisible(true);
-        return;
-      }
-    const motorcycleID = await generateMotorcycleID(values.GPSnumber);
-      const newMotorcycle = {
-        ...values,
-        MotorcycleID: motorcycleID,
-        CompanyName: Employer.CompanyName,
-        available: true
-      };
-
-      await addDoc(collection(db, 'Motorcycle'), newMotorcycle);
-      setPopupMessage("Motorcycle added successfully!");
-      setPopupImage(successImage);
-      setPopupVisible(true);
-
-    } catch (error) {
-      console.error('Error adding motorcycle:', error);
-      setPopupMessage("Error adding motorcycle");
-      setPopupImage(errorImage);
-      setPopupVisible(true);
     }
-  };
+};
+
+// Unique ID generation function
+const generateMotorcycleID = async (gpsNumber) => {
+    let uniqueID = '';
+    let isUnique = false;
+
+    while (!isUnique) {
+        const randomDigits = Math.floor(100000000 + Math.random() * 900000000).toString();
+        uniqueID = `5${randomDigits}`;
+
+        const q = query(collection(db, 'Motorcycle'), where('MotorcycleID', '==', uniqueID));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            isUnique = true; // If no existing IDs match, this ID is unique
+        }
+    }
+
+    return uniqueID; // Returns the unique ID
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -146,6 +174,11 @@ const AddMotorcycle = () => {
 
     if (!LicensePlate) {
       newValidationMessages.LicensePlate = 'Please enter motorcycle license plate.';
+      isValid = false;
+    }
+
+    if (!DriverID) {
+      newValidationMessages.DriverID = 'Please choose a driver';
       isValid = false;
     }
 
@@ -265,25 +298,24 @@ const AddMotorcycle = () => {
 
             <div>
               <label>Driver ID</label>
-              <select
-                name="DriverID"
-                value={motorcycle.DriverID}
-                onChange={handleInputChange}
-              >
-                <option value={null}>None</option>
-                {availableDrivers.length > 0 ? (
-                  availableDrivers.map(({ value, label }) => {
-                    return (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    )
-                  })
-                ) : (
-                  <option disabled>No drivers available</option>
-                )}
-              </select>
-              {validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
+             <select
+  name="DriverID"
+  value={motorcycle.DriverID}
+  onChange={handleInputChange}
+>
+  <option value="" disabled>Select a Driver</option> {/* Disabled placeholder option */}
+  <option value={null}>None</option> {/* This will be treated as null */}
+  {availableDrivers.length > 0 ? (
+    availableDrivers.map(({ value, label }) => (
+      <option key={value} value={value}>
+        {label}
+      </option>
+    ))
+  ) : (
+    <option disabled>No drivers available</option>
+  )}
+</select>
+{validationMessages.DriverID && <p className={s.valdationMessage}>{validationMessages.DriverID}</p>}
             </div>
           </div>
 

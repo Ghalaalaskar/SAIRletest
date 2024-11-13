@@ -1,6 +1,5 @@
 import React from 'react';
-import { LoadScript, GoogleMap, MarkerF } from '@react-google-maps/api';
-import { AlignLeftOutlined } from '@ant-design/icons';
+import { LoadScript, GoogleMap, MarkerF } from '@react-google-maps/api'; 
 
 const Map = ({ lat, lng, placeName }) => { 
   const containerStyle = {
@@ -13,11 +12,7 @@ const Map = ({ lat, lng, placeName }) => {
     lat: lat,
     lng: lng,
   };
-
-  const onLoad = (map) => {
-    console.log('Map Loaded:', map);
-  };
-
+ 
   // Function to open Google Maps in a new tab
   const handleMarkerClick = () => {
     console.log(`Opening Google Maps at: ${lat}, ${lng}`); // Log the coordinates
@@ -27,16 +22,11 @@ const Map = ({ lat, lng, placeName }) => {
   };
 
   return (
-    <LoadScript
-      googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc"
-      onError={(e) => console.error('Error loading maps', e)}
-    >
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={center}
-          zoom={14}
-          onLoad={onLoad}
+          zoom={14} 
         >
           <MarkerF 
             position={center} 
@@ -44,7 +34,7 @@ const Map = ({ lat, lng, placeName }) => {
           />
         </GoogleMap>
       </div>
-    </LoadScript>
+   
   );
 };
 

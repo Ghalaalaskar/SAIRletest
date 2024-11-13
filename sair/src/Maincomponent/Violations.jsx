@@ -6,10 +6,9 @@ import EyeIcon from '../images/eye.png';
 import { Table } from 'antd';
 import Header from './Header';
 import s from "../css/Violations.module.css";
-// import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const ViolationList = () => {
-  const [motorcycles, setMotorcycles] = useState([]);
+  const [motorcycles, setMotorcycles] = useState({});
   const [violations, setViolations] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,98 +16,103 @@ const ViolationList = () => {
   const navigate = useNavigate();
   const employerUID = sessionStorage.getItem('employerUID');
 
-
-
-  // Fetch Employer Company Name and Motorcycles
   useEffect(() => {
-    // Fetch Violations Data
-    const fetchViolations = (gpsNumbers) => {
-      if (gpsNumbers.length === 0) return;
-
-      const violationCollection = query(
-        collection(db, 'Violation'),
-        where('GPSnumber', 'in', gpsNumbers)
-      );
-
-      const unsubscribe = onSnapshot(violationCollection, (snapshot) => {
-        const violationList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setViolations(violationList);
-        fetchDrivers(violationList);
-      });
-
-      return () => unsubscribe();
-    };
-
-    const fetchEmployerCompanyName = async () => {
+    const fetchEmployerDrivers = async () => {
       if (employerUID) {
         const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
         if (employerDoc.exists()) {
-          fetchMotorcycles(employerDoc.data().CompanyName); // Pass company name directly
+          const companyName = employerDoc.data().CompanyName;
+          fetchDrivers(companyName);
         } else {
           console.error("No such employer!");
         }
       }
     };
 
-    const fetchMotorcycles = (companyName) => {
-      const motorcycleCollection = query(
-        collection(db, 'Motorcycle'),
-        where('CompanyName', '==', companyName)
-      );
-
-      const unsubscribe = onSnapshot(motorcycleCollection, (snapshot) => {
-        const motorcycleMap = {};
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          motorcycleMap[data.GPSnumber] = data.LicensePlate;
-        });
-        setMotorcycles(motorcycleMap);
-        const gpsNumbers = Object.keys(motorcycleMap);
-        if (gpsNumbers.length > 0) {
-          fetchViolations(gpsNumbers);
-        } else {
-          setViolations([]);
-        }
-      });
-
-      return () => unsubscribe();
-    };
-
-    fetchEmployerCompanyName();
+    fetchEmployerDrivers();
   }, [employerUID]);
 
-
-  // Fetch Drivers Data
-  const fetchDrivers = (violationList) => {
-    const driverIDs = violationList.map(v => v.driverID);
-    const driverCollection = collection(db, 'Driver');
+  const fetchDrivers = (companyName) => {
+    const driverCollection = query(
+      collection(db, 'Driver'),
+      where('CompanyName', '==', companyName)
+    );
 
     const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
       const driverMap = {};
+      const driverIDs = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (driverIDs.includes(data.DriverID)) {
-          driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
-        }
+        driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
+        driverIDs.push(data.DriverID);
       });
       setDrivers(driverMap);
+      if (driverIDs.length > 0) {
+        fetchViolations(driverIDs);
+      } else {
+        setViolations([]);
+      }
     });
 
     return () => unsubscribe();
   };
 
-  // Filtering logic based on searchQuery and searchDate
+  const fetchMotorcycles = (violationIDs) => {
+    const motorcycleCollection = query(
+      collection(db, 'History'),
+      where('ID', 'in', violationIDs) // Matching by violationID
+    );
+
+    const unsubscribe = onSnapshot(motorcycleCollection, (snapshot) => {
+      const motorcycleMap = {};
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log("Fetched Motorcycle Data:", data); // Log fetched motorcycle data
+        motorcycleMap[data.ID] = data.LicensePlate; // Map ID to License Plate
+      });
+      console.log("Motorcycle Map:", motorcycleMap); // Log the entire motorcycle map
+      setMotorcycles(motorcycleMap);
+    });
+
+    return () => unsubscribe();
+  };
+
+  const fetchViolations = (driverIDs) => {
+    const violationCollection = query(
+      collection(db, 'Violation'),
+      where('driverID', 'in', driverIDs)
+    );
+
+    const unsubscribe = onSnapshot(violationCollection, (snapshot) => {
+      const violationList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setViolations(violationList);
+      if (violationList.length > 0) {
+        const violationIDs = violationList.map(v => v.violationID); // Collecting violation IDs
+        fetchMotorcycles(violationIDs); // Fetch motorcycles using violation IDs
+      } else {
+        setMotorcycles({});
+      }
+    });
+
+    return () => unsubscribe();
+  };
+
+  // Filtering violations
   const filteredViolations = violations.filter((violation) => {
     const driverName = drivers[violation.driverID] || 'Unknown Driver';
-    const licensePlate = motorcycles[violation.GPSnumber] || 'Unknown Plate';
+    const licensePlate = motorcycles[violation.violationID] || 'Unknown Plate'; // Match with violationID
+
+    console.log("Checking Violation:", violation);
+    console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
 
     let violationDate = '';
     if (violation.time) {
       violationDate = new Date(violation.time * 1000).toISOString().split('T')[0];
     }
+
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -121,7 +125,7 @@ const ViolationList = () => {
     {
       title: 'Violation ID',
       dataIndex: 'violationID',
-      key: 'id',
+      key: 'violationID',
       align: 'center',
     },
     {
@@ -131,10 +135,10 @@ const ViolationList = () => {
       render: (text, record) => drivers[record.driverID] || 'Unknown Driver',
     },
     {
-      title: 'Motorcycle Licence Plate Number',
+      title: 'Motorcycle License Plate',
       key: 'motorcyclePlate',
       align: 'center',
-      render: (text, record) => motorcycles[record.GPSnumber] || 'Unknown Plate',
+      render: (text, record) => motorcycles[record.violationID] || 'Unknown Plate', // Use violationID for lookup
     },
     {
       title: 'Speed',
@@ -154,24 +158,18 @@ const ViolationList = () => {
     },
   ];
 
-
   return (
     <>
-
       <Header active="violations" />
-
-   
-        <div className="breadcrumb">
-          <a onClick={() => navigate('/employer-home')}>Home</a>
-          <span> / </span>
-          <a onClick={() => navigate('/violations')}>Violations List</a>
-        </div>
-   <main>
+      <div className="breadcrumb">
+        <a onClick={() => navigate('/employer-home')}>Home</a>
+        <span> / </span>
+        <a onClick={() => navigate('/violations')}>Violations List</a>
+      </div>
+      <main>
         <div className={s.container}>
-          <div className={s.searchHeader}  >
-            <h2 className={s.title}  >
-              Violations List
-            </h2>
+          <div className={s.searchHeader}>
+            <h2 className={s.title}>Violations List</h2>
             <div className={s.searchInputs}>
               <div className={s.searchContainer}>
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -179,13 +177,13 @@ const ViolationList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver Name or Plate Number"
+                  placeholder="Search by Driver Name or License Plate"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '280px' }}
                 />
               </div>
-              <div className={s.searchContainer} >
+              <div className={s.searchContainer}>
                 <input
                   type="date"
                   value={searchDate}
@@ -193,7 +191,6 @@ const ViolationList = () => {
                   style={{ width: '120px', backgroundColor: 'transparent' }} />
               </div>
             </div>
-
           </div>
 
           <Table
@@ -203,10 +200,8 @@ const ViolationList = () => {
             pagination={{ pageSize: 5 }}
           />
         </div>
-
       </main>
     </>
-
   );
 };
 

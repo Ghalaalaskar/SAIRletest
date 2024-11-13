@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { doc, getDoc, setDoc, query, collection, where, onSnapshot, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, query, collection, where, onSnapshot, getDocs, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown , Modal} from 'antd';
+import { Form, Input, Button, notification, Card, Row, Col, Select, Menu, Dropdown, Modal } from 'antd';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import SAIRLogo from '../images/SAIRlogo.png';
@@ -11,11 +11,13 @@ import { UserOutlined, DownOutlined } from '@ant-design/icons';
 import Header from './Header';
 
 import s from '../css/Profile.module.css';
+import { Option } from 'antd/es/mentions';
 
 const EditDriver = () => {
   const { driverId } = useParams();
   const navigate = useNavigate();
   const [driverData, setDriverData] = useState(null);
+  const [oldDriverData, setOldDriverData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [availableMotorcycles, setAvailableMotorcycles] = useState([]);
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
@@ -53,7 +55,14 @@ const EditDriver = () => {
 
           setDriverData({
             ...driverData,
-            CompanyName: companyName // Include CompanyName
+            CompanyName: companyName, // Include CompanyName
+            GPSnumber: driverData.GPSnumber || 'None'
+          });
+
+          setOldDriverData({
+            ...driverData,
+            CompanyName: companyName, // Include CompanyName
+            GPSnumber: driverData.GPSnumber || 'None'
           });
 
           setOriginalDriverID(driverData.DriverID); // Store original Driver ID
@@ -121,11 +130,11 @@ const EditDriver = () => {
     setIsNotificationVisible(true);
     setTimeout(() => {
       setIsNotificationVisible(false);
-    }, 2000); // Hide after 5 seconds
+    }, 2000);
   };
 
-   // Validate phone number
-   const validatePhoneNumber = (PhoneNumber) => {
+  // Validate phone number
+  const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     const phoneRegex1 = /^\+96605\d{8}$/;
     if (PhoneNumber === '+966') {
@@ -139,101 +148,89 @@ const EditDriver = () => {
   };
 
 
-
-  // Handle driver update
   const handleUpdateDriver = async (values) => {
+    const previousGPS = oldDriverData.GPSnumber;
+    const newGPS = values.GPSnumber;
+
     try {
-      // Check if the new DriverID exists
+      // Step 1: Check if DriverID has changed
       if (values.DriverID !== originalDriverID) {
         const driverIdExists = await checkIfDriverIdExists(values.DriverID);
         if (driverIdExists) {
           showNotification('Driver ID already exists.', false);
           return;
         }
-
         // Update associated violations if DriverID has changed
         await updateViolations(originalDriverID, values.DriverID);
       }
 
-     // New phone number with prefix
-    const newPhoneNumber = values.PhoneNumber;
+      // Step 2: Update the previous motorcycle if it exists
+      console.log('previousGPS:', previousGPS, 'newGPS:', newGPS);;
+      if (previousGPS && previousGPS !== newGPS) {
+        const previousMotorcycleQuery = query(
+          collection(db, 'Motorcycle'),
+          where('GPSnumber', '==', previousGPS)
+        );
+        const previousQuerySnapshot = await getDocs(previousMotorcycleQuery);
 
-    // Only check for duplication if the phone number has changed
-    if (newPhoneNumber !== originalPhoneNumber) {
-      const phoneNumberExists = await checkIfPhoneNumberExists(newPhoneNumber.slice(4)); // Remove +966 for the check
-      if (phoneNumberExists) {
-        showNotification('Phone number already exists.', false);
-        return;
+        if (!previousQuerySnapshot.empty) {
+          const previousMotorcycleDocRef = previousQuerySnapshot.docs[0].ref;
+          await updateDoc(previousMotorcycleDocRef, {
+            DriverID: null, // Unassign the driver
+            available: true // Set it to available
+          });
+          console.log(`Updated Motorcycle with GPS ${previousGPS} to available and unassigned.`);
+        } else {
+          console.error(`No motorcycle found with GPS number: ${previousGPS}`);
+        }
       }
-    }
 
-      const driverDocRef = doc(db, 'Driver', driverId);
-      const updatedData = {
-        ...driverData,
-        ...values,
-        CompanyName: driverData.CompanyName,
-        available: values.GPSnumber === null, // Set available based on GPS selection
-        PhoneNumber: values.PhoneNumber.startsWith('+966') ? values.PhoneNumber : `+966${values.PhoneNumber}`,
-        GPSnumber: values.GPSnumber // Set GPSnumber to null if "None" is selected
-      };
-
-      // Update the driver document
-      await setDoc(driverDocRef, updatedData);
-
-      // Update the motorcycle
-      if (!values.GPSnumber) {
-        // If a motorcycle is selected
+      // Step 3: Update the new motorcycle if it exists
+      if (newGPS && newGPS !== "None") {
         const motorcycleQuery = query(
           collection(db, 'Motorcycle'),
-          where('GPSnumber', '==', values.GPSnumber)
+          where('GPSnumber', '==', newGPS)
         );
         const querySnapshot = await getDocs(motorcycleQuery);
 
         if (!querySnapshot.empty) {
-          const motorcycleDocRef = querySnapshot.docs[0].ref; // Get the document reference
-          // Update the DriverID and available fields in the motorcycle document
-          await setDoc(motorcycleDocRef, {
-            DriverID: values.DriverID,
-            available: false // Set motorcycle's available field to false
-          }, { merge: true });
+          const motorcycleDocRef = querySnapshot.docs[0].ref;
+          await updateDoc(motorcycleDocRef, {
+            DriverID: values.DriverID, // Assign the new driver
+            available: false // Mark as not available
+          });
+          console.log(`Assigned Motorcycle with GPS ${newGPS} to Driver ${values.DriverID}.`);
         } else {
-          console.error(`No motorcycle found with GPS number: ${values.GPSnumber}`);
-        }
-      } else {
-        // If "None" is selected, update the corresponding motorcycle to set DriverID to null and available to true
-        if (driverData.GPSnumber) { // Check if there was a previous GPS number
-          const motorcycleQuery = query(
-            collection(db, 'Motorcycle'),
-            where('GPSnumber', '==', driverData.GPSnumber)
-          );
-          const querySnapshot = await getDocs(motorcycleQuery);
-
-          if (!querySnapshot.empty) {
-            const motorcycleDocRef = querySnapshot.docs[0].ref; // Get the document reference
-            // Update the DriverID and available fields in the motorcycle document
-            await setDoc(motorcycleDocRef, {
-              DriverID: null, // Set DriverID to null
-              available: true // Set motorcycle's available field to true
-            }, { merge: true });
-          } else {
-            console.error(`No motorcycle found with GPS number: ${driverData.GPSnumber}`);
-          }
+          console.error(`No motorcycle found with GPS number: ${newGPS}`);
         }
       }
 
-      // Show success notification
-      showNotification("Driver updated successfully!", true);
-      // Redirect to Driver List after 2 seconds
-      if (timerRef.current) clearTimeout(timerRef.current); // Clear any existing timer
-      timerRef.current = setTimeout(() => {
-        navigate('/driverslist');
-      }, 2000); // 2 seconds
+      // Step 4: Update the driver document
+      const driverDocRef = doc(db, 'Driver', driverData.UID); // Use the new DriverID
 
+      const updatedData = {
+        ...driverData,
+        ...values,
+        PhoneNumber: values.PhoneNumber.startsWith('+966') ? values.PhoneNumber : `+966${values.PhoneNumber}`,
+        GPSnumber: newGPS === 'None' ? null : newGPS
+      };
+
+      console.log(' driverDocRef:', driverDocRef);
+      console.log('Updated driver data:', updatedData);
+
+      await setDoc(driverDocRef, updatedData);
+      showNotification("Driver updated successfully!", true);
+
+      // Redirect to Driver List after a short delay
+      setTimeout(() => {
+        navigate('/driverslist');
+      }, 2000);
     } catch (error) {
       console.error('Error updating driver:', error);
       showNotification(`Error updating driver: ${error.message}`, false);
     }
   };
+
 
   // Function to update violations when DriverID changes
   const updateViolations = async (oldDriverID, newDriverID) => {
@@ -279,13 +276,14 @@ const EditDriver = () => {
     getCompanyName();
   }, [employerUID]);
 
-  
+
 
   // Update submit handler 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { Fname, Lname, PhoneNumber, DriverID, GPSnumber } = driverData;
-    console.log("subbb", driverData);
+    console.log('Submitting driver event :', e );
+    const { Fname, Lname, PhoneNumber, DriverID } = driverData;
+
     let isValid = true;
     const newValidationMessages = {};
 
@@ -300,7 +298,7 @@ const EditDriver = () => {
     }
 
     // Phone number validation only checks for emptiness here
-    if (!PhoneNumber ||PhoneNumber == '+966') {
+    if (!PhoneNumber || PhoneNumber === '+966') {
       newValidationMessages.PhoneNumber = 'Please enter driver phone number';
       isValid = false;
     } else {
@@ -329,17 +327,35 @@ const EditDriver = () => {
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
+
+// Update the driverData with the new GPS number
+  if (name === 'GPSnumber') {
+    setDriverData(prev => ({
+      ...prev,
+      GPSnumber: value
+    }));
+
+    // If GPS number is set to "None", fetch available motorcycles again
+    if (value === 'None') {
+      await fetchAvailableMotorcycles(companyName);
+    } else {
+      // If changing to a valid GPS number, fetch available motorcycles
+      await fetchAvailableMotorcycles(companyName);
+    }
+  } else {
     setDriverData(prev => ({
       ...prev,
       [name]: value
     }));
-  
-    // Remove validation message when user starts typing
-    setValidationMessages(prev => ({
-      ...prev,
-      [name]: ''
-    }));
-  
+  }
+
+  // Clear validation messages if necessary
+  setValidationMessages(prev => ({
+    ...prev,
+    [name]: ''
+  }));
+
+
     // Check uniqueness when Driver ID changes
     if (name === 'DriverID') {
       if (value.length !== 10) {
@@ -358,12 +374,12 @@ const EditDriver = () => {
       }
     }
   };
-  
-  
+
+
 
   const handlePhoneNumberChange = (e) => {
     let newPhoneNumber = e.target.value;
-    
+
     // Ensure the phone number has the correct format
     if (newPhoneNumber.startsWith('+966')) {
       setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
@@ -371,7 +387,7 @@ const EditDriver = () => {
       newPhoneNumber = '+966' + newPhoneNumber.slice(3);
       setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
     }
-  
+
     // Validate phone number only if it has more than 4 characters
     let phoneError = '';
     if (newPhoneNumber.length > 4) {
@@ -380,23 +396,13 @@ const EditDriver = () => {
         phoneError = validationResult;
       }
     }
-  
+
     setValidationMessages(prev => ({
       ...prev,
       PhoneNumber: phoneError
     }));
   };
-
-  const menu = (
-    <Menu style={{ fontSize: '15px' }}>
-      <Menu.Item key="profile" onClick={() => navigate('/employee-profile')}>
-        Profile
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={() => { auth.signOut(); navigate('/'); }} style={{ color: 'red' }}>
-        Logout
-      </Menu.Item>
-    </Menu>
-  );
+ 
 
 
   return (
@@ -483,19 +489,29 @@ const EditDriver = () => {
                     <label>GPS Number</label>
                     <select
                       name="GPSnumber"
-                      value={driverData.GPSnumber}
+                      value={driverData.GPSnumber || 'None'}
                       onChange={handleInputChange}
                       className={s.select}
                     >
-                      <option className={s.select} value="None">None</option>
+                      {/* Show the currently assigned GPS number if available */}
+                      {driverData.GPSnumber && (
+                        <option value={driverData.GPSnumber}>
+                          {driverData.GPSnumber}
+                        </option>
+                      )}
+                      {/* Add "None" option only if it is not already selected */}
+                      {driverData.GPSnumber !== 'None' && (
+                        <option value="None">None</option>
+                      )}
+                      {/* Render available motorcycles, including the currently selected GPS number */}
                       {availableMotorcycles.length > 0 ? (
-                        availableMotorcycles.map((item) => (
-                          <option key={item.id} value={item.GPSnumber}>
-                            {item.GPSnumber}
-                          </option>
-                        ))
+                       availableMotorcycles.map((item) => (
+                            <option key={item.id} value={item.GPSnumber}>
+                              {item.GPSnumber}
+                            </option>
+                          ))
                       ) : (
-                        <option className={s.select} disabled>No motorcycles available</option>
+                        <option disabled>No motorcycles available</option>
                       )}
                     </select>
                     {validationMessages.GPSnumber && <p className={s.valdationMessage}>{validationMessages.GPSnumber}</p>}
@@ -512,20 +528,19 @@ const EditDriver = () => {
           </div>
         </div>
         <Modal
-      visible={isNotificationVisible}
-      onCancel={() => setIsNotificationVisible(false)}
-      footer={null} // No footer buttons
-      style={{ top: '38%' }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <img
-          src={isSuccess ? successImage : errorImage}
-          alt={isSuccess ? 'Success' : 'Error'}
-          style={{ width: '30%' }}
-        />
-        <p>{notificationMessage}</p>
-      </div>
-    </Modal>
+          visible={isNotificationVisible}
+          onCancel={() => setIsNotificationVisible(false)}
+          footer={<p style={{ textAlign: 'center' }}> {notificationMessage}</p>} // No footer buttons
+          style={{ top: '38%' }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <img
+              src={isSuccess ? successImage : errorImage}
+              alt={isSuccess ? 'Success' : 'Error'}
+              style={{ width: '20%', marginBottom: '16px' }}
+            />
+          </div>
+        </Modal>
       </main>
     </div>
   );

@@ -180,6 +180,9 @@ const DriverList = () => {
         setIsSuccess(true);
         setNotificationMessage('Driver deleted successfully!');
         setIsNotificationVisible(true);
+        setTimeout(() => {
+          navigate('/driverslist'); // Adjust the path as needed
+        }, 2000);
       } else {
         setIsSuccess(false);
         setNotificationMessage('Driver not found.');
@@ -257,22 +260,23 @@ const DriverList = () => {
 
         {/* Delete Confirmation Modal */}
         <Modal
-          visible={isDeletePopupVisible}
-          onCancel={() => setIsDeletePopupVisible(false)}
-          footer={null}
-          title="Confirm Deletion"
-          style={{top:'38%'}}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <p>Are you sure you want to delete {driverToRemove?.Fname}?</p>
-            <Button type="primary" danger onClick={() => handleDeleteDriver(driverToRemove.id)}>
-              Yes
-            </Button>
-            <Button onClick={() => setIsDeletePopupVisible(false)} style={{ marginLeft: '8px' }}>
-              No
-            </Button>
-          </div>
-        </Modal>
+  visible={isDeletePopupVisible}
+  onCancel={() => setIsDeletePopupVisible(false)}
+  title="Confirm Deletion"
+  style={{ top: '38%' }}
+  footer={[
+    <Button key="no" onClick={() => setIsDeletePopupVisible(false)}>
+      No
+    </Button>,
+    <Button key="yes" type="primary" danger onClick={() => handleDeleteDriver(driverToRemove.id)}>
+      Yes
+    </Button>,
+  ]}
+>
+  <div>
+    <p>Are you sure you want to delete {driverToRemove?.Fname}?</p>
+  </div>
+</Modal>
 
         {/* Notification Modal */}
         <Modal

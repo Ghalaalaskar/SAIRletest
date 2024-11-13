@@ -1,119 +1,112 @@
 import { useEffect, useState } from 'react';
-import { doc, getDoc, getDocs, query, where, collection, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 import Map from './Map'; 
-import SAIRLogo from '../images/SAIRlogo.png';
-import logoutIcon from '../images/logout.png';
-import { Button, Table, Dropdown, Menu } from 'antd';
-import { UserOutlined, DownOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './Header';
-
+import { useLocation } from 'react-router-dom';
 import s from "../css/ViolationDetail.module.css";
 
 const ViolationDetail = () => {
-  const [violations, setViolations] = useState([]);
-  const [motorcycleData, setMotorcycleData] = useState({});
-  const { driverId } = useParams(); // Get driver ID from URL
+  const [violation, setViolation] = useState(null);
+  const [motorcycles, setMotorcycles] = useState([]); // State for motorcycle data
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const { violationId } = useParams();
   const navigate = useNavigate();
-  const [companyName, setCompanyName] = useState('');
+  const location = useLocation();
+const from = location.state?.from; // Get the source of navigation
 
-  useEffect(() => {
-    const fetchViolationsByDriver = () => {
-      console.log('Querying violations for Driver ID:', driverId);
 
-      const violationsQuery = query(
-        collection(db, 'Violation'),
-        where('driverID', '==', driverId)
-      );
-
-      const unsubscribe = onSnapshot(violationsQuery, async (querySnapshot) => { // Mark async here
-        const violationsList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        console.log('Real-time violations fetched:', violationsList);
-        setViolations(violationsList);
-
-        if (violationsList.length > 0 && violationsList[0].GPSnumber) {
-          const motorcycleQuery = query(
-            collection(db, 'Motorcycle'),
-            where('GPSnumber', '==', violationsList[0].GPSnumber)
-          );
-
-          onSnapshot(motorcycleQuery, (motorcycleSnapshot) => {
-            setMotorcycleData(motorcycleSnapshot.docs[0]?.data() || {});
-          });
-        }
-      });
-
-      return () => unsubscribe();
-    };
-
-    fetchViolationsByDriver();
-  }, [driverId]);
-
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      navigate('/'); // Redirect to login page
-    }).catch((error) => {
-      console.error('Error LOGGING out:', error);
-    });
-  };
-  const goBack = () => {
-    navigate(-1); // Navigate back to the previous page
+  // Function to fetch motorcycle data based on violationID
+  const fetchMotorcycles = async (VID) => {
+    try {
+      const motorcycleQuery = query(collection(db, 'History'), where('ID', '==', VID)); // Adjusted to fetch using violationID
+      const motorcycleSnapshot = await getDocs(motorcycleQuery);
+      const motorcyclesData = motorcycleSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMotorcycles(motorcyclesData);
+    } catch (error) {
+      setError('Failed to fetch motorcycle details.');
+      console.error('Error fetching motorcycles:', error);
+    }
   };
 
   useEffect(() => {
-    const fetchUserName = async () => {
-      const employerUID = sessionStorage.getItem('employerUID'); // Get the stored UID
+    const fetchViolation = async () => {
+      if (!violationId) {
+        console.error("Violation ID is missing.");
+        setError("Violation ID is missing.");
+        setLoading(false);
+        return; // Exit if violationId is not provided
+      }
 
-      if (employerUID) {
-        try {
-          const userDocRef = doc(db, 'Employer', employerUID); // Use the UID to fetch the document
-          const docSnap = await getDoc(userDocRef);
+      try {
+        const violationDocRef = doc(db, 'Violation', violationId);
+        const violationSnapshot = await getDoc(violationDocRef);
 
-          if (docSnap.exists()) {
-            const employerData = docSnap.data();
-            console.log("Employer Data:", employerData); // Log the fetched data
-            setCompanyName(employerData.CompanyName); // Set the company name
-          } else {
-            console.log("No such document!");
+        if (violationSnapshot.exists()) {
+          const violationData = { id: violationSnapshot.id, ...violationSnapshot.data() };
+          setViolation(violationData);
+
+          // Fetch motorcycle data using violationID
+          if (violationData.violationID) {
+            await fetchMotorcycles(violationData.violationID); // Call the fetchMotorcycles function with the correct ID
           }
-        } catch (error) {
-          console.error('Error fetching employer data:', error);
+        } else {
+          setError('No such violation found!');
         }
+      } catch (err) {
+        console.error('Error fetching violation or motorcycle:', err);
+        setError('Failed to fetch violation details.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserName();
-  }, []);
+    fetchViolation();
+  }, [violationId]);
 
- 
+  const goBack = () => {
+    navigate(-1); // Navigates to the previous page
+  };
+
+  if (loading) {
+    return <div>   </div>; // Loading state
+  }
+
+  if (error) {
+    return <div>{error}</div>; // Error state
+  }
+
+  if (!violation) {
+    return <div>No violation data available.</div>; // No violation case
+  }
   return (
     <div  >
 
-      <Header active="violations" />
+<Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
 
       <div className="breadcrumb">
         <a onClick={() => navigate('/employer-home')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/driverslist')}>Driver List</a>
         <span> / </span>
-        <a onClick={() => navigate('/driver-details/:driverId')}>Drivers Details</a>
+        <a onClick={() => navigate(`/driver-details/${violation.driverId}`)}>Drivers Details</a>
         <span> / </span>
-        <a onClick={() => navigate(`/violation/detail/${driverId}`)}>Violation Details</a>
+        <a onClick={() => navigate(`/drivers/:driverId/violations`)}>Violations List</a>
+        <span> / </span>
+        <a onClick={() => navigate(`/violation/detail/${violationId}`)}>Violation Details</a>
       </div>
 
       <main  className={s.violation}>
-      <h2 className="title">Violation Details for Driver ID: {driverId}</h2>
-        {violations.map((violation, index) => (
+      <h2 className="title">Violation Details</h2>
           <div key={violation.id}>
             <hr />
-            <h3 style={{ color: "#059855", fontSize: "22px", fontWeight: "bold" }}>
-              Violation {index + 1}
-            </h3>
             <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-10px', marginRight:'10px'}} color="#059855" fill="none">
     <path d="M19 18.5C18.4313 19.3861 17.799 20.284 16.8019 20.6679C15.9395 21 14.8562 21 12.6896 21C11.5534 21 10.9853 21 10.4566 20.8834C9.64995 20.7056 8.90001 20.3294 8.27419 19.7888C7.86398 19.4344 7.52311 18.9785 6.84137 18.0667L3.83738 14.0487C3.3758 13.4314 3.38907 12.5789 3.86965 11.9763C4.49772 11.1888 5.66877 11.1237 6.3797 11.8369L8.0011 13.4634V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M11.0004 5.5C11.0004 4.67157 10.3288 4 9.50036 4C9.32491 4 9.15649 4.03012 9 4.08548M11.0004 5.5V3.5C11.0004 2.67157 11.6719 2 12.5004 2C13.3288 2 14.0004 2.67157 14.0004 3.5V5.5M11.0004 5.5V6.5011M14.0004 5.5C14.0004 4.67157 14.6719 4 15.5004 4C16.3288 4 17.0004 4.67157 17.0004 5.5V7.5M14.0004 5.5V9.5011M17.0004 7.5C17.0004 6.67157 17.6719 6 18.5004 6C19.3288 6 20.0004 6.67157 20.0004 7.5C19.9984 10.1666 20.0155 12.8335 19.9875 15.5M17.0004 7.5V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -125,7 +118,7 @@ const ViolationDetail = () => {
         <path d="M14.5 16L18 16" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M2 9H22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
       </svg> Motorcycle License Plate</h3>
-            <p style={{fontSize:'18px', marginLeft:'45px'}}>{motorcycleData.LicensePlate || 'Not Available'}</p>
+            <p style={{fontSize:'18px', marginLeft:'45px'}}>{motorcycles.length > 0 ? motorcycles[0].LicensePlate : ''}</p>
             <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-10px', marginRight:'10px'}} color="#059855" fill="none">
     <path d="M21 4L2.99997 4M21 20L2.99997 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M7.13475 9.66101C9.0449 10.6709 9.99997 11.1759 9.99997 12C9.99997 12.8241 9.0449 13.3291 7.13475 14.339L5.83399 15.0267C4.36702 15.8023 3.63353 16.1901 3.28087 15.9082C3.18606 15.8324 3.10784 15.7325 3.05232 15.6163C2.84584 15.1841 3.26182 14.3908 4.09379 12.8043C4.27833 12.4524 4.37059 12.2764 4.3871 12.084C4.39189 12.0281 4.39189 11.9719 4.3871 11.916C4.3706 11.7236 4.27833 11.5476 4.09379 11.1957C3.26182 9.60915 2.84584 8.81587 3.05232 8.38372C3.10784 8.26754 3.18606 8.16764 3.28087 8.09184C3.63353 7.80989 4.36702 8.19769 5.83399 8.97329L7.13475 9.66101Z" stroke="currentColor" stroke-width="1.5" />
@@ -170,10 +163,8 @@ const ViolationDetail = () => {
               {violation.position && 
               <Map lat={violation.position.latitude} lng={violation.position.longitude} />}
             </div>
-            <hr />
           </div>
-        ))}
-        <div style={{ marginBottom: '80px' }}>
+                  <div style={{ marginBottom: '80px' }}>
           <Button onClick={goBack}
             style={{
             float: 'right', marginBottom: '100px', width: 'auto',
