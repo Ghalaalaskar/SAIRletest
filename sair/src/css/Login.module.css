@@ -30,8 +30,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 725px;
-  height: auto;
+  width: auto;
+  height: 740px;
   /* Maintain aspect ratio */
 } 
 .loginContainer .error-message.visible {

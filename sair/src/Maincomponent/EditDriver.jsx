@@ -164,6 +164,15 @@ const EditDriver = () => {
         await updateViolations(originalDriverID, values.DriverID);
       }
 
+          // Check if PhoneNumber has changed and is unique
+    if (values.PhoneNumber !== originalPhoneNumber) {
+      const phoneNumberExists = await checkIfPhoneNumberExists(values.PhoneNumber);
+      if (phoneNumberExists) {
+        showNotification('The Phone number is already used. Please use a new number.', false);
+        return;
+      }
+    }
+
       // Step 2: Update the previous motorcycle if it exists
       console.log('previousGPS:', previousGPS, 'newGPS:', newGPS);;
       if (previousGPS && previousGPS !== newGPS) {
@@ -365,7 +374,7 @@ const EditDriver = () => {
         if (exists) {
           setValidationMessages(prev => ({
             ...prev,
-            DriverID: 'Driver ID already exists.'
+            DriverID: ''
           }));
         }
       }

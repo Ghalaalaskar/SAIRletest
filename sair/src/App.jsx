@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-
 import Login from './Maincomponent/UserAuth/Login';
 import Signup from './Maincomponent/UserAuth/Signup';
 import ForgotPassword from './Maincomponent/UserAuth/ForgotPassword';
@@ -26,10 +25,8 @@ import MotorcycleDetails from './Maincomponent/Motorcycledetails'
 import { LoadScript } from '@react-google-maps/api';
 import VMotorcycle from './Maincomponent/VMotorcycle'
 import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
-
-
-
 import "./css/common.css"
+import ScrollToTop from './ScrollToTop'; 
 
 
 function App() {
@@ -66,6 +63,7 @@ function App() {
     onError={(e) => console.error('Error loading maps', e)}
   >
     <Router>
+    <ScrollToTop /> 
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

@@ -159,7 +159,7 @@ const AddDriver = () => {
       );
       const phoneSnapshot = await getDocs(phoneQuery);
       if (!phoneSnapshot.empty) {
-        setPopupMessage("Phone number already exists.");
+        setPopupMessage("The Phone number is already used. Please use a new number.");
         setPopupImage(errorImage);
         setPopupVisible(true);
         return;

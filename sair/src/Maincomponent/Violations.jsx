@@ -119,6 +119,9 @@ const ViolationList = () => {
     const matchesSearchDate = searchDate ? violationDate === searchDate : true;
 
     return matchesSearchQuery && matchesSearchDate;
+  }).sort((a, b) => {
+    // Sort by time in descending order (newest first)
+    return (b.time || 0) - (a.time || 0);
   });
 
   const columns = [
