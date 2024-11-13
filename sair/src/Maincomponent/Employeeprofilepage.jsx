@@ -9,8 +9,11 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import Header from "./Header" 
 import { Modal } from 'antd';
 import s from "../css/Profile.module.css"
+import { useContext } from 'react';
+import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 
 const Profile = () => {
+  const { setShortCompanyName } = useContext(ShortCompanyNameContext);
   const [Employer, setEmployer] = useState({
     commercialNumber: '',
     PhoneNumber: '',
@@ -19,6 +22,7 @@ const Profile = () => {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
+    ShortCompanyName:'',
   });
 
   const [originalEmployerData, setOriginalEmployerData] = useState({});
@@ -304,7 +308,7 @@ const Profile = () => {
         ));
 
         if (!existingUserQuery1.empty) {
-          setPopupMessage("The phone number is already used. Please use a correct number.");
+          setPopupMessage("The phone number is already used. Please use a new number.");
           setPopupImage(errorImage);
           setPopupVisible(true);
           setLoading(false);
@@ -335,7 +339,8 @@ const Profile = () => {
       delete updateData.confirmNewPassword;
 
       await updateDoc(docRef, updateData);
-
+      // Update the global short company name after successful save
+      setShortCompanyName(Employer.ShortCompanyName);
       if (Employer.newPassword && user) {
         const credential = EmailAuthProvider.credential(user.email, Employer.currentPassword);
         await reauthenticateWithCredential(user, credential);
@@ -497,6 +502,18 @@ const Profile = () => {
               {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
            
+            <div>
+            <label className={s.profileLabel}>Short Company Name</label> 
+            <input
+              type="text"
+              name="ShortCompanyName"
+              onChange={handleChange}
+              disabled={!editMode}
+              value={`${Employer.ShortCompanyName}`}
+            />
+          </div></div>
+
+          <div className={s.formRow}>
             <div>
               <label className={s.profileLabel}>Company Email</label>
               <input

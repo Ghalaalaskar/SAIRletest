@@ -6,13 +6,13 @@ import { auth, db } from '../firebase';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import s from '../css/Header.module.css';
+import { useContext } from 'react';
+import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 
 const Header = ({ active }) => {
+  const { shortCompanyName } = useContext(ShortCompanyNameContext);
   const navigate = useNavigate();
-  const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState(
-    sessionStorage.getItem('companyName') || '' // Load from sessionStorage initially
-  );
-    const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const showModal = () => {
     setModalVisible(true);
@@ -38,31 +38,6 @@ const Header = ({ active }) => {
       </Menu.Item>
     </Menu>
   );
-
-  useEffect(() => {
-    const fetchUserName = async () => {
-      const employerUID = sessionStorage.getItem('employerUID');
-      
-      if (employerUID && !currentEmployerCompanyName) {
-        // Only fetch if there's a UID and no name in sessionStorage
-        try {
-          const userDocRef = doc(db, 'Employer', employerUID);
-          const docSnap = await getDoc(userDocRef);
-          if (docSnap.exists()) {
-            const employerData = docSnap.data();
-            setCurrentEmployerCompanyName(employerData.CompanyName);
-            sessionStorage.setItem('companyName', employerData.CompanyName); // Cache it for next load
-          } else {
-            console.log('No such document!');
-          }
-        } catch (error) {
-          console.error('Error fetching employer data:', error);
-        }
-      }
-    };
-
-    fetchUserName();
-  }, [currentEmployerCompanyName]);
   
   const navItems = [
     { path: 'employer-home', label: 'Home' },
@@ -101,7 +76,7 @@ const Header = ({ active }) => {
               onMouseLeave={(e) => (e.currentTarget.style.color = 'black')}
             >
               <UserOutlined style={{ marginRight: 10 }} />
-              Hello {currentEmployerCompanyName || 'Guest'}
+              Hello {shortCompanyName || ''}
               <DownOutlined style={{ marginLeft: 15 }} />
             </Link>
           </Dropdown>
@@ -119,7 +94,7 @@ const Header = ({ active }) => {
           <Button key="cancel" onClick={handleCancel}>
             Cancel
           </Button>,
-          <Button key="logout" onClick={handleLogout} style={{ backgroundColor: '#FF6666', color: 'white' }}>
+          <Button key="logout" onClick={handleLogout} style={{ backgroundColor: 'red', color: 'white' }}>
             Logout
           </Button>,
         ]}

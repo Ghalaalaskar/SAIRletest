@@ -25,6 +25,7 @@ import ComplaintGeneral from './Maincomponent/ComplaintGeneral'
 import MotorcycleDetails from './Maincomponent/Motorcycledetails'
 import { LoadScript } from '@react-google-maps/api';
 import VMotorcycle from './Maincomponent/VMotorcycle'
+import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
 
 
 
@@ -59,7 +60,7 @@ function App() {
 
 
   return (
-
+<ShortCompanyNameProvider>
     <LoadScript
     googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc"
     onError={(e) => console.error('Error loading maps', e)}
@@ -91,6 +92,7 @@ function App() {
       </Routes>
     </Router>
     </LoadScript>
+    </ShortCompanyNameProvider>
   );
 }
 
