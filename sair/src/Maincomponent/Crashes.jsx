@@ -20,67 +20,86 @@ const CrashList = () => {
     const fetchDriversAndCrashes = async () => {
       if (!employerUID) return;
 
-      const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
-      if (!employerDoc.exists()) {
-        console.error("No such employer!");
-        return;
+  const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
+  if (!employerDoc.exists()) {
+    console.error("No such employer!");
+    return;
+  }
+
+  const companyName = employerDoc.data().CompanyName;
+  if (!companyName) {
+    console.error("No valid company name found.");
+    return;
+  }
+
+  const driverCollection = query(
+    collection(db, 'Driver'),
+    where('CompanyName', '==', companyName)
+  );
+
+  const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
+    const driverIds = [];
+    const driverMap = {};
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.DriverID) {
+        driverIds.push(data.DriverID);
+        driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
       }
+    });
 
-      const companyName = employerDoc.data().CompanyName;
+    if (driverIds.length === 0) {
+      console.error("No valid Driver IDs found.");
+      return;
+    }
 
-      // Fetch drivers for the company
-      const driverCollection = query(
-        collection(db, 'Driver'),
-        where('CompanyName', '==', companyName)
-      );
+    setDrivers(driverMap);
+    fetchCrashes(driverIds);
+  });
 
-      const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
-        const driverIds = [];
-        const driverMap = {};
-        
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          driverIds.push(data.DriverID);
-          driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`; // Store driver names
-        });
-        
-        setDrivers(driverMap); // Update state with driver names
-        fetchCrashes(driverIds);
-      });
-
-      return () => unsubscribeDrivers();
-    };
+  return () => unsubscribeDrivers();
+};
 
     const fetchCrashes = (driverIds) => {
-      if (driverIds.length === 0) return;
-
+      if (!driverIds || driverIds.length === 0) {
+        console.error("Driver IDs are invalid.");
+        return;
+      }
+    
       const crashCollection = query(
         collection(db, 'Crash'),
         where('driverID', 'in', driverIds)
       );
-
+    
       const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
         const crashList = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
+    
+        console.log('Fetched Crashes:', crashList); // Debugging
+    
         setCrashes(crashList);
         fetchMotorcycles(crashList);
       });
-
+    
       return () => unsubscribeCrashes();
     };
 
     const fetchMotorcycles = (crashList) => {
-      const crashIDs = crashList.map(crash => crash.crashID); // Use crashID for fetching
-      if (crashIDs.length === 0) return;
-
+      const crashIDs = crashList.map(crash => crash.crashID).filter(id => id); // Filter out undefined or null;
+  
+      if (!crashIDs || crashIDs.length === 0) {
+        console.error("No valid Crash IDs found.");
+        return;
+      }
+    
       const motorcycleCollection = query(
         collection(db, 'History'),
-        where('ID', 'in', crashIDs) // Match ID from History with crashID
+        where('ID', 'in', crashIDs) // Ensure this matches the ID field in History
       );
-
+    
       const unsubscribeMotorcycles = onSnapshot(motorcycleCollection, (snapshot) => {
         const motorcycleMap = {};
         snapshot.forEach((doc) => {
@@ -89,7 +108,7 @@ const CrashList = () => {
         });
         setMotorcycles(motorcycleMap);
       });
-
+    
       return () => unsubscribeMotorcycles();
     };
 
@@ -106,6 +125,7 @@ const CrashList = () => {
 
     return matchesSearchDriverID && matchesSearchDate;
   });
+
 
   const columns = [
     {

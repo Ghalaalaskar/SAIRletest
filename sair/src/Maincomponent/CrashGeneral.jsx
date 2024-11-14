@@ -174,7 +174,7 @@ Email</h3>
               <p style={{ fontSize: '18px', marginLeft: '45px' }}>{currentCrash.crashID}</p>
 
               <h3 style={{ color: "#059855", fontWeight: 'bold', fontSize: '20px' }}>   <span style={{ 
-    backgroundColor: currentCrash.Status === 'confirmed' ? 'green' : 'red', // Set backgroundColor
+    backgroundColor: currentCrash.Status === 'Confirmed' ? 'green' : 'red', // Set backgroundColor
     marginRight: '20px',
     marginLeft:'5px',
     borderRadius: '50%', 
