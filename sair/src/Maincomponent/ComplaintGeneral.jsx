@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { doc, getDocs, query, where, collection, getDoc } from 'firebase/firestore';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { db } from '../firebase';
 import Header from './Header';
 import s from "../css/ViolationDetail.module.css"; 
@@ -11,7 +11,11 @@ const ComplaintGeneral = () => {
     const [currentComplaint, setCurrentComplaint] = useState({});
     const [driverDetails, setDriverDetails] = useState({});
     const { complaintId } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
+    const from = location.state?.from; // Get the source of navigation
+    const violationId = location.state?.violationId; // Get violationId from state
+
 
     useEffect(() => {
         const fetchComplaintDetails = async () => {
@@ -56,18 +60,39 @@ const ComplaintGeneral = () => {
         }
         return ''; // Return an empty string if timestamp is not available
     };
-
+  // Determine the active state for the Header
+  // Determine the active state for the Header
+  let activeHeader;
+  if (from === 'ViolationDetail') {
+    const vehicleType = location.state?.vehicleType; // Assuming we pass vehicleType when navigating
+    activeHeader = vehicleType === 'motorcycle' ? 'motorcycleslist' : 'driverslist';
+  } else if (from === 'ViolationGeneral') {
+    activeHeader = 'violations';
+  } else {
+    activeHeader = 'complaints'; // Default case
+  }
     return (
-        <div>
-            <Header active="complaints" />
+        
+<div>
+      <Header active={activeHeader} />
 
-            <div className="breadcrumb">
-                <a onClick={() => navigate('/employer-home')}>Home</a>
-                <span> / </span>
-                <a onClick={() => navigate('/complaints')}>Complaints List</a>
-                <span> / </span>
-                <a onClick={() => navigate(`/complaint/general/${complaintId}`)}>Complaint Details</a>
-            </div>
+      <div className="breadcrumb">
+        <a onClick={() => navigate('/employer-home')}>Home</a>
+        <span> / </span>
+        <a onClick={() => navigate('/complaints')}>Complaints List</a>
+        <span> / </span>
+        <a onClick={() => navigate('/complaint/general/:complaintId')}>Complaint Details</a>
+        {from && (
+          <>
+            <span> / </span>
+            <a 
+              onClick={() => navigate(from === 'ViolationDetail' ? `/violation/detail/${violationId}` : '/violation/general')}
+            >
+              {from === 'ViolationDetail' ? 'Violation Details' : 'Violation General'}
+            </a>
+          </>
+        )}
+      </div>
 
             <main className={s.violation}>
                 <h2 className={s.title}>Complaint Details</h2>

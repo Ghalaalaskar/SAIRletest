@@ -39,7 +39,9 @@ const fetchComplaints = async (violationID) => {
 
 const handleViewComplaints = () => {
   if (complaints.length > 0) {
-    navigate(`/complaint/general/${complaints[0].id}`); // Navigate to the first complaint
+    navigate(`/complaint/general/${complaints[0].id}`,{ state: { from: 'ViolationDetails', violationId: complaints[0].violationID      } 
+    }); // Pass the violationId here } }); 
+    // Navigate to the first complaint
   } else {
     setIsPopupVisible(true); // Show popup if no complaints exist
   }
