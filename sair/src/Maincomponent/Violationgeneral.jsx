@@ -3,17 +3,21 @@ import { doc, getDoc, getDocs, query, where, collection, onSnapshot } from 'fire
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import Map from './Map'; 
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons'; 
 import Header from './Header';
 import s from "../css/ViolationDetail.module.css";
+import X from '../images/redx.webp';
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
   const [currentMotorCycle, setCurrentMotorCycle] = useState({});
-  const { violationId } = useParams(); // Get the violation ID from the URL
+  const { violationId } = useParams(); 
   const navigate = useNavigate();
+  const [complaints, setComplaints] = useState([]);
   const [companyName, setCompanyName] = useState('');
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
 
   useEffect(() => {
     const fetchViolationDetails = async () => {
@@ -30,9 +34,12 @@ const ViolationGeneral = () => {
               const q = query(collection(db, "History"), where("ID", "==", violationData.violationID));
               const querySnapshot = await getDocs(q);
               setCurrentMotorCycle(querySnapshot.docs[0]?.data() || {});
-            }
+            } 
+            // Fetch complaints associated with this violation
+        fetchComplaints(violationData.violationID);
           }
         });
+       
 
         return () => unsubscribe();
       } catch (error) {
@@ -88,6 +95,28 @@ const ViolationGeneral = () => {
 
     fetchUserName();
   }, []);
+
+  const fetchComplaints = async (violationID) => {
+    try {
+      const complaintsQuery = query(collection(db, 'Complaint'), where('ViolationID', '==', violationID));
+      const complaintsSnapshot = await getDocs(complaintsQuery);
+      const complaintsData = complaintsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComplaints(complaintsData);
+    } catch (error) {
+      console.error('Error fetching complaints:', error);
+    }
+  };
+
+  const handleViewComplaints = () => {
+    if (complaints.length > 0) {
+      navigate(`/complaint/general/${complaints[0].id}`); // Navigate to the first complaint
+    } else {
+      setIsPopupVisible(true); // Show popup if no complaints exist
+    }
+  };
 
   return (
     <div  >
@@ -240,19 +269,50 @@ Motorcycle Speed</h3>
             />
           )}
         </div>
-        <div style={{ marginBottom: '70px' }}>
+        <hr/> 
+ <div style={{ marginBottom: '50px' }}>
+                    {/* View Complaints Button */}
+                    <Button onClick={handleViewComplaints} style={{
+              backgroundColor: '#059855',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50px',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: '20px 10px',
+              height: '60px',
+              fontFamily: 'Open Sans',
+            }}><i className="fas fa-eye" style={{ marginRight: '8px' }}></i>
+              View Complaints
+            </Button>
+
+       
           <Button onClick={goBack} style={{
-            float: 'right', marginBottom: '100px', width: 'auto',
+            float: 'right', width: 'auto',
             height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
           }}>
             <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
           </Button>
           </div>
+      
 </div>
+
                 </>
             )}
 
       </main>
+            {/* Popup for no complaints */}
+            <Modal
+        title={null}
+        visible={isPopupVisible}
+        onCancel={() => setIsPopupVisible(false)}
+        footer={<p style={{ textAlign: 'center' }}>There are no complaints associated with this violation.</p>}
+        style={{ top: '38%' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          <img src={X} alt="No Complaints" style={{ width: '20%', marginBottom: '16px' }} />
+        </div>
+      </Modal>
     </div>
   );
 };

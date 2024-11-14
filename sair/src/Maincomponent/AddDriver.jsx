@@ -11,6 +11,7 @@ import {
   getDocs,
   updateDoc,
 } from 'firebase/firestore';
+import emailjs from 'emailjs-com';
 import { db, auth } from '../firebase';
 import {
   Button,
@@ -20,7 +21,6 @@ import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import { useNavigate } from 'react-router-dom';
 import { generateRandomPassword } from '../utils/common';
-import { sendEmail } from '../utils/email';
 import {Modal} from 'antd';
 import Header from './Header';
 import s from "../css/Profile.module.css";
@@ -159,7 +159,7 @@ const AddDriver = () => {
       );
       const phoneSnapshot = await getDocs(phoneQuery);
       if (!phoneSnapshot.empty) {
-        setPopupMessage("Phone number already exists.");
+        setPopupMessage("The Phone number is already used. Please use a new number.");
         setPopupImage(errorImage);
         setPopupVisible(true);
         return;
@@ -213,30 +213,29 @@ const AddDriver = () => {
         }
       }
 
-      const response = await sendEmail({
+      const templateParams = {
         email: values.Email,
         subject: 'Welcome to SAIR!',
-        message: `Congratulations! 
-            
-                You are now a driver at ${Employer.CompanyName}.
-                            
-                We are excited to have you with us! 
-                
-                Your password is: ${generatedPassword}
-                
-                To ensure your safety, we have set up your account in SAIR Mobile app. Download SAIR now from Google Play to monitor regulations and keep us informed about any crashes.
-                
-                Best Regards,  
-                SAIR Team`,
-      });
-
-      if (response.success) {
-        setPopupMessage("Driver added successfully!");
+        companyName: Employer.CompanyName,
+        generatedPassword: generatedPassword,
+      };
+  
+      const response = await emailjs.send(
+        'service_ltz361p',
+        'template_u0v3anh',
+        templateParams,
+        '6NEdVNsgOnsmX-H4s'
+      );
+  
+      if (response.status === 200) {
+        setPopupMessage('Driver added successfully!');
         setPopupImage(successImage);
       } else {
-        setPopupMessage("Error adding driver");
+        setPopupMessage('Error adding driver');
         setPopupImage(errorImage);
       }
+  
+      setPopupVisible(true);
 
       setPopupVisible(true);
 

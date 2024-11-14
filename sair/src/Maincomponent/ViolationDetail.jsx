@@ -3,11 +3,13 @@ import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firesto
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import Map from './Map'; 
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './Header';
 import { useLocation } from 'react-router-dom';
 import s from "../css/ViolationDetail.module.css";
+import X from '../images/redx.webp';
+
 
 const ViolationDetail = () => {
   const [violation, setViolation] = useState(null);
@@ -16,9 +18,32 @@ const ViolationDetail = () => {
   const [error, setError] = useState(null); // Error state
   const { violationId } = useParams();
   const navigate = useNavigate();
+  const [complaints, setComplaints] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
   const location = useLocation();
 const from = location.state?.from; // Get the source of navigation
 
+const fetchComplaints = async (violationID) => {
+  try {
+    const complaintsQuery = query(collection(db, 'Complaint'), where('ViolationID', '==', violationID));
+    const complaintsSnapshot = await getDocs(complaintsQuery);
+    const complaintsData = complaintsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setComplaints(complaintsData);
+  } catch (error) {
+    console.error('Error fetching complaints:', error);
+  }
+};
+
+const handleViewComplaints = () => {
+  if (complaints.length > 0) {
+    navigate(`/complaint/general/${complaints[0].id}`); // Navigate to the first complaint
+  } else {
+    setIsPopupVisible(true); // Show popup if no complaints exist
+  }
+};
 
   // Function to fetch motorcycle data based on violationID
   const fetchMotorcycles = async (VID) => {
@@ -56,6 +81,8 @@ const from = location.state?.from; // Get the source of navigation
           // Fetch motorcycle data using violationID
           if (violationData.violationID) {
             await fetchMotorcycles(violationData.violationID); // Call the fetchMotorcycles function with the correct ID
+           // Fetch complaints associated with the violation
+           await fetchComplaints(violationData.violationID); // Fetch complaints here
           }
         } else {
           setError('No such violation found!');
@@ -86,6 +113,9 @@ const from = location.state?.from; // Get the source of navigation
   if (!violation) {
     return <div>No violation data available.</div>; // No violation case
   }
+
+
+
   return (
     <div  >
 
@@ -164,8 +194,23 @@ const from = location.state?.from; // Get the source of navigation
               <Map lat={violation.position.latitude} lng={violation.position.longitude} />}
             </div>
           </div>
-                  <div style={{ marginBottom: '80px' }}>
-          <Button onClick={goBack}
+          <hr/>
+          <div style={{ marginBottom: '50px' }}>
+                    {/* View Complaints Button */}
+                    <Button onClick={handleViewComplaints} style={{
+              backgroundColor: '#059855',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50px',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: '20px 10px',
+              height: '60px',
+              fontFamily: 'Open Sans',
+            }}><i className="fas fa-eye" style={{ marginRight: '8px' }}></i>
+              View Complaints
+            </Button>
+            <Button onClick={goBack}
             style={{
             float: 'right', marginBottom: '100px', width: 'auto',
             height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
@@ -174,7 +219,18 @@ const from = location.state?.from; // Get the source of navigation
           </Button>
         </div>
       </main>
-
+  {/* Popup for no complaints */}
+  <Modal
+        title={null}
+        visible={isPopupVisible}
+        onCancel={() => setIsPopupVisible(false)}
+        footer={<p style={{ textAlign: 'center' }}>There are no complaints associated with this violation.</p>}
+        style={{ top: '38%' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          <img src={X} alt="No Complaints" style={{ width: '20%', marginBottom: '16px' }} />
+        </div>
+      </Modal>
     </div>
   );
 };

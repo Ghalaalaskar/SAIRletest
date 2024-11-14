@@ -29,9 +29,9 @@
   position: absolute;
   top: -3px;
   right: 0;
-  width: 725px;
+  width: auto;
   /* Adjust width as per your needs */
-  height: 690px;
+  height: 1100px;
   /* Maintain aspect ratio */
 }
 

@@ -96,7 +96,9 @@ const CrashList = () => {
     fetchDriversAndCrashes();
   }, [employerUID]);
 
-  const filteredCrashes = crashes.filter((crash) => {
+  const filteredCrashes =  crashes.filter(crash => crash.Status === 'Confirmed') // Only include Rejected or Confirmed statuses
+  .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
+  .filter((crash) => {
     const crashDate = crash.time ? new Date(crash.time * 1000).toISOString().split('T')[0] : '';
 
     const matchesSearchDriverID = crash.driverID.toLowerCase().includes(searchDriverID.toLowerCase());

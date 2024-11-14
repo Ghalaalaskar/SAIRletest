@@ -12,6 +12,7 @@ const EditMotorcycle = () => {
   const { motorcycleId } = useParams();
   const navigate = useNavigate();
   const [motorcycleData, setMotorcycleData] = useState(null);
+  const [oldMotorcycleData, setOldMotorcycleData] = useState(null);
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
@@ -27,6 +28,7 @@ const EditMotorcycle = () => {
         if (motorcycleDoc.exists()) {
           const data = motorcycleDoc.data();
           setMotorcycleData(data);
+          setOldMotorcycleData(data);
           fetchAvailableDrivers();
         } else {
           setNotificationMessage('Motorcycle not found.');
@@ -176,7 +178,9 @@ const EditMotorcycle = () => {
     setMotorcycleData(prev => ({ ...prev, [name]: value }));
     setValidationMessages(prev => ({ ...prev, [name]: '' }));
   };
-
+  console.log(motorcycleData)
+  console.log(motorcycleData?.DriverID || 'None')
+  
   return (
     <div>
       <Header active="motorcycleslist" />
@@ -255,7 +259,14 @@ const EditMotorcycle = () => {
                     value={motorcycleData.DriverID || 'None'}
                     onChange={handleInputChange}
                   >
-                    <option value="None">None</option>
+                      <option value="None">None</option>
+                      {
+                        oldMotorcycleData.DriverID && (
+                          <option value={oldMotorcycleData.DriverID}>
+                            {oldMotorcycleData.DriverID}
+                          </option>
+                        )
+                      }
                     {availableDrivers.map(driver => (
                       <option key={driver.id} value={driver.DriverID}>
                         {driver.DriverID}

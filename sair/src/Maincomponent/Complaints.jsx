@@ -98,7 +98,9 @@ const ComplaintList = () => {
     fetchDriversAndComplaints();
   }, [employerUID]);
 
-  const filteredComplaints = complaints.filter((complaint) => {
+  const filteredComplaints = complaints
+  .sort((a, b) => (b.DateTime?.seconds || 0) - (a.DateTime?.seconds || 0)) // Sort by DateTime in descending order
+  .filter((complaint) => {
     const complaintDate = complaint.DateTime ? new Date(complaint.DateTime.seconds * 1000).toISOString().split('T')[0] : '';
 
     const matchesStatus = selectedStatus ? complaint.Status === selectedStatus : true;

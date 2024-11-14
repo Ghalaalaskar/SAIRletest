@@ -7,6 +7,7 @@ import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
 import backgroundImage from '../../images/sairbackground.png';
 import axios from 'axios';
+import {Button, Modal} from 'antd';
 import { getDocs, query, collection, where } from 'firebase/firestore';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -587,62 +588,50 @@ const SignUp = () => {
         </form>
 
         {popupVisible && (
-          <div className="popup">
-            <button className="close-btn" onClick={handleClosePopup}>×</button>
-            <img src={popupImage} alt="Popup" />
-            <p>{popupMessage}</p>
-            {showConfirmButtons && (
-            <div style={{ display: 'flex', gap: '10px', marginLeft: '-101px' }}>
-            <button  
-                style={{
-                    borderRadius: '14px',
-                    backgroundColor: '#059855',
-                    border: 'none',
-                    padding: '8px',
-                    fontSize: '15px',
-                    cursor: 'pointer',
-                    color: 'white',
-                    textAlign: 'center',
-                    marginTop: '12px',
-                    width: '87px',
-                    height: '36px',
-                    transition: 'background-color 0.3s ease',
-                    marginBottom: '10px',
-                    fontWeight: 'bold',
-                    fontFamily: 'Open Sans',
-                    marginLeft:'140px',
-                }}  
-                onClick={handleYes}
-            >
-                Yes
-            </button>
-            <button 
-                style={{
-                    borderRadius: '14px',
-                    backgroundColor: '#059855',
-                    border: 'none',
-                    padding: '8px',
-                    fontSize: '15px',
-                    cursor: 'pointer',
-                    color: 'white',
-                    textAlign: 'center',
-                    marginTop: '12px',
-                    width: '87px',
-                    height: '36px',
-                    transition: 'background-color 0.3s ease',
-                    marginBottom: '10px',
-                    fontWeight: 'bold',
-                    fontFamily: 'Open Sans',
-                    
-                }}  
-                onClick={handleNo}
-            >
-                No
-            </button>
-        </div>
-        
-      ) }
-          </div>
+          <Modal
+  title={null} // Change as needed
+  visible={popupVisible}
+  onCancel={handleClosePopup}
+  footer={[
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
+    <Button 
+      key="yes" 
+      type="default" // Use default type for the Yes button
+      onClick={handleYes}
+      style={{
+        width: '87px',
+        height: '36px',
+        fontFamily: 'Open Sans',
+      }}
+    >
+      Yes
+    </Button>
+    <Button 
+      key="no" 
+      type="default" // Use default type for the No button
+      onClick={handleNo}
+      style={{
+        width: '87px',
+        height: '36px',
+        fontFamily: 'Open Sans',
+      }}
+    >
+      No
+    </Button>
+    </div>
+  ]}
+  style={{ top: '38%' }}
+  bodyStyle={{ textAlign: 'center' }} // Center text in modal body
+>
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <img
+      src={popupImage}
+      alt="Popup"
+      style={{ width: '20%', marginBottom: '16px' }} // Adjust as needed
+    />
+    <p >{popupMessage}</p>
+  </div>
+</Modal>
         )}
       </div>
     </div>
