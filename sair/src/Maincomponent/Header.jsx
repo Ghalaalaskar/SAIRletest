@@ -10,9 +10,31 @@ import { useContext } from 'react';
 import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 
 const Header = ({ active }) => {
-  const { shortCompanyName } = useContext(ShortCompanyNameContext);
+  const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchShortCompanyName = async () => {
+      if (!shortCompanyName) { // Only fetch if it's not set
+        const employerUID = sessionStorage.getItem('employerUID');
+        if (employerUID) {
+          try {
+            const userDocRef = doc(db, 'Employer', employerUID);
+            const docSnap = await getDoc(userDocRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setShortCompanyName(data.ShortCompanyName || '');
+            }
+          } catch (error) {
+            console.error('Error fetching short company name:', error);
+          }
+        }
+      }
+    };
+
+    fetchShortCompanyName();
+  }, [shortCompanyName, setShortCompanyName]);
 
   const showModal = () => {
     setModalVisible(true);
