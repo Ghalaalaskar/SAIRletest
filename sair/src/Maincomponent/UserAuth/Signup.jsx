@@ -588,51 +588,52 @@ const SignUp = () => {
         </form>
 
         {popupVisible && (
-          <Modal
-  title={null} // Change as needed
-  visible={popupVisible}
-  onCancel={handleClosePopup}
-  footer={[
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
-    <Button 
-      key="yes" 
-      type="default" // Use default type for the Yes button
-      onClick={handleYes}
-      style={{
-        width: '87px',
-        height: '36px',
-        fontFamily: 'Open Sans',
-      }}
+    <Modal
+        title={null} // Change as needed
+        visible={popupVisible}
+        onCancel={handleClosePopup}
+        footer={null} // Set footer to null to avoid rendering default footer
+        style={{ top: '38%' }}
+        bodyStyle={{ textAlign: 'center' }} // Center text in modal body
     >
-      Yes
-    </Button>
-    <Button 
-      key="no" 
-      type="default" // Use default type for the No button
-      onClick={handleNo}
-      style={{
-        width: '87px',
-        height: '36px',
-        fontFamily: 'Open Sans',
-      }}
-    >
-      No
-    </Button>
-    </div>
-  ]}
-  style={{ top: '38%' }}
-  bodyStyle={{ textAlign: 'center' }} // Center text in modal body
->
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-    <img
-      src={popupImage}
-      alt="Popup"
-      style={{ width: '20%', marginBottom: '16px' }} // Adjust as needed
-    />
-    <p >{popupMessage}</p>
-  </div>
-</Modal>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <img
+                src={popupImage}
+                alt="Popup"
+                style={{ width: '20%', marginBottom: '16px' }} // Adjust as needed
+            />
+            <p>{popupMessage}</p>
+            {showConfirmButtons && ( // Conditional rendering for buttons
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '12px' }}>
+                    <Button 
+                        key="yes" 
+                        type="default" // Use default type for the Yes button
+                        onClick={handleYes}
+                        style={{
+                            width: '87px',
+                            height: '36px',
+                            fontFamily: 'Open Sans',
+                        }}
+                    >
+                        Yes
+                    </Button>
+                    <Button 
+                        key="no" 
+                        type="default" // Use default type for the No button
+                        onClick={handleNo}
+                        style={{
+                            width: '87px',
+                            height: '36px',
+                            fontFamily: 'Open Sans',
+                        }}
+                    >
+                        No
+                    </Button>
+                </div>
+            )}
+        </div>
+    </Modal>
+)}
       </div>
     </div>
   );
