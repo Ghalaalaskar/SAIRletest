@@ -39,7 +39,7 @@ const fetchComplaints = async (violationID) => {
 
 const handleViewComplaints = () => {
   if (complaints.length > 0) {
-    navigate(`/complaint/general/${complaints[0].id}`,{ state: { from: 'ViolationDetails', violationId: complaints[0].violationID      } 
+    navigate(`/complaint/general/${complaints[0].id}`,{ state: { from: 'ViolationDetails', violationId: complaints[0].violationID,  previousList: from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'  } 
     }); // Pass the violationId here } }); 
     // Navigate to the first complaint
   } else {
@@ -197,7 +197,7 @@ const handleViewComplaints = () => {
             </div>
           </div>
           <hr/>
-          <div style={{ marginBottom: '50px' }}>
+          <div style={{ marginBottom: '10px' }}>
                     {/* View Complaints Button */}
                     <Button onClick={handleViewComplaints} style={{
               backgroundColor: '#059855',
@@ -226,7 +226,7 @@ const handleViewComplaints = () => {
         title={null}
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
-        footer={<p style={{ textAlign: 'center' }}>There are no complaints associated with this violation.</p>}
+        footer={<p style={{ textAlign: 'center' }}>There is no complaint associated with this violation.</p>}
         style={{ top: '38%' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
