@@ -164,7 +164,7 @@ const EditDriver = () => {
         await updateViolations(originalDriverID, values.DriverID);
       }
 
-          // Check if PhoneNumber has changed and is unique
+        // Check if PhoneNumber has changed and is unique
     if (values.PhoneNumber !== originalPhoneNumber) {
       const phoneNumberExists = await checkIfPhoneNumberExists(values.PhoneNumber);
       if (phoneNumberExists) {
@@ -374,7 +374,7 @@ const EditDriver = () => {
         if (exists) {
           setValidationMessages(prev => ({
             ...prev,
-            DriverID: ''
+            DriverID: 'Driver ID already exists.'
           }));
         }
       }
@@ -385,25 +385,39 @@ const EditDriver = () => {
 
   const handlePhoneNumberChange = (e) => {
     let newPhoneNumber = e.target.value;
-
-    // Ensure the phone number has the correct format
-    if (newPhoneNumber.startsWith('+966')) {
-      setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
-    } else {
-      newPhoneNumber = '+966' + newPhoneNumber.slice(3);
-      setDriverData({ ...driverData, PhoneNumber: newPhoneNumber });
+    
+    // Remove all +966 prefixes and leading zeros
+    newPhoneNumber = newPhoneNumber.replace(/\+966/g, '').replace(/^0+/, '');
+    
+    // If there's content, add single +966 prefix
+    if (newPhoneNumber) {
+      // Find first occurrence of 5
+      const indexOfFive = newPhoneNumber.indexOf('5');
+      if (indexOfFive !== -1) {
+        // Keep only the part starting with 5
+        newPhoneNumber = '+966' + newPhoneNumber.substring(indexOfFive);
+      } else {
+        newPhoneNumber = '+966' + newPhoneNumber;
+      }
     }
-
-    // Validate phone number only if it has more than 4 characters
+  
+    setDriverData(prev => ({
+      ...prev,
+      PhoneNumber: newPhoneNumber
+    }));
+  
+    // Validate phone number
     let phoneError = '';
     if (newPhoneNumber.length > 4) {
       const validationResult = validatePhoneNumber(newPhoneNumber);
-      if (validationResult) {
+      if (validationResult === '' || validationResult === '0') {
+        phoneError = '';
+      } else {
         phoneError = validationResult;
       }
     }
-
-    setValidationMessages(prev => ({
+  
+    setValidationMessages((prev) => ({
       ...prev,
       PhoneNumber: phoneError
     }));

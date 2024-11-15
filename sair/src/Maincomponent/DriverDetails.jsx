@@ -204,9 +204,8 @@ Email</h3>
                                 </div>
               ))
             ) : (
-              <p>No motorcycles associated with this driver.</p>
+              <p>No motorcycles associated with this driver.</p> 
             )}
-
             <button onClick={handleViewViolations} style={{
               backgroundColor: '#059855',
               color: 'white',

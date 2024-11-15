@@ -270,7 +270,7 @@ Motorcycle Speed</h3>
           )}
         </div>
         <hr/> 
- <div style={{ marginBottom: '50px' }}>
+ <div style={{ marginBottom: '10px' }}>
                     {/* View Complaints Button */}
                     <Button onClick={handleViewComplaints} style={{
               backgroundColor: '#059855',
@@ -306,7 +306,7 @@ Motorcycle Speed</h3>
         title={null}
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
-        footer={<p style={{ textAlign: 'center' }}>There are no complaints associated with this violation.</p>}
+        footer={<p style={{ textAlign: 'center' }}>There is no complaint associated with this violation.</p>}
         style={{ top: '38%' }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
