@@ -46,6 +46,7 @@ const Header = ({ active }) => {
 
   const handleLogout = async () => {
     await auth.signOut();
+    sessionStorage.removeItem('ShortCompanyName'); // Clear sessionStorage
     navigate('/');
     setModalVisible(false);
   };
