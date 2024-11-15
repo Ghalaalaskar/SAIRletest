@@ -93,18 +93,38 @@ const AddDriver = () => {
 
   const handlePhoneNumberChange = (e) => {
     let newPhoneNumber = e.target.value;
-    if (newPhoneNumber.startsWith('+966')) {
-      setDriver({ ...driver, PhoneNumber: newPhoneNumber });
-    } else {
-      newPhoneNumber = '+966' + newPhoneNumber.slice(3);
-      setDriver({ ...driver, PhoneNumber: newPhoneNumber });
+    
+    // Remove all +966 prefixes and leading zeros
+    newPhoneNumber = newPhoneNumber.replace(/\+966/g, '').replace(/^0+/, '');
+    
+    // If there's content, add single +966 prefix
+    if (newPhoneNumber) {
+      // Find first occurrence of 5
+      const indexOfFive = newPhoneNumber.indexOf('5');
+      if (indexOfFive !== -1) {
+        // Keep only the part starting with 5
+        newPhoneNumber = '+966' + newPhoneNumber.substring(indexOfFive);
+      } else {
+        newPhoneNumber = '+966' + newPhoneNumber;
+      }
     }
-
+  
+    setDriver(prev => ({
+      ...prev,
+      PhoneNumber: newPhoneNumber
+    }));
+  
+    // Validate phone number
     let phoneError = '';
     if (newPhoneNumber.length > 4) {
-      phoneError = validatePhoneNumber(newPhoneNumber);
+      const validationResult = validatePhoneNumber(newPhoneNumber);
+      if (validationResult === '' || validationResult === '0') {
+        phoneError = '';
+      } else {
+        phoneError = validationResult;
+      }
     }
-
+  
     setValidationMessages((prev) => ({
       ...prev,
       PhoneNumber: phoneError
@@ -149,7 +169,7 @@ const AddDriver = () => {
 
   const handleAddDriver = async (values) => {
     try {
-      const formattedPhoneNumber = `+966${values.PhoneNumber}`;
+      const formattedPhoneNumber = `${values.PhoneNumber}`;
       const GPSnumber = values.GPSnumber === "None" ? null : values.GPSnumber;
 
       const phoneQuery = query(

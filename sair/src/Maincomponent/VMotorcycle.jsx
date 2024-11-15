@@ -22,7 +22,11 @@ const VMotorcycle  = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setViolations(violationsList);
+             // Sort violations from newest to oldest based on timestamp
+             const sortedViolations = violationsList.sort((a, b) => {
+              return (b.timestamp || 0) - (a.timestamp || 0); // Adjust 'timestamp' to your actual field name
+            });
+        setViolations(sortedViolations);
       }, (error) => {
         console.error('Error fetching violations:', error);
         setError('Failed to fetch violations.');
