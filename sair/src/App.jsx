@@ -27,7 +27,7 @@ import VMotorcycle from './Maincomponent/VMotorcycle'
 import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
 import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
-// import { CrashNotification } from './CrashNotification';
+import { CrashNotification } from './CrashNotification';
 
 
 function App() {
@@ -65,7 +65,7 @@ function App() {
   >
     <Router>
     <ScrollToTop /> 
-    {/* <CrashNotification /> */}
+    <CrashNotification />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
