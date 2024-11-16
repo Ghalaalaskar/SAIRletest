@@ -13,6 +13,7 @@ import s from '../../css/Login.module.css';
 import "../../css/common.css";
 import { useContext } from 'react';
 import { ShortCompanyNameContext } from '../../ShortCompanyNameContext';
+import '../../css/CustomModal.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ const Login = () => {
   const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [missingFields, setMissingFields] = useState({});
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
@@ -56,6 +59,26 @@ const Login = () => {
     });
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+  
+    // Update state dynamically based on the input's `name` attribute
+    if (name === 'email') {
+      setEmail(value);
+    } else if (name === 'password') {
+      setPassword(value);
+    }
+  
+    // Clear the missing field error as soon as the user starts typing
+    if (value.trim() !== '' && missingFields[name]) {
+      setMissingFields((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+  };
+  
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -91,9 +114,21 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     // event.preventDefault();
-    if (!email || !password) {
-      return;
-    }
+    const newMissingFields = {};
+if (!email) {
+  newMissingFields.email = 'Please enter your email.';
+}
+if (!password) {
+  newMissingFields.password = 'Please enter your password.';
+}
+
+if (Object.keys(newMissingFields).length > 0) {
+  setMissingFields(newMissingFields);
+  setLoading(false);
+  return;
+}
+
+
 
     try {
       const auth = getAuth();
@@ -316,15 +351,16 @@ const Login = () => {
               <input
                 type='email'
                 id='email'
+                name='email'
                 placeholder='Enter your Company email'
                 value={email}
                 onFocus={(e) => (e.target.placeholder = '')} // Clear placeholder on focus
                 onBlur={(e) =>
                   (e.target.placeholder = 'Enter your Company email')
                 } // Restore placeholder on blur if empty
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                onChange={handleInputChange}
               />
+              {missingFields.email && <p style={{ color: 'red', marginTop: '3px',fontSize:'14px' }}>{missingFields.email}</p>}
               <br />
               <label htmlFor='password'></label>
               <br />
@@ -336,8 +372,7 @@ const Login = () => {
                   value={password}
                   onFocus={(e) => (e.target.placeholder = '')} // Clear placeholder on focus
                   onBlur={(e) => (e.target.placeholder = 'Enter your password')} // Restore placeholder on blur if empty
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onChange={handleInputChange}
                 /> 
                 <span
                   onClick={togglePasswordVisibility}
@@ -347,6 +382,7 @@ const Login = () => {
                     className={showPassword ? 'far fa-eye' : 'far fa-eye-slash'}
                   ></i>
                 </span>
+                {missingFields.password && <p style={{ color: 'red', marginTop: '3px',fontSize:'14px'}}>{missingFields.password}</p>}
               </div>
             </div>
           ) : null}
@@ -384,6 +420,12 @@ const Login = () => {
     footer={<p style={{textAlign:'center'}}>{popupMessage}</p>} 
     style={{ top: '38%' }} 
     bodyStyle={{ textAlign: 'center' }} // Center text in modal body
+    className="custom-modal" 
+    closeIcon={
+      <span className="custom-modal-close-icon">
+        ×
+      </span>
+    }
   >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <img

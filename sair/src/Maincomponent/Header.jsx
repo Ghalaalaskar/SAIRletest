@@ -8,6 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import s from '../css/Header.module.css';
 import { useContext } from 'react';
 import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
+import '../css/CustomModal.css';
 
 const Header = ({ active }) => {
   const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
@@ -128,6 +129,12 @@ const Header = ({ active }) => {
         onCancel={handleCancel}
         centered
         style={{ top: '1%' }}
+        className="custom-modal"
+        closeIcon={
+          <span className="custom-modal-close-icon">
+            ×
+          </span>
+        }
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             Cancel
