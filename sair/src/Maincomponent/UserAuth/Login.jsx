@@ -11,10 +11,13 @@ import s from '../../css/Login.module.css';
 // import '@fortawesome/fontawesome-free/css/all.min.css';
 // import '../../App.css';
 import "../../css/common.css";
+import { useContext } from 'react';
+import { ShortCompanyNameContext } from '../../ShortCompanyNameContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState('');
+  const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -170,6 +173,12 @@ const Login = () => {
             userFound = true;
             const employerUID = querySnapshot.docs[0].id;
             sessionStorage.setItem('employerUID', employerUID);
+             // Fetch the ShortCompanyName and update sessionStorage
+             const employerData = querySnapshot.docs[0].data();
+             const shortCompanyName = employerData.ShortCompanyName || '';
+             sessionStorage.setItem('ShortCompanyName', shortCompanyName);
+             setShortCompanyName(shortCompanyName); // Update the context
+
             setTimeout(() => {
               navigate('/employer-home');
             }, 1500);
