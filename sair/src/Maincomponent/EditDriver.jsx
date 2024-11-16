@@ -48,7 +48,6 @@ const EditDriver = () => {
         const driverDoc = await getDoc(driverDocRef);
         if (driverDoc.exists()) {
           const driverData = driverDoc.data();
-
           const companyName = await fetchCompanyName(employerUID);
 
           console.log('Driver data:', driverData);
@@ -166,7 +165,7 @@ const EditDriver = () => {
 
         // Check if PhoneNumber has changed and is unique
     if (values.PhoneNumber !== originalPhoneNumber) {
-      const phoneNumberExists = await checkIfPhoneNumberExists(values.PhoneNumber);
+      const phoneNumberExists = await checkIfPhoneNumberExists(values.PhoneNumber,driverData.UID);
       if (phoneNumberExists) {
         showNotification('The Phone number is already used. Please use a new number.', false);
         return;
@@ -267,11 +266,14 @@ const EditDriver = () => {
   };
 
   // Function to check if PhoneNumber exists
-  const checkIfPhoneNumberExists = async (phoneNumber) => {
+  const checkIfPhoneNumberExists = async (phoneNumber, currentDriverId) => {
     const phoneQuery = query(
       collection(db, 'Driver'),
-      where('PhoneNumber', '==', `${phoneNumber}`)
+      where('PhoneNumber', '==', phoneNumber),
+      where('__name__', '!=', currentDriverId), // Use the document ID to exclude the current driver
+      where('CompanyName', '==', driverData.CompanyName)
     );
+  
     const querySnapshot = await getDocs(phoneQuery);
     return !querySnapshot.empty; // Returns true if exists
   };
@@ -374,7 +376,7 @@ const EditDriver = () => {
         if (exists) {
           setValidationMessages(prev => ({
             ...prev,
-            DriverID: 'Driver ID already exists.'
+            DriverID: ''
           }));
         }
       }
