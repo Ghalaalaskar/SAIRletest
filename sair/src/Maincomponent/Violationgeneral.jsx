@@ -118,6 +118,37 @@ const ViolationGeneral = () => {
     }
   };
 
+  const getOrdinal = (num) => {
+    const ordinals = [
+      "th", // 0
+      "first", // 1
+      "second", // 2
+      "third", // 3
+      "fourth", // 4
+      "fifth", // 5
+      "sixth", // 6
+      "seventh", // 7
+      "eighth", // 8
+      "ninth", // 9
+      "tenth", // 10
+      "eleventh", // 11
+      "twelfth", // 12
+      "thirteenth", // 13
+      "fourteenth", // 14
+      "fifteenth", // 15
+      "sixteenth", // 16
+      "seventeenth", // 17
+      "eighteenth", // 18
+      "nineteenth", // 19
+      "twentieth" // 20
+    ];
+    
+    if (num < ordinals.length) return ordinals[num];
+    
+    // For numbers greater than 20, return "th"
+    return num + "th"; // Fallback for numbers greater than 20
+  };
+
   return (
     <div  >
 
@@ -231,6 +262,11 @@ Motorcycle Speed</h3>
     <path d="M10 8C8.89543 8 8 8.67157 8 9.5C8 10.3284 8.89543 11 10 11C11.1046 11 12 11.6716 12 12.5C12 13.3284 11.1046 14 10 14M10 8C10.8708 8 11.6116 8.4174 11.8862 9M10 8V7M10 14C9.12919 14 8.38836 13.5826 8.1138 13M10 14V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 </svg>Violation Amount</h3>
         <p style={{fontSize:'18px', marginLeft:'45px'}}>{currentViolation.price} SAR</p>
+        {(currentViolation.count30 > 0 || currentViolation.count50 > 0) && (
+  <p style={{ fontSize: '15px', marginLeft: '45px', color: '#FF0000' }}>
+    This is a reckless violation. It's the driver's <strong>{getOrdinal(currentViolation.count30 > 0 ? currentViolation.count30 : currentViolation.count50)}</strong> time committingthis offense. <br/>  As a result, the violation amount has been increased.
+  </p>
+)}
         </div>
         <div >
         <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-5px', marginRight:'10px'}} color="#059855" fill="none">
