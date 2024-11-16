@@ -7,6 +7,7 @@ import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import Header from './Header';
 import s from '../css/Profile.module.css';
+import '../css/CustomModal.css';
 
 const EditMotorcycle = () => {
   const { motorcycleId } = useParams();
@@ -290,6 +291,12 @@ const EditMotorcycle = () => {
           onCancel={() => setIsNotificationVisible(false)}
           footer={<p style={{ textAlign: 'center' }}>{notificationMessage}</p>}
           style={{ top: '38%' }}
+          className="custom-modal" 
+          closeIcon={
+            <span className="custom-modal-close-icon">
+              ×
+            </span>
+          }
         >
           <div style={{ textAlign: 'center' }}>
             <img

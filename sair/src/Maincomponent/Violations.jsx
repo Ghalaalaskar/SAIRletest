@@ -6,6 +6,7 @@ import EyeIcon from '../images/eye.png';
 import { Table } from 'antd';
 import Header from './Header';
 import s from "../css/Violations.module.css";
+import '../css/CustomModal.css';
 
 const ViolationList = () => {
   const [motorcycles, setMotorcycles] = useState({});

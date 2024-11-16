@@ -6,6 +6,7 @@ import EyeIcon from '../images/eye.png';
 import { Table } from 'antd';
 import Header from './Header';
 import s from "../css/CrashList.module.css"; // CSS module for CrashList
+import '../css/CustomModal.css';
 
 const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});

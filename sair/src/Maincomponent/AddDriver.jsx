@@ -24,6 +24,7 @@ import { generateRandomPassword } from '../utils/common';
 import {Modal} from 'antd';
 import Header from './Header';
 import s from "../css/Profile.module.css";
+import '../css/CustomModal.css';
 
 const AddDriver = () => {
   const navigate = useNavigate();
@@ -448,6 +449,12 @@ const AddDriver = () => {
     onCancel={handleClosePopup}
     footer={<p style={{ textAlign:'center'}}>{popupMessage}</p>}
     style={{ top: '38%' }} // Center the modal vertically
+    className="custom-modal" 
+    closeIcon={
+      <span className="custom-modal-close-icon">
+        ×
+      </span>
+    }
   >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
       <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />

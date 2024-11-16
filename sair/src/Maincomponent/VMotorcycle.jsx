@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import Header from './Header';
 import s from "../css/VDriver.module.css";
 import EyeIcon from '../images/eye.png';
+import '../css/CustomModal.css';
 
 const VMotorcycle  = () => {
   const { motorcycleId } = useParams(); // Get motorcycleId from URL parameters

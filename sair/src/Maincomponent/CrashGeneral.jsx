@@ -8,6 +8,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './Header';
 import s from "../css/ViolationDetail.module.css"; // Reusing the same CSS module
 import crashImage from '../images/crash.png';
+import '../css/CustomModal.css';
 
 const CrashGeneral = () => {
     const [currentCrash, setCurrentCrash] = useState({});

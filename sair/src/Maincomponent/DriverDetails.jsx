@@ -7,6 +7,7 @@ import { Button, Dropdown, Menu, Modal } from 'antd';
 import Header from './Header';
 import X from '../images/redx.webp';
 import s from "../css/DriverDetail.module.css";
+import '../css/CustomModal.css';
 
 const DriverDetails = () => {
   const { driverId } = useParams();
@@ -240,6 +241,12 @@ Email</h3>
         This driver has no violations.
       </p>}
     style={{ top: '38%' }} // Center the modal vertically
+    className="custom-modal" 
+    closeIcon={
+      <span className="custom-modal-close-icon">
+        ×
+      </span>
+    }
   >
 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
     

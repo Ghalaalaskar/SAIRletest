@@ -8,6 +8,7 @@ import EyeIcon from '../images/eye.png';
 import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import { Button, Table, Modal  } from 'antd';
+import '../css/CustomModal.css';
 
 import Header from './Header';
 
@@ -318,11 +319,16 @@ const handleAddMotorcycleSubmit = async (e) => {
         {/* Add Motorcycle Modal */}
         <Modal
         style={{ top: '10%' }}
-          className={s.modal}
           title="Add Motorcycle"
           visible={isAddPopupVisible}
           onCancel={() => setIsAddPopupVisible(false)}
           footer={null}
+          className="custom-modal" 
+          closeIcon={
+            <span className="custom-modal-close-icon">
+              ×
+            </span>
+          }
         >
           <form onSubmit={handleAddMotorcycleSubmit}>
             <input
@@ -373,6 +379,12 @@ const handleAddMotorcycleSubmit = async (e) => {
       Yes
     </Button>,
   ]}
+  className="custom-modal" 
+  closeIcon={
+    <span className="custom-modal-close-icon">
+      ×
+    </span>
+  }
 >
   <div>
     <p>Are you sure you want to delete {motorcycleToRemove?.GPSnumber}?</p>
@@ -385,6 +397,12 @@ const handleAddMotorcycleSubmit = async (e) => {
   onCancel={() => setIsNotificationVisible(false)}
   footer={<p style={{ textAlign: 'center' }}> {notificationMessage}</p>}
   style={{ top: '38%' }}
+  className="custom-modal" 
+  closeIcon={
+    <span className="custom-modal-close-icon">
+      ×
+    </span>
+  }
 >
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
     <img
