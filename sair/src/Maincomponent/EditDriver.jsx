@@ -9,6 +9,7 @@ import SAIRLogo from '../images/SAIRlogo.png';
 import logoutIcon from '../images/logout.png';
 import { UserOutlined, DownOutlined } from '@ant-design/icons';
 import Header from './Header';
+import '../css/CustomModal.css';
 
 import s from '../css/Profile.module.css';
 import { Option } from 'antd/es/mentions';
@@ -555,6 +556,12 @@ const EditDriver = () => {
           onCancel={() => setIsNotificationVisible(false)}
           footer={<p style={{ textAlign: 'center' }}> {notificationMessage}</p>} // No footer buttons
           style={{ top: '38%' }}
+          className="custom-modal" 
+          closeIcon={
+            <span className="custom-modal-close-icon">
+              ×
+            </span>
+          }
         >
           <div style={{ textAlign: 'center' }}>
             <img

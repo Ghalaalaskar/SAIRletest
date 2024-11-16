@@ -8,6 +8,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './Header';
 import s from "../css/ViolationDetail.module.css";
 import X from '../images/redx.webp';
+import '../css/CustomModal.css';
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
@@ -308,6 +309,12 @@ Motorcycle Speed</h3>
         onCancel={() => setIsPopupVisible(false)}
         footer={<p style={{ textAlign: 'center' }}>There is no complaint associated with this violation.</p>}
         style={{ top: '38%' }}
+        className="custom-modal" 
+        closeIcon={
+          <span className="custom-modal-close-icon">
+            ×
+          </span>
+        }
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <img src={X} alt="No Complaints" style={{ width: '20%', marginBottom: '16px' }} />
