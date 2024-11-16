@@ -10,7 +10,8 @@ import axios from 'axios';
 import {Button, Modal} from 'antd';
 import { getDocs, query, collection, where } from 'firebase/firestore';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
+import { CloseOutlined } from '@ant-design/icons'; 
+import '../../css/CustomModal.css';
 import s from '../../css/Signup.module.css';
 
 const SignUp = () => {
@@ -595,7 +596,13 @@ const SignUp = () => {
         footer={null} // Set footer to null to avoid rendering default footer
         style={{ top: '38%' }}
         bodyStyle={{ textAlign: 'center' }} // Center text in modal body
-    >
+        className="custom-modal" 
+        closeIcon={
+          <span className="custom-modal-close-icon">
+            ×
+          </span>
+        }
+      >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <img
                 src={popupImage}

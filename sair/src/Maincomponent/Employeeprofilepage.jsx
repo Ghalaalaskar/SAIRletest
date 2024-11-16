@@ -11,6 +11,7 @@ import { Modal } from 'antd';
 import s from "../css/Profile.module.css"
 import { useContext } from 'react';
 import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
+import '../css/CustomModal.css';
 
 const Profile = () => {
   const { setShortCompanyName } = useContext(ShortCompanyNameContext);
@@ -351,7 +352,9 @@ const Profile = () => {
       setPopupImage(successImage);
       setPopupVisible(true);
       setEditMode(false);
-
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmNewPassword(false);
       setEmployer((prev) => ({
         ...prev,
         currentPassword: "",
@@ -373,7 +376,9 @@ const Profile = () => {
     //setEmployer(originalEmployerData); // Restore original data
     const employerUID = sessionStorage.getItem('employerUID');
     const docRef = doc(db, 'Employer', employerUID);
-    
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
     // Fetch the latest data from the database
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -654,6 +659,12 @@ const Profile = () => {
         onCancel={handleClosePopup}
         footer={<p style={{ textAlign: 'center' }}> {popupMessage}</p>} 
         style={{ top: '38%' }}
+        className="custom-modal" 
+        closeIcon={
+          <span className="custom-modal-close-icon">
+            ×
+          </span>
+        }
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 

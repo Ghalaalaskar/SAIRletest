@@ -54,7 +54,7 @@ export const monitorUnits = (sess, fetchInterval) => {
           const loadedUnits = sess.getItems('avl_unit');
           if (loadedUnits) {
             //await processUnits1(loadedUnits);
-            //await processUnits2(loadedUnits);
+            // await processUnits2(loadedUnits);
     
           } else {
             console.log('No units found.');
@@ -349,7 +349,7 @@ const generateViolationId = () => {
          const driverQuerySnapshot1 = await getDocs(
             query(
                 collection(db, 'Driver'), 
-                where('GPSnumber', '==', GPSserialnumber)
+                where('GPSnumber', '==', GPSserialnumber)//GPSserialnumber
             )
          );
          if (driverQuerySnapshot1.empty) {
@@ -417,7 +417,7 @@ const generateViolationId = () => {
                 console.log(acceleration);
     
                 // Check if deceleration indicates crash
-                if (acceleration <= -1) {  // Emergency deceleration 
+                if (acceleration <= -7 ) {  // Emergency deceleration   
                     console.log("Potential crash detected for :", GPSserialnumber, "Acceleration:", acceleration);
                     const starttime = newcrashTime - 5 * 60; // crashes in 5 min before.  
                     const endtime = newcrashTime;
@@ -461,6 +461,7 @@ const storeCrash = async (CrashID,driverid, GPSnumber, location, position, speed
         time: time,
         timestamp: Timestamp.now(),
         Status:"Rejected",
+        Flag:false,
       });
       console.log('crash stored successfully.');
     } catch (e) {
