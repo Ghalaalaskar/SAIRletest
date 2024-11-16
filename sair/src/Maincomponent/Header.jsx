@@ -44,11 +44,26 @@ const Header = ({ active }) => {
     setModalVisible(false);
   };
 
+  // const handleLogout = async () => {
+  //   await auth.signOut();
+  //   sessionStorage.removeItem('ShortCompanyName'); // Clear sessionStorage
+  //   navigate('/');
+  //   setModalVisible(false);
+  // };
   const handleLogout = async () => {
-    await auth.signOut();
-    sessionStorage.removeItem('ShortCompanyName'); // Clear sessionStorage
-    navigate('/');
-    setModalVisible(false);
+    try {
+      await auth.signOut(); // Sign out the user
+      // Clear all session-specific data
+      sessionStorage.removeItem('ShortCompanyName');
+      sessionStorage.removeItem('employerUID');
+      window.dispatchEvent(new Event('storage')); // Notify other components
+      // Navigate to the login page
+      navigate('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      setModalVisible(false); // Close the logout confirmation modal
+    }
   };
 
   const menu = (
