@@ -8,6 +8,7 @@ import errorImage from '../../images/Error.png';
 import s from "../../css/ForgotPassword.module.css"
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { Modal } from 'antd';
+import '../../css/CustomModal.css';
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState('');
@@ -132,6 +133,12 @@ const ForgetPassword = () => {
     footer={<p style={{textAlign:'center'}}>{popupMessage}</p>}
     style={{ top: '38%' }}
     bodyStyle={{ textAlign: 'center' }}
+    className="custom-modal" 
+    closeIcon={
+      <span className="custom-modal-close-icon">
+        ×
+      </span>
+    }
   >
     <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />
     

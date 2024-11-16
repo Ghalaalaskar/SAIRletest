@@ -7,6 +7,7 @@ import successImage from '../images/Sucess.png';
 import errorImage from '../images/Error.png';
 import s from "../css/Profile.module.css";
 import {Modal} from 'antd';
+import '../css/CustomModal.css';
 
 const AddMotorcycle = () => {
   const navigate = useNavigate();
@@ -335,6 +336,12 @@ const generateMotorcycleID = async (gpsNumber) => {
     onCancel={handleClosePopup}
     footer={<p style={{ textAlign:'center' }}>{popupMessage}</p>}
     style={{ top: '38%' }} // Center the modal vertically
+    className="custom-modal" 
+    closeIcon={
+      <span className="custom-modal-close-icon">
+        ×
+      </span>
+    }
   >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
       <img src={popupImage} alt="Popup" style={{ width: '20%', marginBottom: '16px' }} />

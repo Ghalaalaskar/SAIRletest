@@ -1,5 +1,6 @@
 import React from 'react';
 import { LoadScript, GoogleMap, MarkerF } from '@react-google-maps/api'; 
+import '../css/CustomModal.css';
 
 const Map = ({ lat, lng, placeName }) => { 
   const containerStyle = {

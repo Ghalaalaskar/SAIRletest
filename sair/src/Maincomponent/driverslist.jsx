@@ -12,6 +12,7 @@ import errorImage from '../images/Error.png';
 import { SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import { Button, Table, Modal } from 'antd';
 import Header from './Header';
+import '../css/CustomModal.css';
 
 import s from "../css/DriverList.module.css";
 
@@ -272,6 +273,12 @@ const DriverList = () => {
       Yes
     </Button>,
   ]}
+  className="custom-modal" 
+  closeIcon={
+    <span className="custom-modal-close-icon">
+      ×
+    </span>
+  }
 >
   <div>
     <p>Are you sure you want to delete {driverToRemove?.Fname}?</p>
@@ -284,6 +291,12 @@ const DriverList = () => {
           onCancel={() => setIsNotificationVisible(false)}
           footer={<p style={{textAlign:'center'}}>{notificationMessage}</p>}
           style={{top:'38%'}}
+          className="custom-modal" 
+          closeIcon={
+            <span className="custom-modal-close-icon">
+              ×
+            </span>
+          }
         >
           <div style={{ textAlign: 'center' }}>
             <img

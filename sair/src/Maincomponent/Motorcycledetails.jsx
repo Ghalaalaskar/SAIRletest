@@ -7,6 +7,7 @@ import { Button, Modal } from 'antd';
 import Header from './Header';
 import X from '../images/redx.webp';
 import s from "../css/DriverDetail.module.css";
+import '../css/CustomModal.css';
 
 const MotorcycleDetails = () => {
   const { motorcycleId } = useParams();
@@ -208,6 +209,12 @@ Email</h3>
           onCancel={() => setIsPopupVisible(false)}
           footer={<p style={{ textAlign: 'center' }}>No violations associated with this motorcycle.</p>}
           style={{ top: '38%' }}
+          className="custom-modal" 
+          closeIcon={
+            <span className="custom-modal-close-icon">
+              ×
+            </span>
+          }
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <img src={X} alt="No Violations"style={{ width: '20%', marginBottom: '16px' }} />

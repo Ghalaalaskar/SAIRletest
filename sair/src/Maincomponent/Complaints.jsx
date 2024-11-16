@@ -7,6 +7,7 @@ import { Table, Select } from 'antd';
 import Header from './Header';
 import { FaFilter } from 'react-icons/fa';
 import s from "../css/ComplaintList.module.css"; // CSS module for ComplaintList
+import '../css/CustomModal.css';
 
 const ComplaintList = () => {
   const [motorcycles, setMotorcycles] = useState({});

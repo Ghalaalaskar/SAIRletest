@@ -4,6 +4,7 @@ import Vision from '../images/Vision.png';
 import Mision from '../images/Mision.png'; 
 import Header from './Header';
 import s from "../css/EmployerHome.module.css";
+import '../css/CustomModal.css';
 
 const EmployeeHome = () => {
   const styles = {
