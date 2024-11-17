@@ -413,12 +413,12 @@ const generateViolationId = () => {
                 const currread = recentSpeeds[GPSserialnumber][i]; //15
                 const deltaViolocity = currread.speed - prevread.speed;
                 const deltaTime = currread.time - prevread.time;
-                const acceleration = deltaViolocity / deltaTime;
-                console.log(acceleration);
+                const deceleration = deltaViolocity / deltaTime;
+                console.log(deceleration);
     
                 // Check if deceleration indicates crash
-                if (acceleration <= -7 ) {  // Emergency deceleration   
-                    console.log("Potential crash detected for :", GPSserialnumber, "Acceleration:", acceleration);
+                if (deceleration <= -7 ) {  // Emergency deceleration   
+                    console.log("Potential crash detected for :", GPSserialnumber, "Acceleration:", deceleration);
                     const starttime = newcrashTime - 5 * 60; // crashes in 5 min before.  
                     const endtime = newcrashTime;
                     const querySnapshot = await getDocs(
