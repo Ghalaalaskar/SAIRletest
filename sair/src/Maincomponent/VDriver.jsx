@@ -24,11 +24,10 @@ const ViolationsTable = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        // Check if the timestamp field exists and sort violations from newest to oldest
+
         const sortedViolations = violationsList.sort((a, b) => {
-          // Ensure to replace 'timestamp' with your actual timestamp field
-          return (b.timestamp || 0) - (a.timestamp || 0); 
-        });
+          return (b.time || 0) - (a.time || 0);
+                });
 
         setViolations(sortedViolations);
       }, (error) => {

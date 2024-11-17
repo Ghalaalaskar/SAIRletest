@@ -25,7 +25,7 @@ const VMotorcycle  = () => {
         }));
              // Sort violations from newest to oldest based on timestamp
              const sortedViolations = violationsList.sort((a, b) => {
-              return (b.timestamp || 0) - (a.timestamp || 0); // Adjust 'timestamp' to your actual field name
+              return (b.time || 0) - (a.time || 0); // Adjust 'time' to your actual field name
             });
         setViolations(sortedViolations);
       }, (error) => {

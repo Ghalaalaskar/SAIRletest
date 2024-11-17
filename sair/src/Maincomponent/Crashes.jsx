@@ -15,6 +15,8 @@ const CrashList = () => {
   const [searchDriverID, setSearchDriverID] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState(''); // Single search input
+
   const employerUID = sessionStorage.getItem('employerUID');
 
   useEffect(() => {
@@ -120,12 +122,18 @@ const CrashList = () => {
   .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
   .filter((crash) => {
     const crashDate = crash.time ? new Date(crash.time * 1000).toISOString().split('T')[0] : '';
-
-    const matchesSearchDriverID = crash.driverID.toLowerCase().includes(searchDriverID.toLowerCase());
     const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-    return matchesSearchDriverID && matchesSearchDate;
-  });
+    const driverName = drivers[crash.driverID] || 'Unknown Driver';
+      const licensePlate = motorcycles[crash.crashID] || 'Unknown Plate'; // Use crashID to fetch motorcycle
+
+      const matchesSearchQuery = 
+        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+
+
+      return matchesSearchQuery && matchesSearchDate;
+    });
 
 
   const columns = [
@@ -191,9 +199,9 @@ const CrashList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver ID"
-                  value={searchDriverID}
-                  onChange={(e) => setSearchDriverID(e.target.value)}
+                  placeholder="Search by Driver Name or License Plate"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '280px' }}
                 />
               </div>

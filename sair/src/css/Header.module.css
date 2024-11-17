@@ -93,6 +93,8 @@ nav {
   border: none;
   cursor: pointer;
   font-family: 'Open Sans';
+  display: flex;
+  align-items: center;
 }
 
 .logout {

@@ -234,10 +234,12 @@ const AddDriver = () => {
         }
       }
 
+
+      // Send Welcome Registration email
       const templateParams = {
         email: values.Email,
         subject: 'Welcome to SAIR!',
-        companyName: Employer.CompanyName,
+        companyName: Employer.ShortCompanyName,
         generatedPassword: generatedPassword,
       };
   
@@ -271,6 +273,8 @@ const AddDriver = () => {
       setPopupImage(errorImage);
     }
   };
+
+
 
   const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;

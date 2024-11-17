@@ -1,4 +1,4 @@
-import { DownOutlined, UserOutlined } from '@ant-design/icons';
+import { DownOutlined, UserOutlined, BellOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Modal, Button } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import SAIRLogo from '../images/SAIRlogo.png';
@@ -77,6 +77,14 @@ const Header = ({ active }) => {
       </Menu.Item>
     </Menu>
   );
+  // for notification
+  const notificationMenu = (
+    <Menu style={{ width: '200px' }}>
+      <Menu.Item key='notification1'>Crash detected<br/>Id:8884747</Menu.Item>
+      <Menu.Item key='notification2'>Notification 2</Menu.Item>
+      <Menu.Item key='notification3'>Notification 3</Menu.Item>
+    </Menu>
+  );
   
   const navItems = [
     { path: 'employer-home', label: 'Home' },
@@ -107,6 +115,7 @@ const Header = ({ active }) => {
         </div>
 
         <div className={s.logoutButton}>
+
           <Dropdown overlay={menu} trigger={['click']} style={{ fontSize: '15px', zIndex: 999999 }}>
             <Link
               to={(e) => e.preventDefault()}
@@ -119,8 +128,16 @@ const Header = ({ active }) => {
               <DownOutlined style={{ marginLeft: 15 }} />
             </Link>
           </Dropdown>
+
+          <Dropdown overlay={notificationMenu} trigger={['click']}>
+    <BellOutlined style={{ fontSize: '24px', marginLeft: '15px', cursor: 'pointer'}} 
+    onMouseEnter={(e) => (e.currentTarget.style.color = '#059855')}
+    onMouseLeave={(e) => (e.currentTarget.style.color = 'black')}/>
+  </Dropdown>
+
         </div>
       </nav>
+      
 
       {/* Logout Confirmation Modal */}
       <Modal
