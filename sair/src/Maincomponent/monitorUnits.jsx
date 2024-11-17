@@ -53,8 +53,8 @@ export const monitorUnits = (sess, fetchInterval) => {
           }
           const loadedUnits = sess.getItems('avl_unit');
           if (loadedUnits) {
-            //await processUnits1(loadedUnits);
-            // await processUnits2(loadedUnits);
+             await processUnits1(loadedUnits);
+             await processUnits2(loadedUnits);
     
           } else {
             console.log('No units found.');
@@ -74,12 +74,12 @@ export const monitorUnits = (sess, fetchInterval) => {
         if(pos){
           const GPSserialnumber = unit.getName();
           console.log('gpsnum:',GPSserialnumber);
-          const maxSpeed = 160;//await fetchMaxSpeed(pos.y,pos.x); 
+          const maxSpeed = await fetchMaxSpeed(pos.y,pos.x); 
           console.log('Max speed from API in proccess method:', maxSpeed);
 
         
        if (maxSpeed!==0) {
-        const driverSpeed = 175;//pos.s;
+        const driverSpeed = pos.s;
         console.log('driverspeed:',driverSpeed);
         if (driverSpeed > maxSpeed) {
          const driverQuerySnapshot = await getDocs(
