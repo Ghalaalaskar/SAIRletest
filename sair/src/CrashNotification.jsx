@@ -2,12 +2,25 @@ import { useEffect, useState, useRef } from 'react';
 import { db } from './firebase';
 import { collection, doc, getDoc, onSnapshot, getDocs,updateDoc, query, where } from 'firebase/firestore';
 import { notification } from 'antd';
-
-notification.config({
-    placement: 'topRight',
-    duration: 5, // Default duration for notifications
-    closeIcon: <span style={{ fontSize: '20px' }}>×</span>, // Custom close icon
-  });
+import "./css/notificationStyles.css";
+// notification.config({
+//     placement: 'topRight',
+//     duration: 5, // Default duration for notifications
+//     closeIcon: (
+//         <span
+//           style={{
+//             fontSize: '20px',
+//             color: '#ffffff',
+//             padding: '0 15px', // Adjust padding to control spacing
+//             display: 'inline-flex',
+//             alignItems: 'center',
+//             justifyContent: 'center',
+//           }}
+//         >
+//           ×
+//         </span>
+//       ),
+//   });
 
 export const CrashNotification = () => {
   const [companyDrivers, setCompanyDrivers] = useState({}); // Store drivers for all employers
@@ -161,8 +174,13 @@ export const CrashNotification = () => {
               message: 'Crash Alert',
               description: `Crash detected for driver ${driverName} (ID: ${crash.driverID}).`,
               placement: 'topRight',
-              duration: 10,
-              style: { width: 300 },
+              duration: 30,
+              className: 'custom-notification',
+              style: { width: 450,
+                backgroundColor: 'rgba(255, 77, 79, 0.6)', // Red with 80% opacity
+                color: '#ffffff',
+                borderRadius: '10px',
+               },
             });
           }
 
