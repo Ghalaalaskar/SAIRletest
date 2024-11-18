@@ -121,13 +121,13 @@ const ComplaintList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || 'Unknown Driver',
+      render: (text, record) => drivers[record.driverID] || '   ',
     },
     {
       title: 'Motorcycle License Plate',
       key: 'motorcyclePlate',
       align: 'center',
-      render: (text, record) => motorcycles[record.ViolationID] || 'Unknown Plate',
+      render: (text, record) => motorcycles[record.ViolationID] || '   ',
     },
     {
       title: 'Status',

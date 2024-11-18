@@ -103,8 +103,8 @@ const ViolationList = () => {
 
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
-    const driverName = drivers[violation.driverID] || 'Unknown Driver';
-    const licensePlate = motorcycles[violation.violationID] || 'Unknown Plate'; // Match with violationID
+    const driverName = drivers[violation.driverID] || '  ';
+    const licensePlate = motorcycles[violation.violationID] || '  '; // Match with violationID
 
     console.log("Checking Violation:", violation);
     console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
@@ -136,13 +136,13 @@ const ViolationList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || 'Unknown Driver',
+      render: (text, record) => drivers[record.driverID] || '   ',
     },
     {
       title: 'Motorcycle License Plate',
       key: 'motorcyclePlate',
       align: 'center',
-      render: (text, record) => motorcycles[record.violationID] || 'Unknown Plate', // Use violationID for lookup
+      render: (text, record) => motorcycles[record.violationID] || '   ', // Use violationID for lookup
     },
     {
       title: 'Speed',

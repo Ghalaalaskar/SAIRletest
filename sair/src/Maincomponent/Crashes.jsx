@@ -124,8 +124,8 @@ const CrashList = () => {
     const crashDate = crash.time ? new Date(crash.time * 1000).toISOString().split('T')[0] : '';
     const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-    const driverName = drivers[crash.driverID] || 'Unknown Driver';
-      const licensePlate = motorcycles[crash.crashID] || 'Unknown Plate'; // Use crashID to fetch motorcycle
+    const driverName = drivers[crash.driverID] || ' ';
+      const licensePlate = motorcycles[crash.crashID] || ' '; // Use crashID to fetch motorcycle
 
       const matchesSearchQuery = 
         driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -147,13 +147,13 @@ const CrashList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || 'Unknown Driver',
+      render: (text, record) => drivers[record.driverID] || '   ',
     },
     {
       title: 'Motorcycle License Plate',
       key: 'motorcyclePlate',
       align: 'center',
-      render: (text, record) => motorcycles[record.crashID] || 'Unknown Plate', // Use crashID to fetch motorcycle
+      render: (text, record) => motorcycles[record.crashID] || '   ', // Use crashID to fetch motorcycle
     },
     {
       title: 'Status',
