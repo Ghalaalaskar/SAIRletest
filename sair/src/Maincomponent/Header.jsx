@@ -129,7 +129,7 @@ const Header = ({ active }) => {
           console.log('Initial new crashes detected:', crashList);
           setHasNewCrashes(true); // Show badge for all crashes
         } else {
-          const isNewCrash = crashList.some((crash) => crash.time > currentLastClickTime);
+          const isNewCrash = crashList.some((crash) => crash.time >= currentLastClickTime);
           setHasNewCrashes(isNewCrash);
         }
         

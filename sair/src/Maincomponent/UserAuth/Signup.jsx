@@ -43,6 +43,9 @@ const SignUp = () => {
     
 
   });
+  const [invalidcommercialMessages, setinvalidcommercialMessages] = useState({
+    invalidcommercial: '',
+  });
   const [loading, setLoading] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -107,6 +110,10 @@ const SignUp = () => {
       }));
 
       if (value === '' || commercialNumberError) {
+        setinvalidcommercialMessages((prev) => ({
+          ...prev,
+          invalidcommercial: '',
+        }));
         setUser((prev) => ({ ...prev, CompanyName: '' }));
         setIsCompanyNameReadOnly(false);
         setIsShortCompanyNameReadOnly(false);
@@ -130,10 +137,31 @@ const SignUp = () => {
       if (!commercialNumberError) {
         const isValid = await fetchRegistrationInfo(value);
         if(isValid===0){
-          setPopupMessage("The commercial number is invalid.");
-          setPopupImage(errorImage);
-          setPopupVisible(true);
-          setLoading(false);
+          // setPopupMessage("The commercial number is invalid.");
+          // setPopupImage(errorImage);
+          // setPopupVisible(true);
+          // setLoading(false);
+          setinvalidcommercialMessages((prev) => ({
+            ...prev,
+            invalidcommercial: 'The commercial number is invalid.',
+          }));
+          setUser((prev) => ({ ...prev,  CompanyName:'' ,ShortCompanyName:'',CompanyEmail:'',PhoneNumber:'',Password:'',confirmPassword:''}));
+          setValidationMessages((prev) => ({
+            ...prev,
+            emailError: '',
+            phoneError: '',
+            passwordError: '',
+            confirmPasswordError: '',
+          }));
+          setMissingFields({});
+          
+          setPasswordRequirements({
+            length: false,
+            uppercase: false,
+            lowercase: false,
+            number: false,
+            special: false,
+          });
           setIsCompanyNameReadOnly(true);
           setIsShortCompanyNameReadOnly(true);
           setIsCompanyEmailReadOnly(true);
@@ -156,6 +184,10 @@ const SignUp = () => {
               delete updated.CompanyName;
               return updated;
           });
+          setinvalidcommercialMessages((prev) => ({
+            ...prev,
+            invalidcommercial: '',
+          }));
         }
          // else {
       //     setUser((prev) => ({ ...prev, CompanyName: '' })); // Clear if not valid
@@ -452,7 +484,15 @@ const SignUp = () => {
   //     return '';
   //   };
     
-
+  const handleBlur = (fieldName) => {
+    if (fieldName === 'commercialNumber' && invalidcommercialMessages.invalidcommercial) {
+      setPopupMessage(invalidcommercialMessages.invalidcommercial);
+      setPopupImage(errorImage);
+      setPopupVisible(true);
+    }
+  };
+  
+  
 
 
 
@@ -487,6 +527,7 @@ const SignUp = () => {
               type="text"
               name="commercialNumber"
               value={user.commercialNumber}
+              onBlur={() => handleBlur('commercialNumber')}
               onChange={handleChange}
 
               required
@@ -494,6 +535,7 @@ const SignUp = () => {
             />
             {missingFields['commercialNumber'] && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields['commercialNumber']}</p>}
             {validationMessages.commercialNumberError && <p style={{ color: 'red', marginTop: '3px'}}>{validationMessages.commercialNumberError}</p>}
+            {invalidcommercialMessages.invalidcommercial && <p style={{ color: 'red', marginTop: '3px' }}>{invalidcommercialMessages.invalidcommercial}</p>}
           </div>
 
           <div className={s.profileField}>
