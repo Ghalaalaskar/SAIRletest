@@ -53,8 +53,8 @@ export const monitorUnits = (sess, fetchInterval) => {
           }
           const loadedUnits = sess.getItems('avl_unit');
           if (loadedUnits) {
-             await processUnits1(loadedUnits);
-             await processUnits2(loadedUnits);
+            //  await processUnits1(loadedUnits);
+              //await processUnits2(loadedUnits);
     
           } else {
             console.log('No units found.');
@@ -460,8 +460,9 @@ const storeCrash = async (CrashID,driverid, GPSnumber, location, position, speed
         driverSpeed: speed,
         time: time,
         timestamp: Timestamp.now(),
-        Status:"Rejected",
+        Status:"Pending",
         Flag:false,
+        isRead:false,
       });
       console.log('crash stored successfully.');
     } catch (e) {
