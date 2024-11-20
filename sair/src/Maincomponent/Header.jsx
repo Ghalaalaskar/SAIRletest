@@ -20,9 +20,13 @@ const Header = ({ active }) => {
   const [drivers, setDrivers] = useState({});
 
    ///ABOUT RED CIRCULE VISIBILITY
+   const [isFirstLogin, setIsFirstLogin] = useState(false);
    const [hasNewCrashes, setHasNewCrashes] = useState(false); // Badge visibility
-   const lastClickTimeRef = useRef(null);
-  ///ABOUT RED CIRCULE VISIBILITY
+   const [storedCrashIds, setStoredCrashIds] = useState(() => {
+    const saved = localStorage.getItem("crashIds");
+    return saved ? JSON.parse(saved) : []; // Parse JSON if found, else initialize as an empty array
+  });
+    ///ABOUT RED CIRCULE VISIBILITY
 
 
   useEffect(() => {
@@ -47,18 +51,23 @@ const Header = ({ active }) => {
     fetchShortCompanyName();
   }, [shortCompanyName, setShortCompanyName]);
 
+
   useEffect(() => {
-    // Load last click time from local storage or initialize to null
-    const storedLastClickTime = localStorage.getItem('lastClickTime');
-    if (storedLastClickTime) {
-      lastClickTimeRef.current = Number(storedLastClickTime); // Convert string to number
-      console.log('Loaded lastClickTimeRef from localStorage:', lastClickTimeRef.current);
-    } else {
-      console.log('No lastClickTime found, initializing to null');
-      lastClickTimeRef.current = null; // First session, no crashes clicked yet
+    // Check if this is the first login
+    const savedCrashIds = localStorage.getItem("crashIds");
+
+    if (!savedCrashIds) {
+      // No crash IDs found in localStorage, mark as first login
+      console.log("First login detected: Initializing crash IDs");
+      setIsFirstLogin(true); // Mark first login
+      localStorage.setItem("crashIds", JSON.stringify([])); // Initialize crash IDs in localStorage
     }
   }, []);
 
+  useEffect(() => {
+    // Update localStorage whenever storedCrashIds changes
+    localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
+  }, [storedCrashIds]);
 
   // Fetch drivers and crashes based on employer UID and company name
   const fetchDriversAndCrashes = useCallback(async () => {
@@ -119,22 +128,22 @@ const Header = ({ active }) => {
           ...doc.data(),
         }));
         
-        setCrashes(crashList);
-        ///ABOUT RED CIRCULE VISIBILITY
-         // Check if any crash is new (timestamp > lastClickTime)
-         const currentLastClickTime = lastClickTimeRef.current; // Always use the ref value
-         console.log('Current lastClickTimeRef:', currentLastClickTime);
-   
-         if (currentLastClickTime === null && crashList.length > 0) {
-          console.log('Initial new crashes detected:', crashList);
-          setHasNewCrashes(true); // Show badge for all crashes
-        } else {
-          const isNewCrash = crashList.some((crash) => crash.time >= currentLastClickTime);
-          setHasNewCrashes(isNewCrash);
-        }
         
-       });
-  
+        setCrashes(crashList);
+        const newCrashIds = crashList.map((crash) => crash.id);
+        console.log("Fetched new crash IDs:", newCrashIds);
+        console.log('old',storedCrashIds);
+
+        const isNewCrash = newCrashIds.some((id) => !storedCrashIds.includes(id));
+        if (isNewCrash) {
+          console.log("New crashes detected!");
+          const updatedCrashIds = [...new Set([...storedCrashIds, ...newCrashIds])]; // Merge arrays without duplicates
+          localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
+          setStoredCrashIds(updatedCrashIds); // Update state
+          setHasNewCrashes(true);
+        }
+      }, []);
+      
         ///ABOUT RED CIRCULE VISIBILITY
 
      
@@ -149,21 +158,17 @@ const Header = ({ active }) => {
   // Update crash as read and navigate to details page
   const handleNotificationClick = async (crash) => {
     try {
-      ///ABOUT RED CIRCULE VISIBILITY
-      // Update the last click time to the current time
-      const currentTime =Number(Date.now() / 1000); // Current Unix timestamp
-      console.log('Updated1 lastClickTime:', currentTime);
-    
-   lastClickTimeRef.current = currentTime;
-    localStorage.setItem('lastClickTime', currentTime); // Persist for future sessions
-           setHasNewCrashes(false);
-       console.log('eee');
-      ///ABOUT RED CIRCULE VISIBILITY
       navigate(`/crash/general/${crash.id}`);
-      await updateDoc(doc(db, 'Crash', crash.id), { isRead: true });
-      
+      await updateDoc(doc(db, "Crash", crash.id), { isRead: true });
+      console.log('h1',storedCrashIds);
+      console.log(crash.id);
+      const updatedCrashIds = storedCrashIds.filter((id) => id !== crash.id);
+      localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
+      setStoredCrashIds(updatedCrashIds);
+      console.log('handle',storedCrashIds);
+      setHasNewCrashes(false);
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
     }
   };
 
@@ -206,7 +211,7 @@ const Header = ({ active }) => {
       // Clear all session-specific data
       sessionStorage.removeItem('ShortCompanyName');
       sessionStorage.removeItem('employerUID');
-      localStorage.removeItem('lastClickTime'); 
+      localStorage.removeItem('crashIds');
       window.dispatchEvent(new Event('storage')); // Notify other components
       // Navigate to the login page
       navigate('/');

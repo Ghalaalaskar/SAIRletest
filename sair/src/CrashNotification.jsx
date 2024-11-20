@@ -61,11 +61,12 @@ export const CrashNotification = () => {
           const drivers = driverSnapshot.docs.map((doc) => ({
             id: doc.data().DriverID,
             name: `${doc.data().Fname} ${doc.data().Lname}`,
+            PhoneNumber: doc.data().PhoneNumber,
           }));
 
           // Aggregate drivers under the current company
           updatedDrivers[companyName] = drivers.reduce((acc, driver) => {
-            acc[driver.id] = driver.name;
+            acc[driver.id] = { name: driver.name, PhoneNumber: driver.PhoneNumber };
             return acc;
           }, {});
 
@@ -159,7 +160,7 @@ export const CrashNotification = () => {
       const unsubscribeCrash = onSnapshot(crashQuery, (snapshot) => {
         snapshot.docs.forEach(async (crashDoc) => {
           const crash = { id: crashDoc.id, ...crashDoc.data() };
-          const driverName = drivers[crash.driverID] || 'Unknown';
+          const driver = drivers[crash.driverID] || { name: 'Unknown', phoneNumber: 'Unavailable' };
           const date=formatDate(crash.time);
           const time= new Date(crash.time * 1000).toLocaleTimeString();
           console.log('crash:',crash);
@@ -167,7 +168,7 @@ export const CrashNotification = () => {
           if (showNotifications && employerUID) {
             notification.open({
               message: <strong>Crash Alert</strong>,
-              description: `Crash detected for driver ${driverName} on ${date} at ${time}. Please call the driver to confirm the crash and provide necessary support.`,
+              description: `Crash detected for driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.. Please call the driver to confirm the crash and provide necessary support.`,
               placement: 'topRight',
               closeIcon: null, 
               duration: 20,
