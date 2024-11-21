@@ -202,7 +202,7 @@ const handleViewComplaints = () => {
             <p style={{fontSize:'18px', marginLeft:'45px'}}>{violation.price} SAR</p>
             {(violation.count30 > 0 || violation.count50 > 0) && (
   <p style={{ fontSize: '15px', marginLeft: '45px', color: '#FF0000'}}>
-  This is a reckless violation. It's the driver's<strong> {getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> time committingthis offense. <br/>  As a result, the violation amount has been increased.
+  According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong> {getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> offense. <br/> As a result, the penalty amount has been increased.
 </p>
 )}
             <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-10px', marginRight:'10px'}} color="#059855" fill="none">
