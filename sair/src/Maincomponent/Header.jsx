@@ -64,10 +64,10 @@ const Header = ({ active }) => {
     }
   }, []);
 
-  useEffect(() => {
-    // Update localStorage whenever storedCrashIds changes
-    localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
-  }, [storedCrashIds]);
+  // useEffect(() => {
+  //   // Update localStorage whenever storedCrashIds changes
+  //   localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
+  // }, [storedCrashIds]);
 
   // Fetch drivers and crashes based on employer UID and company name
   const fetchDriversAndCrashes = useCallback(async () => {
@@ -145,9 +145,6 @@ const Header = ({ active }) => {
       }, []);
       
         ///ABOUT RED CIRCULE VISIBILITY
-
-     
-
       return () => unsubscribeCrashes();
     }
   }, []);//not sure

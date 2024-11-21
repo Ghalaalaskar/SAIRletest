@@ -208,6 +208,7 @@ if (Object.keys(newMissingFields).length > 0) {
             userFound = true;
             const employerUID = querySnapshot.docs[0].id;
             sessionStorage.setItem('employerUID', employerUID);
+            localStorage.setItem("crashIds", JSON.stringify([])); //not sure
              // Fetch the ShortCompanyName and update sessionStorage
              const employerData = querySnapshot.docs[0].data();
              const shortCompanyName = employerData.ShortCompanyName || '';
