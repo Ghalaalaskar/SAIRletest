@@ -29,7 +29,6 @@ import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
 import { CrashNotification } from './CrashNotification';
 
-
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
@@ -59,6 +58,7 @@ function App() {
 
   return (
 <ShortCompanyNameProvider>
+
     <LoadScript
     googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc"
     onError={(e) => console.error('Error loading maps', e)}
@@ -92,6 +92,7 @@ function App() {
       </Routes>
     </Router>
     </LoadScript>
+    
     </ShortCompanyNameProvider>
   );
 }

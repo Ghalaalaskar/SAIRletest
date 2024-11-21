@@ -18,6 +18,12 @@ const SignUp = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [isCompanyNameReadOnly, setIsCompanyNameReadOnly] = useState(false);
+  const [isShortCompanyNameReadOnly, setIsShortCompanyNameReadOnly] = useState(false);
+  const [isCompanyEmailReadOnly, setIsCompanyEmailReadOnly] = useState(false);
+  const [isPhoneReadOnly, setIsPhoneReadOnly] = useState(false);
+  const [isPassReadOnly, setIsPassReadOnly] = useState(false);
+  const [isConfirmReadOnly, setIsConfirmReadOnly] = useState(false);
+
   const [user, setUser] = useState({
     commercialNumber: '',
     PhoneNumber: '',
@@ -36,6 +42,9 @@ const SignUp = () => {
     passwordError: '',
     
 
+  });
+  const [invalidcommercialMessages, setinvalidcommercialMessages] = useState({
+    invalidcommercial: '',
   });
   const [loading, setLoading] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -101,26 +110,89 @@ const SignUp = () => {
       }));
 
       if (value === '' || commercialNumberError) {
+        setinvalidcommercialMessages((prev) => ({
+          ...prev,
+          invalidcommercial: '',
+        }));
         setUser((prev) => ({ ...prev, CompanyName: '' }));
         setIsCompanyNameReadOnly(false);
+        setIsShortCompanyNameReadOnly(false);
+        setIsCompanyEmailReadOnly(false);
+        setIsPhoneReadOnly(false);
+        setIsPassReadOnly(false);
+        setIsConfirmReadOnly(false);
       }
 
+      // if(value.length === 10){
+      //   const isValid = await fetchRegistrationInfo(value);
+      //   if(isValid===0){
+      //     setPopupMessage("The commercial number is invalid.");
+      //     setPopupImage(errorImage);
+      //     setPopupVisible(true);
+      //     setLoading(false);
+      //     return; // Prevent sign-up if commercial number not exist in the wathq api
+      //   }
+      //  }
+
       if (!commercialNumberError) {
-        const companyName = await fetchRegistrationInfo(value);
-        if (companyName !== 0) {
-          setUser((prev) => ({ ...prev, CompanyName: companyName })); // Update with fetched name
-          setIsCompanyNameReadOnly(true); // Set CompanyName field to read-only
+        const isValid = await fetchRegistrationInfo(value);
+        if(isValid===0){
+          // setPopupMessage("The commercial number is invalid.");
+          // setPopupImage(errorImage);
+          // setPopupVisible(true);
+          // setLoading(false);
+          setinvalidcommercialMessages((prev) => ({
+            ...prev,
+            invalidcommercial: 'The commercial number is invalid.',
+          }));
+          setUser((prev) => ({ ...prev,  CompanyName:'' ,ShortCompanyName:'',CompanyEmail:'',PhoneNumber:'',Password:'',confirmPassword:''}));
+          setValidationMessages((prev) => ({
+            ...prev,
+            emailError: '',
+            phoneError: '',
+            passwordError: '',
+            confirmPasswordError: '',
+          }));
+          setMissingFields({});
           
+          setPasswordRequirements({
+            length: false,
+            uppercase: false,
+            lowercase: false,
+            number: false,
+            special: false,
+          });
+          setIsCompanyNameReadOnly(true);
+          setIsShortCompanyNameReadOnly(true);
+          setIsCompanyEmailReadOnly(true);
+          setIsPhoneReadOnly(true);
+          setIsPassReadOnly(true);
+          setIsConfirmReadOnly(true);
+          return; // Prevent sign-up if commercial number not exist in the wathq api
+        }
+        else{
+          setUser((prev) => ({ ...prev, CompanyName: isValid })); // Update with fetched name
+          setIsCompanyNameReadOnly(true); // Set CompanyName field to read-only
+          setIsShortCompanyNameReadOnly(false);
+          setIsCompanyEmailReadOnly(false);
+          setIsPhoneReadOnly(false);
+          setIsPassReadOnly(false);
+          setIsConfirmReadOnly(false);
           // Remove CompanyName from missingFields when read-only
           setMissingFields((prev) => {
               const updated = { ...prev };
               delete updated.CompanyName;
               return updated;
           });
-      } else {
-          setUser((prev) => ({ ...prev, CompanyName: '' })); // Clear if not valid
-          setIsCompanyNameReadOnly(false);
-      }
+          setinvalidcommercialMessages((prev) => ({
+            ...prev,
+            invalidcommercial: '',
+          }));
+        }
+         // else {
+      //     setUser((prev) => ({ ...prev, CompanyName: '' })); // Clear if not valid
+      //     setIsCompanyNameReadOnly(false);
+      // }
       }
 
     } else if (name === 'CompanyEmail') {
@@ -155,7 +227,7 @@ const SignUp = () => {
     }
   
     // Reset validation message if the field is empty and not already handled above
-    if (value.trim() === '' && !['Password', 'commercialNumber', 'CompanyEmail'].includes(name)) {
+    if (value.trim() === '' && !['Password', 'commercialNumber', 'CompanyEmail','ShortCompanyName'].includes(name)) {
       setValidationMessages((prev) => ({ ...prev, [`${name}Error`]: '' }));
     }
   };
@@ -242,11 +314,9 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // Log validation messages to debug
-    console.log('Validation Messages:', validationMessages);
   
      // Check for empty required fields
-     const requiredFields = ['commercialNumber', 'CompanyName', 'CompanyEmail', 'PhoneNumber', 'Password', 'confirmPassword'];
+     const requiredFields = ['commercialNumber', 'CompanyName', 'CompanyEmail', 'PhoneNumber', 'Password', 'confirmPassword','ShortCompanyName'];
      const newMissingFields = {};
  
      requiredFields.forEach((field) => {
@@ -291,14 +361,14 @@ const SignUp = () => {
 
     try {
       // Check if the commercialNumber invalid
-      const isValid = await fetchRegistrationInfo(user.commercialNumber);
-      if(isValid===0){
-        setPopupMessage("The commercial number is invalid.");
-        setPopupImage(errorImage);
-        setPopupVisible(true);
-        setLoading(false);
-        return; // Prevent sign-up if commercial number not exist in the wathq api
-      }
+      // const isValid = await fetchRegistrationInfo(user.commercialNumber);
+      // if(isValid===0){
+      //   setPopupMessage("The commercial number is invalid.");
+      //   setPopupImage(errorImage);
+      //   setPopupVisible(true);
+      //   setLoading(false);
+      //   return; // Prevent sign-up if commercial number not exist in the wathq api
+      // }
       
       
 
@@ -414,7 +484,15 @@ const SignUp = () => {
   //     return '';
   //   };
     
-
+  const handleBlur = (fieldName) => {
+    if (fieldName === 'commercialNumber' && invalidcommercialMessages.invalidcommercial) {
+      setPopupMessage(invalidcommercialMessages.invalidcommercial);
+      setPopupImage(errorImage);
+      setPopupVisible(true);
+    }
+  };
+  
+  
 
 
 
@@ -449,6 +527,7 @@ const SignUp = () => {
               type="text"
               name="commercialNumber"
               value={user.commercialNumber}
+              onBlur={() => handleBlur('commercialNumber')}
               onChange={handleChange}
 
               required
@@ -456,6 +535,7 @@ const SignUp = () => {
             />
             {missingFields['commercialNumber'] && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields['commercialNumber']}</p>}
             {validationMessages.commercialNumberError && <p style={{ color: 'red', marginTop: '3px'}}>{validationMessages.commercialNumberError}</p>}
+            {invalidcommercialMessages.invalidcommercial && <p style={{ color: 'red', marginTop: '3px' }}>{invalidcommercialMessages.invalidcommercial}</p>}
           </div>
 
           <div className={s.profileField}>
@@ -479,7 +559,10 @@ const SignUp = () => {
               name="ShortCompanyName"
               onChange={handleChange}
               value={user.ShortCompanyName}
+              readOnly={isShortCompanyNameReadOnly}
+              required
             />
+            {missingFields['ShortCompanyName'] && <p style={{ color: 'red' , marginTop: '3px'}}>{missingFields['ShortCompanyName']}</p>}
           </div>
 
           <div className={s.profileField}>
@@ -491,6 +574,7 @@ const SignUp = () => {
               value={`${user.PhoneNumber}`}
               onChange={handlePhoneNumberChange}
               pattern="\+9665\d{8}"
+              readOnly={isPhoneReadOnly}
               required
               //style={{ borderColor: getBorderColor('PhoneNumber') }}
             />
@@ -504,6 +588,7 @@ const SignUp = () => {
               name="CompanyEmail"
               value={user.CompanyEmail}
               onChange={handleChange}
+              readOnly={isCompanyEmailReadOnly}
               required
               //style={{ borderColor: getBorderColor('CompanyEmail') }}
             />
@@ -519,6 +604,7 @@ const SignUp = () => {
               name="Password"
               value={user.Password}
               onChange={handleChange}
+              readOnly={isPassReadOnly}
               required
               //style={{ borderColor: getBorderColor('Password'), paddingRight: '30px' }}
             />
@@ -559,6 +645,7 @@ const SignUp = () => {
               name="confirmPassword"
               value={user.confirmPassword}
               onChange={handleChange}
+              readOnly={isConfirmReadOnly}
               required
               //style={{ borderColor: getBorderColor('confirmPassword') }}
             />

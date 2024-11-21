@@ -61,11 +61,12 @@ export const CrashNotification = () => {
           const drivers = driverSnapshot.docs.map((doc) => ({
             id: doc.data().DriverID,
             name: `${doc.data().Fname} ${doc.data().Lname}`,
+            PhoneNumber: doc.data().PhoneNumber,
           }));
 
           // Aggregate drivers under the current company
           updatedDrivers[companyName] = drivers.reduce((acc, driver) => {
-            acc[driver.id] = driver.name;
+            acc[driver.id] = { name: driver.name, PhoneNumber: driver.PhoneNumber };
             return acc;
           }, {});
 
@@ -125,7 +126,7 @@ export const CrashNotification = () => {
     }
   };
   
-
+ 
 
   // Setup crash listeners
   const setupCrashListeners = (drivers, companyName, showNotifications) => {
@@ -159,13 +160,15 @@ export const CrashNotification = () => {
       const unsubscribeCrash = onSnapshot(crashQuery, (snapshot) => {
         snapshot.docs.forEach(async (crashDoc) => {
           const crash = { id: crashDoc.id, ...crashDoc.data() };
-          const driverName = drivers[crash.driverID] || 'Unknown';
+          const driver = drivers[crash.driverID] || { name: 'Unknown', phoneNumber: 'Unavailable' };
+          const date=formatDate(crash.time);
+          const time= new Date(crash.time * 1000).toLocaleTimeString();
           console.log('crash:',crash);
           // Show notification only if employer is logged in
           if (showNotifications && employerUID) {
             notification.open({
               message: <strong>Crash Alert</strong>,
-              description: `Crash detected for driver ${driverName} (ID: ${crash.driverID}).`,
+              description: `Crash detected for driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.. Please call the driver to confirm the crash and provide necessary support.`,
               placement: 'topRight',
               closeIcon: null, 
               duration: 20,
@@ -177,6 +180,7 @@ export const CrashNotification = () => {
                },
             });
           }
+          
 
           // Mark crash as handled globally
           const crashDocRef = doc(db, 'Crash', crash.id);
@@ -194,5 +198,32 @@ export const CrashNotification = () => {
     crashListeners.current = {};
   };
 
-  return null; // No UI needed, as notifications are displayed as pop-ups
+  const formatDate = (time) => {
+    const date = new Date(time * 1000);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
+  };
+
+   // Clear notification when clicking outside
+   useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationElement = document.querySelector('.custom-notification');
+      if (notificationElement && !notificationElement.contains(event.target)) {
+        notification.destroy();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+// Clear notification when clicking outside
+
+
+return null;
 };
