@@ -271,7 +271,7 @@ const EditDriver = () => {
     const phoneQuery = query(
       collection(db, 'Driver'),
       where('PhoneNumber', '==', phoneNumber),
-      where('__name__', '!=', currentDriverId), // Use the document ID to exclude the current driver
+      where('UID', '!=', currentDriverId), // Use the document ID to exclude the current driver
       where('CompanyName', '==', driverData.CompanyName)
     );
   
