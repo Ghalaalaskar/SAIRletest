@@ -265,7 +265,7 @@ Motorcycle Speed</h3>
         <p style={{fontSize:'18px', marginLeft:'45px'}}>{currentViolation.price} SAR</p>
         {(currentViolation.count30 > 0 || currentViolation.count50 > 0) && (
   <p style={{ fontSize: '15px', marginLeft: '45px', color: '#FF0000' }}>
-    This is a reckless violation. It's the driver's <strong>{getOrdinal(currentViolation.count30 > 0 ? currentViolation.count30 : currentViolation.count50)}</strong> time committingthis offense. <br/>  As a result, the violation amount has been increased.
+   According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong>{getOrdinal(currentViolation.count30 > 0 ? currentViolation.count30 : currentViolation.count50)}</strong> offense. <br/>  As a result, the penalty amount has been increased.
   </p>
 )}
         </div>
