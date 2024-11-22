@@ -21,11 +21,17 @@ const Header = ({ active }) => {
 
    ///ABOUT RED CIRCULE VISIBILITY
    const [isFirstLogin, setIsFirstLogin] = useState(false);
-   const [hasNewCrashes, setHasNewCrashes] = useState(false); // Badge visibility
-   const [storedCrashIds, setStoredCrashIds] = useState(() => {
+   const [hasNewCrashes, setHasNewCrashes] = useState(() => {
+    const saved = localStorage.getItem("hasNewCrashes");
+    return saved ? JSON.parse(saved) : false; // Default to false if not saved
+  });
+     const [storedCrashIds, setStoredCrashIds] = useState(() => {
     const saved = localStorage.getItem("crashIds");
     return saved ? JSON.parse(saved) : []; // Parse JSON if found, else initialize as an empty array
   });
+  const [refreshKey, setRefreshKey] = useState(0);
+
+
     ///ABOUT RED CIRCULE VISIBILITY
 
 
@@ -52,23 +58,30 @@ const Header = ({ active }) => {
   }, [shortCompanyName, setShortCompanyName]);
 
 
-  useEffect(() => {
-    // Check if this is the first login
-    const savedCrashIds = localStorage.getItem("crashIds");
-
-    if (!savedCrashIds) {
-      // No crash IDs found in localStorage, mark as first login
-      console.log("First login detected: Initializing crash IDs");
-      setIsFirstLogin(true); // Mark first login
-      localStorage.setItem("crashIds", JSON.stringify([])); // Initialize crash IDs in localStorage
-    }
-  }, []);
-
   // useEffect(() => {
-  //   // Update localStorage whenever storedCrashIds changes
-  //   localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
-  // }, [storedCrashIds]);
+  //   // Check if this is the first login
+  //   const savedCrashIds = localStorage.getItem("crashIds");
 
+  //   if (!savedCrashIds) {
+  //     // No crash IDs found in localStorage, mark as first login
+  //     console.log("First login detected: Initializing crash IDs");
+  //     setIsFirstLogin(true); // Mark first login
+  //     localStorage.setItem("crashIds", JSON.stringify([])); // Initialize crash IDs in localStorage
+  //   }
+  // }, []);
+ 
+
+  useEffect(() => {
+    console.log('here when');
+    localStorage.setItem("hasNewCrashes", JSON.stringify(hasNewCrashes));
+  }, [hasNewCrashes]);
+
+  useEffect(() => {
+    // Update localStorage whenever storedCrashIds changes
+    localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
+  }, [storedCrashIds]);
+
+  
   // Fetch drivers and crashes based on employer UID and company name
   const fetchDriversAndCrashes = useCallback(async () => {
     const employerUID = sessionStorage.getItem('employerUID');
@@ -138,9 +151,11 @@ const Header = ({ active }) => {
         if (isNewCrash) {
           console.log("New crashes detected!");
           const updatedCrashIds = [...new Set([...storedCrashIds, ...newCrashIds])]; // Merge arrays without duplicates
-          localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
           setStoredCrashIds(updatedCrashIds); // Update state
           setHasNewCrashes(true);
+          localStorage.setItem("hasNewCrashes", JSON.stringify(true)); // Persist in localStorage
+          localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
+
         }
       }, []);
       
@@ -155,27 +170,40 @@ const Header = ({ active }) => {
   // Update crash as read and navigate to details page
   const handleNotificationClick = async (crash) => {
     try {
-      navigate(`/crash/general/${crash.id}`);
+      
       await updateDoc(doc(db, "Crash", crash.id), { isRead: true });
+
       console.log('h1',storedCrashIds);
       console.log(crash.id);
       const updatedCrashIds = storedCrashIds.filter((id) => id !== crash.id);
-      localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
       setStoredCrashIds(updatedCrashIds);
       console.log('handle',storedCrashIds);
+      console.log("Setting hasNewCrashes to false after crash click");
       setHasNewCrashes(false);
+
+      localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
+      localStorage.setItem("hasNewCrashes", JSON.stringify(false)); 
+
+
+      navigate(`/crash/general/${crash.id}`);
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
+  useEffect(() => {
+    console.log('hasNewCrashes updated:', hasNewCrashes);
+  }, [hasNewCrashes, refreshKey]); // Add refreshKey as a dependency
 
+  
   
 
   useEffect(() => {
     fetchDriversAndCrashes();
   }, [fetchDriversAndCrashes]);
 
+  
 
+  
   const formatDate = (time) => {
     const date = new Date(time * 1000);
     const year = date.getFullYear();
@@ -209,6 +237,7 @@ const Header = ({ active }) => {
       sessionStorage.removeItem('ShortCompanyName');
       sessionStorage.removeItem('employerUID');
       localStorage.removeItem('crashIds');
+      localStorage.removeItem('hasNewCrashes');
       window.dispatchEvent(new Event('storage')); // Notify other components
       // Navigate to the login page
       navigate('/');

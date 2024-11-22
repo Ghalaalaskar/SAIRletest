@@ -47,6 +47,12 @@ const VMotorcycle  = () => {
       align: 'center',
     },
     {
+      title: 'Driver ID',
+      dataIndex: 'driverID',
+      key: 'driverID',
+      align: 'center',
+    },
+    {
       title: 'Street Speed',
       dataIndex: 'streetMaxSpeed',
       key: 'streetMaxSpeed',
