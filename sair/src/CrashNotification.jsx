@@ -168,7 +168,7 @@ export const CrashNotification = () => {
           if (showNotifications && employerUID) {
             notification.open({
               message: <strong>Crash Alert</strong>,
-              description: `Crash detected for driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.. Please call the driver to confirm the crash and provide necessary support.`,
+              description: `Crash detected for driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}. Please call the driver to confirm the crash and provide necessary support.`,
               placement: 'topRight',
               closeIcon: null, 
               duration: 20,
