@@ -44,7 +44,10 @@ const ViolationList = () => {
       const driverIDs = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
+        driverMap[data.DriverID] = {
+          name: `${data.Fname} ${data.Lname}`,
+          companyName: data.CompanyName, // Add companyName to the driver data
+        };
         driverIDs.push(data.DriverID);
       });
       setDrivers(driverMap);
@@ -101,13 +104,19 @@ const ViolationList = () => {
     return () => unsubscribe();
   };
 
+  //For Comapny name; since its arabic
+  const normalizeText = (text) => {
+    return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
-    const driverName = drivers[violation.driverID] || '  ';
+    const driverName = drivers[violation.driverID]?.name || '  ';
+    const companyName = drivers[violation.driverID]?.CompanyName || '  ';
     const licensePlate = motorcycles[violation.violationID] || '  '; // Match with violationID
 
     console.log("Checking Violation:", violation);
-    console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
+    //console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
 
     let violationDate = '';
     if (violation.time) {
@@ -115,7 +124,8 @@ const ViolationList = () => {
     }
 
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    normalizeText(companyName).includes(normalizeText(searchQuery));
+    //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesSearchDate = searchDate ? violationDate === searchDate : true;
 
@@ -136,7 +146,13 @@ const ViolationList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || '   ',
+      render: (text, record) => drivers[record.driverID]?.name || '   ',
+    },
+    {
+      title: 'Company Name',
+      key: 'CompanyName',
+      align: 'center',
+      render: (text, record) => drivers[record.driverID]?.companyName || '   ',
     },
     {
       title: 'Motorcycle License Plate',
@@ -181,7 +197,7 @@ const ViolationList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver Name or License Plate"
+                  placeholder="Search by Driver Name or Company Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '280px' }}
