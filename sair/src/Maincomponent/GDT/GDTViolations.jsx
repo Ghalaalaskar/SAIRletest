@@ -36,7 +36,7 @@ const ViolationList = () => {
   const fetchDrivers = (companyName) => {
     const driverCollection = query(
       collection(db, 'Driver'),
-      where('CompanyName', '==', companyName)
+      //where('CompanyName', '==', companyName)
     );
 
     const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
@@ -46,7 +46,7 @@ const ViolationList = () => {
         const data = doc.data();
         driverMap[data.DriverID] = {
           name: `${data.Fname} ${data.Lname}`,
-          companyName: data.CompanyName, // Add companyName to the driver data
+          companyName: data.CompanyName,
         };
         driverIDs.push(data.DriverID);
       });
@@ -112,11 +112,8 @@ const ViolationList = () => {
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
     const driverName = drivers[violation.driverID]?.name || '  ';
-    const companyName = drivers[violation.driverID]?.CompanyName || '  ';
-    const licensePlate = motorcycles[violation.violationID] || '  '; // Match with violationID
-
-    console.log("Checking Violation:", violation);
-    //console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
+    const companyName = drivers[violation.driverID]?.companyName || '  '; 
+    const licensePlate = motorcycles[violation.violationID] || '  ';
 
     let violationDate = '';
     if (violation.time) {
@@ -124,9 +121,7 @@ const ViolationList = () => {
     }
 
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    normalizeText(companyName).includes(normalizeText(searchQuery));
-    //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-
+                              normalizeText(companyName).includes(normalizeText(searchQuery));
     const matchesSearchDate = searchDate ? violationDate === searchDate : true;
 
     return matchesSearchQuery && matchesSearchDate;
