@@ -249,7 +249,7 @@ const CrashList = () => {
             pagination={{ pageSize: 5 }}
             onRow={(record) => ({
               style: {
-                backgroundColor: !viewedCrashes[record.id] ? '#d4edda' : 'transparent',
+                backgroundColor: !viewedCrashes[record.id] ? '#f0f8f0' : 'transparent',
               },
             })}
           />

@@ -232,7 +232,7 @@ const ViolationList = () => {
     rowKey="id" // Unique identifier for rows
     onRow={(record) => ({
       style: {
-        backgroundColor: !viewedViolations[record.id] ? '#d4edda' : 'transparent',
+        backgroundColor: !viewedViolations[record.id] ? '#f0f8f0' : 'transparent',
       },
     })}
   />
