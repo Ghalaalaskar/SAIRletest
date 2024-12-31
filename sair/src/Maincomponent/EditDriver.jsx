@@ -215,19 +215,25 @@ const EditDriver = () => {
       }
 
       // Step 4: Update the driver document
-      const driverDocRef = doc(db, 'Driver', driverData.UID); // Use the new DriverID
+      const driversRef = collection(db, "Driver");
+      const driverQuery = query(driversRef, where("UID", "==", driverData.UID));
 
       const updatedData = {
         ...driverData,
         ...values,
         PhoneNumber: values.PhoneNumber.startsWith('+966') ? values.PhoneNumber : `+966${values.PhoneNumber}`,
-        GPSnumber: newGPS === 'None' ? null : newGPS
-      };
+        GPSnumber: newGPS === 'None' ? null : newGPS,
+        available:newGPS === 'None' ? true : false
+      };      
+      const querySnapshot = await getDocs(driverQuery);
 
-      console.log(' driverDocRef:', driverDocRef);
-      console.log('Updated driver data:', updatedData);
+      const driverDocRef = querySnapshot.docs[0].ref;
 
-      await setDoc(driverDocRef, updatedData);
+
+      setDriverData(updatedData);
+      setOldDriverData(updatedData);
+
+      await updateDoc(driverDocRef, updatedData);
       showNotification("Driver updated successfully!", true);
 
       // Redirect to Driver List after a short delay
@@ -271,7 +277,7 @@ const EditDriver = () => {
     const phoneQuery = query(
       collection(db, 'Driver'),
       where('PhoneNumber', '==', phoneNumber),
-      where('UID', '!=', currentDriverId), // Use the document ID to exclude the current driver
+      where('UID', '!=', currentDriverId), 
       where('CompanyName', '==', driverData.CompanyName)
     );
   

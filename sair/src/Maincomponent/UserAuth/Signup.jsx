@@ -66,7 +66,7 @@ const SignUp = () => {
 
   const fetchRegistrationInfo = async (commercialnumber) => {
     try {
-       const API_KEY='vgh6MBYzODlGM4f69bs00ukexqIH3edV';
+       const API_KEY='JKTStpvvTxlb9fL0qWXeK0Uj7iMBAzmC';
         const response = await axios.get(
           `https://api.wathq.sa/v5/commercialregistration/info/${commercialnumber}`, 
             {
@@ -415,6 +415,7 @@ const SignUp = () => {
       setPopupMessage("You have successfully signed up! Please verify your email before logging in.");
       setPopupImage(successImage);
       setPopupVisible(true);
+      localStorage.setItem("crashIds", JSON.stringify([])); //not sure
       setTimeout(() => {
         setPopupVisible(false);
         navigate('/');

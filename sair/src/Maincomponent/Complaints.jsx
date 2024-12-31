@@ -110,6 +110,7 @@ const ComplaintList = () => {
     return matchesStatus && matchesDate;
   });
 
+
   const columns = [
     {
       title: 'Complaint ID',
@@ -142,6 +143,13 @@ const ComplaintList = () => {
           </span>
         );
       },
+    },
+    {
+      title: 'Date',
+      key: 'date',
+      align: 'center',
+      render: (text, record) => 
+        record.DateTime ? new Date(record.DateTime.seconds * 1000).toLocaleDateString() : '',
     },
     {
       title: 'Details',

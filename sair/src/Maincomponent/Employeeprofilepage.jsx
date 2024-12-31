@@ -208,8 +208,8 @@ const Profile = () => {
         currentPasswordError: '',
         currentPasswordsuccess: '',
       }));
-      
     }
+    
     else if (e.target.value.length >= 8) {
       console.log(e.target.value.length);
       const auth = getAuth();
@@ -275,7 +275,7 @@ const Profile = () => {
         newMissingFields.confirmNewPassword = 'Please confirm your new password';
       }
     }
-  
+
     // Check for other required fields like CompanyName and PhoneNumber
     ['CompanyName', 'PhoneNumber'].forEach((field) => {
       if (!Employer[field] || (field === 'PhoneNumber' && Employer.PhoneNumber === '+966')) {
@@ -355,6 +355,16 @@ const Profile = () => {
       setShowCurrentPassword(false);
       setShowNewPassword(false);
       setShowConfirmNewPassword(false);
+      setCurrentPassValid(false);//new
+
+      setPasswordRequirements({
+        length: false,
+        uppercase: false,
+        lowercase: false,
+        number: false,
+        special: false,
+      });
+      
       setEmployer((prev) => ({
         ...prev,
         currentPassword: "",
@@ -379,6 +389,7 @@ const Profile = () => {
     setShowCurrentPassword(false);
     setShowNewPassword(false);
     setShowConfirmNewPassword(false);
+    setCurrentPassValid(false);
     // Fetch the latest data from the database
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {

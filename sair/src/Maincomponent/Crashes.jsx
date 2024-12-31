@@ -16,8 +16,13 @@ const CrashList = () => {
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState(''); // Single search input
-
   const employerUID = sessionStorage.getItem('employerUID');
+
+ // State to track viewed crashes
+ const [viewedCrashes, setViewedCrashes] = useState(() => {
+  const storedViewedCrashes = sessionStorage.getItem('viewedCrashes');
+  return storedViewedCrashes ? JSON.parse(storedViewedCrashes) : {};
+});
 
   useEffect(() => {
     const fetchDriversAndCrashes = async () => {
@@ -135,6 +140,21 @@ const CrashList = () => {
       return matchesSearchQuery && matchesSearchDate;
     });
 
+    const formatDate = (time) => {
+      const date = new Date(time * 1000); // Assuming timestamp is in seconds
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+      const day = date.getDate().toString().padStart(2, '0'); // Days are 1-based
+      return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
+    };
+
+    const handleViewDetails = (record) => {
+      const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
+      setViewedCrashes(updatedViewedCrashes);
+      sessionStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
+  
+      navigate(`/crash/general/${record.id}`);
+    };
 
   const columns = [
     {
@@ -169,11 +189,17 @@ const CrashList = () => {
       },
     },
     {
+      title: 'Date',
+      key: 'date',
+      align: 'center',
+      render: (text, record) => formatDate(record.time),
+    },
+    {
       title: 'Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (
-        <Link to={`/crash/general/${record.id}`}>
+        <Link to={`/crash/general/${record.id}`} onClick={() => handleViewDetails(record)}>
           <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
         </Link>
       ),
@@ -221,6 +247,11 @@ const CrashList = () => {
             dataSource={filteredCrashes}
             rowKey="id"
             pagination={{ pageSize: 5 }}
+            onRow={(record) => ({
+              style: {
+                backgroundColor: !viewedCrashes[record.id] ? '#d4edda' : 'transparent',
+              },
+            })}
           />
         </div>
       </main>

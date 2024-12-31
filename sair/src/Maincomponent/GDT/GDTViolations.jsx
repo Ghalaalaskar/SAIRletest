@@ -15,10 +15,6 @@ const ViolationList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
-  const [viewedViolations, setViewedViolations] = useState(() => {
-    const storedViewedViolations = sessionStorage.getItem('viewedViolations');
-    return storedViewedViolations ? JSON.parse(storedViewedViolations) : {};
-  });  
   const employerUID = sessionStorage.getItem('employerUID');
 
   useEffect(() => {
@@ -40,7 +36,7 @@ const ViolationList = () => {
   const fetchDrivers = (companyName) => {
     const driverCollection = query(
       collection(db, 'Driver'),
-      where('CompanyName', '==', companyName)
+      //where('CompanyName', '==', companyName)
     );
 
     const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
@@ -48,7 +44,10 @@ const ViolationList = () => {
       const driverIDs = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
+        driverMap[data.DriverID] = {
+          name: `${data.Fname} ${data.Lname}`,
+          companyName: data.CompanyName,
+        };
         driverIDs.push(data.DriverID);
       });
       setDrivers(driverMap);
@@ -105,13 +104,16 @@ const ViolationList = () => {
     return () => unsubscribe();
   };
 
+  //For Comapny name; since its arabic
+  const normalizeText = (text) => {
+    return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
-    const driverName = drivers[violation.driverID] || '  ';
-    const licensePlate = motorcycles[violation.violationID] || '  '; // Match with violationID
-
-    console.log("Checking Violation:", violation);
-    console.log("License Plate Found for Violation ID:", violation.violationID, "->", licensePlate);
+    const driverName = drivers[violation.driverID]?.name || '  ';
+    const companyName = drivers[violation.driverID]?.companyName || '  '; 
+    const licensePlate = motorcycles[violation.violationID] || '  ';
 
     let violationDate = '';
     if (violation.time) {
@@ -119,8 +121,7 @@ const ViolationList = () => {
     }
 
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-
+                              normalizeText(companyName).includes(normalizeText(searchQuery));
     const matchesSearchDate = searchDate ? violationDate === searchDate : true;
 
     return matchesSearchQuery && matchesSearchDate;
@@ -128,25 +129,6 @@ const ViolationList = () => {
     // Sort by time in descending order (newest first)
     return (b.time || 0) - (a.time || 0);
   });
-
-    // Function to format the date
-    const formatDate = (time) => {
-      const date = new Date(time * 1000); // Assuming timestamp is in seconds
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
-      const day = date.getDate().toString().padStart(2, '0'); // Days are 1-based
-      return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
-    };
-
-    const handleViewDetails = (record) => {
-      const updatedViewedViolations = { ...viewedViolations, [record.id]: true };
-      setViewedViolations(updatedViewedViolations);
-      sessionStorage.setItem('viewedViolations', JSON.stringify(updatedViewedViolations));
-      
-      // Navigate after updating the state
-      navigate(`/violation/general/${record.id}`);
-    };
-    console.log("Session Storage:", sessionStorage.getItem('viewedViolations'));
 
   const columns = [
     {
@@ -159,7 +141,13 @@ const ViolationList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || '   ',
+      render: (text, record) => drivers[record.driverID]?.name || '   ',
+    },
+    {
+      title: 'Company Name',
+      key: 'CompanyName',
+      align: 'center',
+      render: (text, record) => drivers[record.driverID]?.companyName || '   ',
     },
     {
       title: 'Motorcycle License Plate',
@@ -174,17 +162,11 @@ const ViolationList = () => {
       align: 'center',
     },
     {
-      title: 'Date',
-      key: 'date',
-      align: 'center',
-      render: (text, record) => formatDate(record.time),
-    },
-    {
       title: 'Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (
-        <Link to={`/violation/general/${record.id}`} onClick={() => handleViewDetails(record)}>
+        <Link to={`/violation/general/${record.id}`}>
           <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
         </Link>
       ),
@@ -210,7 +192,7 @@ const ViolationList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver Name or License Plate"
+                  placeholder="Search by Driver Name or Company Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '280px' }}
@@ -227,17 +209,11 @@ const ViolationList = () => {
           </div>
 
           <Table
-    dataSource={violations} // Your data source
-    columns={columns} // Your columns
-    rowKey="id" // Unique identifier for rows
-    onRow={(record) => ({
-      style: {
-        backgroundColor: !viewedViolations[record.id] ? '#d4edda' : 'transparent',
-      },
-    })}
-  />
-
-          
+            columns={columns}
+            dataSource={filteredViolations}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+          />
         </div>
       </main>
     </>

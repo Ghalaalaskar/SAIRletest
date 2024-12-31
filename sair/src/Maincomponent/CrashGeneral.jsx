@@ -59,7 +59,7 @@ const CrashGeneral = () => {
     }, [crashId]);
   
     const goBack = () => {
-      navigate(-1); // Navigate back to the previous page
+      navigate(-2); // Navigate back to the previous page
     };
   
     const formatDate = (time) => {
@@ -164,11 +164,11 @@ Email</h3>
                   src={crashImage} 
                   alt="Crash Icon" 
                   style={{ 
-                    width: '35px', // Match SVG width
-                    height: '45px', // Match SVG height
+                    width: '30px', // Match SVG width
+                    height: '30px', // Match SVG height
                     marginBottom: '2px', 
                     marginRight: '5px',
-                    marginLeft:'-5px',
+                    marginLeft:'1px',
                     filter: 'invert(22%) sepia(83%) saturate(2157%) hue-rotate(150deg) brightness(95%)' // Adjust filter to approximate #059855
                   }} 
                 />Crash ID</h3>

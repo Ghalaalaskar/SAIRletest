@@ -173,7 +173,8 @@ const DriverList = () => {
             const motorcycleDocRef = motorcycleSnapshot.docs[0].ref;
 
             await updateDoc(motorcycleDocRef, {
-              available: true
+              available: true,
+              DriverID:null
             });
           }
         }
