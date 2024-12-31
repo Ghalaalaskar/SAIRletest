@@ -1,0 +1,2 @@
+sair/dist/Group15_SAIR_website-win32-x64/Group15_SAIR_website.exe filter=lfs diff=lfs merge=lfs -text
+C:/Users/ghala/OneDrive/Desktop/SAIRletest-1/sair/dist/Group15_SAIR_website.exe filter=lfs diff=lfs merge=lfs -text
