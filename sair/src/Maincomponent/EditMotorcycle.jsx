@@ -114,6 +114,9 @@ const EditMotorcycle = () => {
         available: values.DriverID === 'None' ? true : false, // Set availability based on driver assignment
       };
 
+      setMotorcycleData(updatedData);
+      setOldMotorcycleData(updatedData);
+
       // Step 1: Update the previous driver's availability and GPSnumber if a new driver is assigned
       const prevDriverId = oldMotorcycleData.DriverID;
       console.log(
@@ -163,8 +166,6 @@ const EditMotorcycle = () => {
         }
       }
 
-      setMotorcycleData(updatedData);
-      setOldMotorcycleData(updatedData);
       
       showNotification('Motorcycle updated successfully!', true);
       setTimeout(() => {
