@@ -57,7 +57,7 @@ const Profile = () => {
   const [currentPassValid, setCurrentPassValid] = useState(false); // New state for current password validity
   const navigate = useNavigate();
   useEffect(() => {
-    const GDTUID = sessionStorage.getItem('UID');
+    const GDTUID = sessionStorage.getItem('gdtUID');
     if (!GDTUID) {
         console.error('GDTUID is null or undefined');
         setPopupMessage('GDTUID not found, please log in.');
@@ -276,7 +276,7 @@ const Profile = () => {
       }
     }
 
-    // Check for other required fields like CompanyName and PhoneNumber
+    // Check for other required fields like and PhoneNumber
     ['PhoneNumber'].forEach((field) => {
       if (!GDT[field] || (field === 'PhoneNumber' && GDT.PhoneNumber === '+966')) {
         newMissingFields[field] = `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
@@ -465,7 +465,7 @@ const Profile = () => {
       <div class="breadcrumb">
         <a onClick={() => navigate('/GDThome')}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate('/GDT-profile')}>Profile</a>
+        <a onClick={() => navigate('/gdtprofile')}>Profile</a>
       </div>
 <div className={s.forme}>
       <main className={s.container}>
