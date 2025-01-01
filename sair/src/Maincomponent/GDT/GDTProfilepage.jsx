@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../firebase';
+import { db, auth } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, getDoc, where, getDocs, query, collection } from 'firebase/firestore';
-import successImage from '../images/Sucess.png';
-import errorImage from '../images/Error.png';
+import successImage from '../../images/Sucess.png';
+import errorImage from '../../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
-import Header from "./Header" 
 import { Modal } from 'antd';
-import s from "../css/Profile.module.css"
+import s from "../../css/Profile.module.css"
+import Header from './GDTHeader';
 import { useContext } from 'react';
-import '../css/CustomModal.css';
+import '../../css/CustomModal.css';
 
 const Profile = () => {
   const [GDT, setGDT] = useState({
@@ -65,7 +65,7 @@ const Profile = () => {
     }
 
     const fetchGDT = async () => {
-      const GDTUID = sessionStorage.getItem('gdtUID'); // Ensure UID is retrieved
+      const GDTUID = sessionStorage.getItem('gdtUID'); 
       if (!GDTUID) {
           console.error('UID not found in session storage');
           return;
