@@ -21,6 +21,7 @@ const Profile = () => {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
+    isAdmin:'',
   });
 
   const [originalGDTData, setOriginalGDTData] = useState({});
@@ -55,27 +56,41 @@ const Profile = () => {
   });
   const [currentPassValid, setCurrentPassValid] = useState(false); // New state for current password validity
   const navigate = useNavigate();
-
   useEffect(() => {
-    const GDTUID = sessionStorage.getItem('GDTUID');
-    const fetchGDT = async () => {
-      const docRef = doc(db, 'GDT', GDTUID);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setGDT(data);
-        setOriginalGDTData(data); // Store original data for cancel functionality
-      } else {
-        setPopupMessage('GDT not found');
-      }
-    };
+    const GDTUID = sessionStorage.getItem('UID');
+    if (!GDTUID) {
+        console.error('GDTUID is null or undefined');
+        setPopupMessage('GDTUID not found, please log in.');
+        return;
+    }
 
-    fetchGDT();
-  }, []);
+    const fetchGDT = async () => {
+      const GDTUID = sessionStorage.getItem('gdtUID'); // Ensure UID is retrieved
+      if (!GDTUID) {
+          console.error('UID not found in session storage');
+          return;
+      }
+  
+      try {
+          const docRef = doc(db, 'GDT', GDTUID);
+          const docSnap = await getDoc(docRef);
+  
+          if (docSnap.exists()) {
+              console.log('Document data:', docSnap.data());
+          } else {
+              console.error('No such document!');
+          }
+      } catch (error) {
+          console.error('Error fetching document:', error);
+      }
+  };
+  
+  fetchGDT();
+}, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setGDT({ ...GDT, [name]: value });
+ const { name, value } = e.target;
+    setGDT((prev) => ({ ...prev, [name]: value || '' }));
      // Clear the missing field error as soon as the user fills it
      if (value.trim() !== '' && missingFields[name]) {
       console.log(missingFields);
@@ -102,7 +117,7 @@ const Profile = () => {
           lowercase: /[a-z]/.test(value),
           number: /\d/.test(value),
           special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
-        };
+      };
     
         // Update password requirements state
         setPasswordRequirements(updatedRequirements);
@@ -280,7 +295,7 @@ const Profile = () => {
       return;
     }
 
-    const GDTUID = sessionStorage.getItem('GDTUID');
+    const GDTUID = sessionStorage.getItem('gdtUID');
     const docRef = doc(db, 'GDT', GDTUID);
     const currentData = await getDoc(docRef);
 
@@ -367,7 +382,7 @@ const Profile = () => {
 
 
   const handleCancel = async () => {
-    const GDTUID = sessionStorage.getItem('GDTUID');
+    const GDTUID = sessionStorage.getItem('gdtUID');
     const docRef = doc(db, 'GDT', GDTUID);
     setShowCurrentPassword(false);
     setShowNewPassword(false);
@@ -459,15 +474,7 @@ const Profile = () => {
 
           <div className={s.formRow}>
 
-            <div>
-              <label className={s.profileLabel}>ID</label>
-              <input
-                type="text"
-                name="GDT Id"
-                value={Employer.commercialNumber} //Lina change
-                readOnly
-              />
-            </div>
+         
             <div>
               <label className={s.profileLabel}>First Name</label>
               <input
@@ -519,7 +526,7 @@ const Profile = () => {
               <input
                 type="text"
                 name="GDTEmail"
-                value={GDT.CompanyEmail}
+                value={GDT.GDTEmail}
                 onChange={handleChange}
                 disabled={!editMode}
                 readOnly
