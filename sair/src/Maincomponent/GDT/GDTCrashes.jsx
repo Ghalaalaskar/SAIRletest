@@ -20,7 +20,7 @@ const CrashList = () => {
 
  // State to track viewed crashes
  const [viewedCrashes, setViewedCrashes] = useState(() => {
-  const storedViewedCrashes = localStorage.getItem('viewedCrashes');
+  const storedViewedCrashes = sessionStorage.getItem('viewedCrashes');
   return storedViewedCrashes ? JSON.parse(storedViewedCrashes) : {};
 });
 
@@ -42,7 +42,7 @@ const CrashList = () => {
 
   const driverCollection = query(
     collection(db, 'Driver'),
-    where('CompanyName', '==', companyName)
+    //where('CompanyName', '==', companyName)
   );
 
   const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
@@ -53,7 +53,10 @@ const CrashList = () => {
       const data = doc.data();
       if (data.DriverID) {
         driverIds.push(data.DriverID);
-        driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
+        driverMap[data.DriverID] = {
+          name: `${data.Fname} ${data.Lname}`,
+          companyName: data.CompanyName,
+        };
       }
     });
 
@@ -123,18 +126,25 @@ const CrashList = () => {
     fetchDriversAndCrashes();
   }, [employerUID]);
 
+    //For Comapny name; since its arabic
+    const normalizeText = (text) => {
+      return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
   const filteredCrashes =  crashes.filter(crash => crash.Status === 'Confirmed'|| crash.Status === 'Rejected') // Only include Rejected or Confirmed statuses
   .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
   .filter((crash) => {
     const crashDate = crash.time ? new Date(crash.time * 1000).toISOString().split('T')[0] : '';
     const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-    const driverName = drivers[crash.driverID] || ' ';
+    const driverName = drivers[crash.driverID]?.name || ' ';
       const licensePlate = motorcycles[crash.crashID] || ' '; // Use crashID to fetch motorcycle
+      const companyName = drivers[crash.driverID]?.companyName || '  '; 
 
       const matchesSearchQuery = 
         driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+        normalizeText(companyName).includes(normalizeText(searchQuery));
+        //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
 
 
       return matchesSearchQuery && matchesSearchDate;
@@ -151,7 +161,7 @@ const CrashList = () => {
     const handleViewDetails = (record) => {
       const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
       setViewedCrashes(updatedViewedCrashes);
-      localStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
+      sessionStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
   
       navigate(`/crash/general/${record.id}`);
     };
@@ -167,7 +177,13 @@ const CrashList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || '   ',
+      render: (text, record) => drivers[record.driverID]?.name || '   ',
+    },
+    {
+      title: 'Company Name',
+      key: 'CompanyName',
+      align: 'center',
+      render: (text, record) => drivers[record.driverID]?.companyName || '   ',
     },
     {
       title: 'Motorcycle License Plate',
@@ -225,7 +241,7 @@ const CrashList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver Name or License Plate"
+                  placeholder="Search by Driver Name or Company Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: '280px' }}

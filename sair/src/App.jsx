@@ -28,6 +28,13 @@ import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
 import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
 import { CrashNotification } from './CrashNotification';
+import GDTHome from './GDT/GDTHome';
+import GDTViolations from './GDT/GDTViolations';
+import GDTCrashes from './GDT/GDTCrashes';
+import GDTComplaints from './GDT/GDTComplaints';
+import GDTHeatmap from './GDT/GDTHeatmap';
+import GDTStafflist from './GDT/GDTStafflist';
+import GDTDriverlist from './GDT/GDTDriverlist';
 
 function App() {
   useEffect(() => {
@@ -89,6 +96,15 @@ function App() {
         <Route path="/complaint/general/:complaintId" element={<ComplaintGeneral />} />
         <Route path="/motorcycle-details/:motorcycleId" element={<MotorcycleDetails />} />
         <Route path="/motorcycle/:motorcycleId/violations" element={<VMotorcycle />} />
+        <Route path="/gdthome" element={<GDTHome />} />
+        <Route path="/gdtviolations" element={<GDTViolations />} />
+        <Route path="/gdtcrashes" element={<GDTCrashes />} />
+        <Route path="/gdtcomplaints" element={<GDTComplaints />} /> 
+        <Route path="/gdtheatmap" element={<GDTHeatmap />} /> 
+        <Route path="/gdtstafflist" element={<GDTStafflist />} /> 
+        <Route path="/gdtdriverlist" element={<GDTDriverlist />} /> 
+
+
       </Routes>
     </Router>
     </LoadScript>
