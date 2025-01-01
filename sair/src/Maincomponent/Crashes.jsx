@@ -20,7 +20,7 @@ const CrashList = () => {
 
  // State to track viewed crashes
  const [viewedCrashes, setViewedCrashes] = useState(() => {
-  const storedViewedCrashes = sessionStorage.getItem('viewedCrashes');
+  const storedViewedCrashes = localStorage.getItem('viewedCrashes');
   return storedViewedCrashes ? JSON.parse(storedViewedCrashes) : {};
 });
 
@@ -151,7 +151,7 @@ const CrashList = () => {
     const handleViewDetails = (record) => {
       const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
       setViewedCrashes(updatedViewedCrashes);
-      sessionStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
+      localStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
   
       navigate(`/crash/general/${record.id}`);
     };

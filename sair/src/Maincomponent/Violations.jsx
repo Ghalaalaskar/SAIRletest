@@ -16,7 +16,7 @@ const ViolationList = () => {
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
   const [viewedViolations, setViewedViolations] = useState(() => {
-    const storedViewedViolations = sessionStorage.getItem('viewedViolations');
+    const storedViewedViolations = localStorage.getItem('viewedViolations');
     return storedViewedViolations ? JSON.parse(storedViewedViolations) : {};
   });  
   const employerUID = sessionStorage.getItem('employerUID');
@@ -141,7 +141,7 @@ const ViolationList = () => {
     const handleViewDetails = (record) => {
       const updatedViewedViolations = { ...viewedViolations, [record.id]: true };
       setViewedViolations(updatedViewedViolations);
-      sessionStorage.setItem('viewedViolations', JSON.stringify(updatedViewedViolations));
+      localStorage.setItem('viewedViolations', JSON.stringify(updatedViewedViolations));
       
       // Navigate after updating the state
       navigate(`/violation/general/${record.id}`);
