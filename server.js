@@ -549,6 +549,129 @@ const generateCrashId = () => {
     return `2${randomNineDigits}`;
   };
 
+// potential violation function
+
+const processUnits3 = async (units,sessionId) => {
+    for (const unit of units) {
+console.log('potentiaaaaaaaaaaaaaaaaaaaaaaal');
+        const pos = unit.pos; // Position object from Wialon
+        console.log(pos);
+
+        if (pos && unit.lmsg) {
+            const GPSserialnumber = unit.nm; // Get unit name as GPS serial number
+            console.log('gpsnum:', GPSserialnumber);
+
+            const maxSpeed = await fetchMaxSpeed(pos.y, pos.x); // Fetch max speed       90; 
+            console.log('Max speed from API in process method:', maxSpeed);
+
+            if (maxSpeed !== 0) {
+                const driverSpeed = pos.s; // Get the driver's speed     80;
+                console.log('driverspeed:', driverSpeed);
+
+                if (driverSpeed+10 == maxSpeed) {
+                    const driverQuerySnapshot = await db.collection('Driver')
+                        .where('GPSnumber', '==', GPSserialnumber)
+                        .get();
+
+                    if (!driverQuerySnapshot.empty) {
+                        const driverid = driverQuerySnapshot.docs[0].data().DriverID;
+                        console.log('DriverID:', driverid);
+
+                        const motorcycleSnapshot = await db.collection('Motorcycle')
+                                .where('GPSnumber', '==', GPSserialnumber)
+                                .get();
+
+                         if (!motorcycleSnapshot.empty) {
+                            const motorcycleData = motorcycleSnapshot.docs[0].data();
+                            const Brand = motorcycleData.Brand;
+                            const LicensePlate = motorcycleData.LicensePlate;
+                            const Model = motorcycleData.Model;
+                            const MotorcycleID = motorcycleData.MotorcycleID;
+                            const Type = motorcycleData.Type;
+
+                            const PotentialViolationID = generatePotentialViolationId();
+                            const PotentialViolationTime = unit.lmsg.rt; // Real-time timestamp of this violation
+                            console.log('potentialviotime:', PotentialViolationTime);
+
+
+                            const position = { longitude: pos.x, latitude: pos.y };
+
+
+                            const location = await fetchLocationWithGoogleMaps( pos.y, pos.x);
+                            console.log(location);
+
+
+                            // const querySnapshot = await db.collection('PotentialViolation')
+                            // .where('GPSnumber', '==', GPSserialnumber)
+                            // .where('driverID', '==', driverid)
+                            // .orderBy('time', 'desc')
+                            // .get();
+
+                            // if (!querySnapshot.empty) {
+                            //     const lastViolation = querySnapshot.docs[0];
+                               
+                            //         const threeMinutesInSeconds = 3 * 60;
+
+                            //         if (PotentialViolationTime - lastViolation.data().time > threeMinutesInSeconds) {
+                            //            console.log('exceed 5 min.');
+                            //            await storePotentialViolation(PotentialViolationID, driverid, GPSserialnumber, location, position, driverSpeed, maxSpeed, PotentialViolationTime);
+                            //            await storeHistory(PotentialViolationID, driverid, GPSserialnumber, Brand, LicensePlate, Model, MotorcycleID, Type);
+                            //          } 
+                                
+                            // } else {
+                                await storePotentialViolation(PotentialViolationID, driverid, GPSserialnumber, location, position, driverSpeed, maxSpeed, PotentialViolationTime);
+                                await storeHistory(PotentialViolationID, driverid, GPSserialnumber, Brand, LicensePlate, Model, MotorcycleID, Type);
+                                console.log('potential violation for this GPS.');
+                            // }
+
+
+
+                           
+                                
+                            }
+                        
+                    }
+                }
+            }
+        }
+    }
+};
+
+
+const generatePotentialViolationId = () => {
+    const min = 100000000; 
+    const max = 999999999; 
+    const randomNineDigits = Math.floor(Math.random() * (max - min + 1)) + min;
+    
+    return `4${randomNineDigits}`;
+  };
+
+
+  const storePotentialViolation = async (PotentialViolationID, driverid, GPSnumber, location, position, speed, maxSpeed, time) => {
+    try {
+        await db.collection('PotentialViolation').add({
+            PotentialViolationID: PotentialViolationID,
+            driverID: driverid,
+            GPSnumber: GPSnumber,
+            location: location,
+            position: position,
+            driverSpeed: speed,
+            streetMaxSpeed: maxSpeed,
+            time: time,
+            timestamp: admin.firestore.Timestamp.now(),
+        });
+        console.log('Potential Violation stored successfully.');
+    } catch (e) {
+        console.error('Error storing Potential violation:', e);
+        console.log('Failed to store Potential violation.');
+    }
+};
+
+
+
+
+
+
 // Function to monitor Wialon units
 const monitorWialon = async () => {
   try {
@@ -556,6 +679,7 @@ const monitorWialon = async () => {
     const units = await fetchUnits(sessionId);
     processUnits1(units,sessionId);
     processUnits2(units,sessionId);
+    processUnits3(units,sessionId);
   } catch (error) {
     console.error("Error monitoring Wialon:", error.message);
   }
