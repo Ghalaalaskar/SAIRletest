@@ -1,3 +1,4 @@
+/*
 import { useEffect, useState } from "react";
 import {
   doc,
@@ -798,3 +799,4 @@ const CrashGeneral = () => {
 };
 
 export default CrashGeneral;
+*/

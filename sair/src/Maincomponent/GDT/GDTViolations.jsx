@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+/* import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, doc, getDoc, query, where } from 'firebase/firestore';
@@ -221,3 +221,4 @@ const ViolationList = () => {
 };
 
 export default ViolationList;
+*/

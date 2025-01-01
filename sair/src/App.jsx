@@ -28,13 +28,13 @@ import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
 import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
 import { CrashNotification } from './CrashNotification';
-import GDTHome from './GDT/GDTHome';
-import GDTViolations from './GDT/GDTViolations';
-import GDTCrashes from './GDT/GDTCrashes';
-import GDTComplaints from './GDT/GDTComplaints';
-import GDTHeatmap from './GDT/GDTHeatmap';
-import GDTStafflist from './GDT/GDTStafflist';
-import GDTDriverlist from './GDT/GDTDriverlist';
+import GDTHome from './Maincomponent/GDT/GDTHome';
+import GDTViolations from './Maincomponent/GDT/GDTViolations';
+import GDTCrashes from './Maincomponent/GDT/GDTCrashes';
+import GDTComplaints from './Maincomponent/GDT/GDTComplaints';
+import GDTHeatmap from './Maincomponent/GDT/GDTHeatmap';
+import GDTStafflist from './Maincomponent/GDT/GDTStafflist';
+import GDTDriverlist from './Maincomponent/GDT/GDTDriverlist';
 
 function App() {
   useEffect(() => {

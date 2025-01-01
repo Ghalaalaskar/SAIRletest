@@ -159,12 +159,12 @@ if (Object.keys(newMissingFields).length > 0) {
             const isAdmin = querySnapshot.docs[0].data().isAdmin;
             if(isAdmin){
               setTimeout(() => {
-                navigate('/GDTAdmin-home');
+                navigate('/gdthome');
               }, 1500);
               }
             else{
               setTimeout(() => {
-                navigate('/GDTStaff-home');
+                navigate('/gdthome');
               }, 1500);
             }
             

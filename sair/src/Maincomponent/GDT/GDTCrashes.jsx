@@ -1,3 +1,4 @@
+/*
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { Link, useNavigate } from 'react-router-dom';
@@ -276,3 +277,4 @@ const CrashList = () => {
 };
 
 export default CrashList;
+*/
