@@ -6,6 +6,7 @@ import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
+import Header from "./GDTHeader" 
 import { Modal } from 'antd';
 import s from "../../css/Profile.module.css"
 import Header from './GDTHeader';
