@@ -134,10 +134,10 @@ if (Object.keys(newMissingFields).length > 0) {
       const auth = getAuth();
       let userFound = false;
 
-      if (role === 'gdtAdmin' || role === 'gdtStaff') {
+      if (role === 'gdt' ) {
         const q = query(
           collection(db, 'GDT'),
-          where('PhoneNumber', '==', phoneNumber)
+          where('GDTEmail', '==', email)
         );
         const querySnapshot = await getDocs(q);
 
@@ -145,40 +145,46 @@ if (Object.keys(newMissingFields).length > 0) {
           try {
             const userCredential = await signInWithEmailAndPassword(
               auth,
-              phoneNumber,
+              email,
               password
             );
             const user = userCredential.user;
 
-            // Check if the user's email is verified
-            if (!user.emailVerified) {
-              setPopupMessage('Please verify your email before logging in.');
-              setPopupImage(errorImage);
-              setPopupVisible(true);
-              return;
-            }
 
-            // If the email is verified, proceed with login
+            //proceed with login
             userFound = true;
             setPopupMessage('Login successful!');
             setPopupImage(successImage);
             setPopupVisible(true);
-            setTimeout(() => {
-              navigate(
-                role === 'gdtAdmin' ? '/Adminhomepage' : '/Staffhomepage'
-              );
-            }, 1500);
+            const isAdmin = querySnapshot.docs[0].data().isAdmin;
+            if(isAdmin){
+              setTimeout(() => {
+                navigate('/GDTAdmin-home');
+              }, 1500);
+              }
+            else{
+              setTimeout(() => {
+                navigate('/GDTStaff-home');
+              }, 1500);
+            }
+            
           } catch (error) {
-            setPopupMessage('Invalid password for Admin/Staff.');
+            setPopupMessage('Invalid email or password.');
             setPopupImage(errorImage);
             setPopupVisible(true);
           }
         } else {
-          setPopupMessage('Admin/Staff user not found.');
+          setPopupMessage('Invalid email or password.');
           setPopupImage(errorImage);
           setPopupVisible(true);
         }
       }
+
+
+
+
+
+
 
       if (role === 'employer') {
         const q = query(
@@ -240,6 +246,13 @@ if (Object.keys(newMissingFields).length > 0) {
     }
   };
 
+
+
+
+
+
+
+
   const handleClosePopup = () => {
     setPopupVisible(false);
   };
@@ -268,11 +281,8 @@ if (Object.keys(newMissingFields).length > 0) {
           <option style={{ fontSize: '15px' }} value=''>
             -- Select a Role --
           </option>
-          <option style={{ fontSize: '15px' }} value='gdtAdmin'>
-            GDT Admin
-          </option>
-          <option style={{ fontSize: '15px' }} value='gdtStaff'>
-            GDT Staff
+          <option style={{ fontSize: '15px' }} value='gdt'>
+            GDT
           </option>
           <option style={{ fontSize: '15px' }} value='employer'>
             Employer
@@ -289,49 +299,68 @@ if (Object.keys(newMissingFields).length > 0) {
         }}
       >
         <Form id='dynamicForm' onSubmit={handleSubmit}>
-          {role === 'gdtAdmin' || role === 'gdtStaff' ? (
+          {role === 'gdt'? (
+            
             <div>
-              <p  >
-                Please fill in the following information to log in to your
-                account.
-              </p>
-              <br />
-              <label htmlFor='phoneNumber'>Phone Number:</label>
-              <br />
-              <input
-                type='text'
-                id='phoneNumber'
-                value={phoneNumber}
-                onChange={(e) =>
-                  setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))
-                }
-              />
-              <span
-                className={`${s.errorMessage} ${errors.phoneStartError ? s.visible : ''
-                  }`}
-              >
-                {errors.phoneStartError}
-              </span>
-              <br />
-              <span
-                className={`${s.errorMessage} ${errors.phoneLengthError ? s.visible : ''
-                  }`}
-              >
-                {errors.phoneLengthError}
-              </span>
-              <br />
-              <label htmlFor='password'>Password:</label>
-              <br />
+            <p style={{marginBottom: '20px'}}
+            >
+              Please fill in the following information to log in to your
+              account.
+            </p>
+            <style>
+              {`
+        input::placeholder {
+          font-size: 14px;
+          padding-left: 15px;
+
+        }
+      `}
+            </style> 
+
+            <input
+              type='email'
+              id='email'
+              name='email'
+              placeholder='Enter your email'
+              value={email}
+              onFocus={(e) => (e.target.placeholder = '')} // Clear placeholder on focus
+              onBlur={(e) =>
+                (e.target.placeholder = 'Enter your email')
+              } // Restore placeholder on blur if empty
+              onChange={handleInputChange}
+            />
+            {missingFields.email && <p style={{ color: 'red', marginTop: '3px',fontSize:'14px' }}>{missingFields.email}</p>}
+            <br />
+            <label htmlFor='password'></label>
+            <br />
+            <div className={s.passwordContainer}>
               <input
                 type={showPassword ? 'text' : 'password'}
-                id='password'
                 name='password'
+                placeholder='Enter your password'
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <br />
+                onFocus={(e) => (e.target.placeholder = '')} // Clear placeholder on focus
+                onBlur={(e) => (e.target.placeholder = 'Enter your password')} // Restore placeholder on blur if empty
+                onChange={handleInputChange}
+              /> 
+              <span
+                onClick={togglePasswordVisibility}
+                className={s.passwordVisibilityToggle}
+              >
+                <i
+                  className={showPassword ? 'far fa-eye' : 'far fa-eye-slash'}
+                ></i>
+              </span>
+              {missingFields.password && <p style={{ color: 'red', marginTop: '3px',fontSize:'14px'}}>{missingFields.password}</p>}
             </div>
+          </div>
+
+
+
+
+
+
+
           ) : role === 'employer' ? (
             <div>
               <p style={{marginBottom: '20px'}}
@@ -392,7 +421,7 @@ if (Object.keys(newMissingFields).length > 0) {
             <a
               className={s.forget}
               id='forget'
-              onClick={() => navigate('/ForgotPassword')}
+              onClick={() =>  navigate(`/ForgotPassword?role=${role}`)}
              
             >
               Forget password?
