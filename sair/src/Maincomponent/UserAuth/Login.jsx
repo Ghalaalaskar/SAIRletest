@@ -153,6 +153,8 @@ if (Object.keys(newMissingFields).length > 0) {
 
             //proceed with login
             userFound = true;
+            const gdtUID = querySnapshot.docs[0].id;
+            sessionStorage.setItem('gdtUID', gdtUID);
             setPopupMessage('Login successful!');
             setPopupImage(successImage);
             setPopupVisible(true);
