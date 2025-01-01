@@ -152,6 +152,9 @@ const EditDriver = () => {
     const previousGPS = oldDriverData.GPSnumber;
     const newGPS = values.GPSnumber;
 
+    setDriverData(values);
+    setOldDriverData(values);
+
     try {
       // Step 1: Check if DriverID has changed
       if (values.DriverID !== originalDriverID) {
@@ -229,9 +232,6 @@ const EditDriver = () => {
 
       const driverDocRef = querySnapshot.docs[0].ref;
 
-
-      setDriverData(updatedData);
-      setOldDriverData(updatedData);
 
       await updateDoc(driverDocRef, updatedData);
       showNotification("Driver updated successfully!", true);
