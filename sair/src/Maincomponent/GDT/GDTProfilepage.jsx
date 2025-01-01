@@ -9,7 +9,6 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import Header from "./GDTHeader" 
 import { Modal } from 'antd';
 import s from "../../css/Profile.module.css"
-import Header from './GDTHeader';
 import { useContext } from 'react';
 import '../../css/CustomModal.css';
 
