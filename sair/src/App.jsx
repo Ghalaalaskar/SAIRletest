@@ -36,6 +36,11 @@ import GDTHeatmap from './Maincomponent/GDT/GDTHeatmap';
 import GDTStafflist from './Maincomponent/GDT/GDTStafflist';
 import GDTDriverlist from './Maincomponent/GDT/GDTDriverlist';
 import GDTProfilepage from './Maincomponent/GDT/GDTProfilepage';
+import GDTAddStaff from './Maincomponent/GDT/GDTAddStaff';
+import GDTEditStaff from './Maincomponent/GDT/GDTEditStaff';
+
+
+
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
@@ -104,7 +109,8 @@ function App() {
         <Route path="/gdtstafflist" element={<GDTStafflist />} /> 
         <Route path="/gdtdriverlist" element={<GDTDriverlist />} /> 
         <Route path="/gdtprofile" element={<GDTProfilepage />} /> 
-
+        <Route path="/gdtaddstaff" element={<GDTAddStaff />} />
+        <Route path="/gdteditstaff/:staffId" element={<GDTEditStaff />} />
       </Routes>
     </Router>
     </LoadScript>
