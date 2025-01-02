@@ -1,4 +1,3 @@
-// src/components/GDTHeader.js
 import { DownOutlined, UserOutlined, BellOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Modal, Button, Badge } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,39 +12,39 @@ import styles from "../../css/BadgeStyles.module.css";
 const GDTHeader = ({ active }) => {
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
+  const [name, setName] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false); // New state for isAdmin
   const [hasNewCrashes, setHasNewCrashes] = useState(() => {
     const saved = localStorage.getItem("hasNewCrashes");
     return saved ? JSON.parse(saved) : false;
   });
-  const [name, setName] = useState(''); // Local state for the user's name
 
   useEffect(() => {
     const fetchName = async () => {
-        const GDTUID = sessionStorage.getItem('GDTUID');
-        console.log('GDTUID:', GDTUID);
-        if (GDTUID) {
-          try {
-            const userDocRef = doc(db, 'GDT', GDTUID);
-            const docSnap = await getDoc(userDocRef);
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              setName(data.Fname || '');
-            } else {
-              console.log('No such document!');
-            }
-          } catch (error) {
-            console.error('Error fetching name:', error);
-          } finally {
-           
+      const GDTUID = sessionStorage.getItem('gdtUID');
+      console.log('GDTUID:', GDTUID);
+      if (GDTUID) {
+        try {
+          const userDocRef = doc(db, 'GDT', GDTUID);
+          const docSnap = await getDoc(userDocRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            console.log('Fetched data:', data);
+            setName(data.Fname || '');
+            setIsAdmin(data.isAdmin || false); // Fetch and set isAdmin
+          } else {
+            console.log('No such document!');
           }
-        } else {
-          console.log('GDTUID is not set in session storage');
+        } catch (error) {
+          console.error('Error fetching name:', error);
         }
-      };
-    
-      fetchName();
-    }, []);
-    
+      } else {
+        console.log('GDTUID is not set in session storage');
+      }
+    };
+    fetchName();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -90,7 +89,7 @@ const GDTHeader = ({ active }) => {
 
   const menu = (
     <Menu>
-      <Menu.Item key='profile' onClick={() => navigate('/employee-profile')}>
+      <Menu.Item key='profile' onClick={() => navigate('/gdtprofile')}>
         Profile
       </Menu.Item>
       <Menu.Item key='logout' onClick={() => setModalVisible(true)} style={{ color: 'red' }}>
@@ -106,7 +105,7 @@ const GDTHeader = ({ active }) => {
     { path: 'gdtcomplaints', label: 'Complaints List' },
     { path: 'gdtdriverlist', label: 'Drivers List' },
     { path: 'gdtheatmap', label: 'Heat-Map' },
-    { path: 'gdtstafflist', label: 'Staff List' },
+    { path: 'gdtstafflist', label: 'Staff List', adminOnly: true },
   ];
 
   return (
@@ -119,11 +118,14 @@ const GDTHeader = ({ active }) => {
         <div className={s.navLinks} id='navLinks'>
           <ul>
             {navItems.map((item) => (
-              <li key={item.path}>
-                <Link className={active === item.path ? s.active : ''} to={`/${item.path}`}>
-                  {item.label}
-                </Link>
-              </li>
+              // Only render if not adminOnly or user is admin
+              (!item.adminOnly || isAdmin) && (
+                <li key={item.path}>
+                  <Link className={active === item.path ? s.active : ''} to={`/${item.path}`}>
+                    {item.label}
+                  </Link>
+                </li>
+              )
             ))}
           </ul>
         </div>
@@ -144,8 +146,7 @@ const GDTHeader = ({ active }) => {
 
           <Dropdown overlay={notificationMenu} trigger={['click']}>
             <Badge dot={hasNewCrashes} className={styles.customBadge}>
-              <BellOutlined
-                className={styles.bellIcon}
+              <BellOutlined className={styles.bellIcon}
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#059855')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'black')}
               />

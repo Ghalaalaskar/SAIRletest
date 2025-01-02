@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../firebase';
+import { db, auth } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, getDoc, where, getDocs, query, collection } from 'firebase/firestore';
-import successImage from '../images/Sucess.png';
-import errorImage from '../images/Error.png';
+import successImage from '../../images/Sucess.png';
+import errorImage from '../../images/Error.png';
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
-import Header from "./Header" 
+import Header from "./GDTHeader" 
 import { Modal } from 'antd';
-import s from "../css/Profile.module.css"
+import s from "../../css/Profile.module.css"
 import { useContext } from 'react';
-import '../css/CustomModal.css';
+import '../../css/CustomModal.css';
 
 const Profile = () => {
   const [GDT, setGDT] = useState({
@@ -57,37 +57,33 @@ const Profile = () => {
   const [currentPassValid, setCurrentPassValid] = useState(false); // New state for current password validity
   const navigate = useNavigate();
   useEffect(() => {
-    const GDTUID = sessionStorage.getItem('UID');
+    const GDTUID = sessionStorage.getItem('gdtUID');
     if (!GDTUID) {
-        console.error('GDTUID is null or undefined');
-        setPopupMessage('GDTUID not found, please log in.');
-        return;
+      console.error('GDTUID is null or undefined');
+      setPopupMessage('GDTUID not found, please log in.');
+      return;
     }
-
+  
     const fetchGDT = async () => {
-      const GDTUID = sessionStorage.getItem('gdtUID'); // Ensure UID is retrieved
-      if (!GDTUID) {
-          console.error('UID not found in session storage');
-          return;
-      }
-  
       try {
-          const docRef = doc(db, 'GDT', GDTUID);
-          const docSnap = await getDoc(docRef);
+        const docRef = doc(db, 'GDT', GDTUID);
+        const docSnap = await getDoc(docRef);
   
-          if (docSnap.exists()) {
-              console.log('Document data:', docSnap.data());
-          } else {
-              console.error('No such document!');
-          }
+        if (docSnap.exists()) {
+          console.log('Document data:', docSnap.data());
+          setGDT(docSnap.data()); // Set the retrieved data to the GDT state
+          setOriginalGDTData(docSnap.data()); // Store the original data
+        } else {
+          console.error('No such document!');
+        }
       } catch (error) {
-          console.error('Error fetching document:', error);
+        console.error('Error fetching document:', error);
       }
-  };
+    };
   
-  fetchGDT();
-}, []);
-
+    fetchGDT();
+  }, []);
+  
   const handleChange = (e) => {
  const { name, value } = e.target;
     setGDT((prev) => ({ ...prev, [name]: value || '' }));
@@ -276,7 +272,7 @@ const Profile = () => {
       }
     }
 
-    // Check for other required fields like CompanyName and PhoneNumber
+    // Check for other required fields like and PhoneNumber
     ['PhoneNumber'].forEach((field) => {
       if (!GDT[field] || (field === 'PhoneNumber' && GDT.PhoneNumber === '+966')) {
         newMissingFields[field] = `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
@@ -465,7 +461,7 @@ const Profile = () => {
       <div class="breadcrumb">
         <a onClick={() => navigate('/GDThome')}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate('/GDT-profile')}>Profile</a>
+        <a onClick={() => navigate('/gdtprofile')}>Profile</a>
       </div>
 <div className={s.forme}>
       <main className={s.container}>
@@ -517,7 +513,17 @@ const Profile = () => {
               {missingFields['PhoneNumber'] && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields['PhoneNumber']}</p>}
               {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
-           
+            <div>
+    <label className={s.profileLabel}>Position</label>
+    <input
+      type="text"
+      name="position"
+      value={GDT.isAdmin ? 'Admin' : 'Staff'}
+      onChange={handleChange}
+      disabled={!editMode}
+      readOnly
+    />
+  </div>
            </div>
 
           <div className={s.formRow}>
