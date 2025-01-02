@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, onSnapshot, doc, getDoc, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import EyeIcon from '../../images/eye.png';
 import { Table } from 'antd';
 import Header from './GDTHeader';
@@ -30,61 +30,57 @@ const ViolationList = () => {
 
   const fetchDrivers = () => {
     const driverCollection = query(collection(db, 'Driver'));
-
+  
     const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
       const driverMap = {};
       const driverIDs = [];
+      const companyPromises = [];
+  
       snapshot.forEach((doc) => {
         const data = doc.data();
         driverMap[data.DriverID] = {
           name: `${data.Fname} ${data.Lname}`,
           companyName: data.CompanyName,
+          shortCompanyName: '', // Placeholder for ShortCompanyName
         };
         driverIDs.push(data.DriverID);
+  
+        // Add a promise to fetch the company details
+        companyPromises.push(
+          fetchCompany(data.CompanyName).then((shortName) => {
+            driverMap[data.DriverID].shortCompanyName = shortName;
+          })
+        );
       });
-
-      setDrivers(driverMap);
-
-      // If there are valid driver IDs, fetch violations
+  
+      // Wait for all company data to be fetched before updating state
+      Promise.all(companyPromises).then(() => {
+        setDrivers(driverMap);
+      });
+  
+      // Fetch violations if there are valid driver IDs
       if (driverIDs.length > 0) {
         fetchViolations(driverIDs);
       } else {
         setViolations([]);
       }
-
-      // Iterate through all driverIDs and fetch company details for each driver
-      driverIDs.forEach((driverID) => {
-        const companyName = driverMap[driverID].companyName;
-        fetchCompany(companyName); // Fetch company info for each driver
-      });
     });
-
+  
     return () => unsubscribe();
   };
 
-  const fetchCompany = (companyName) => {
-    const companyCollection = query(
+  const fetchCompany = async (companyName) => {
+    const companyQuery = query(
       collection(db, 'Employer'),
       where('CompanyName', '==', companyName)
     );
-
-    const unsubscribe = onSnapshot(companyCollection, (snapshot) => {
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const companyData = {
-          CompanyEmail: data.CompanyEmail,
-          CompanyName: data.CompanyName,
-          PhoneNumber: data.PhoneNumber,
-          ShortCompanyName: data.ShortCompanyName,
-          commercialNumber: data.commercialNumber,
-        };
-        console.log("Fetched Company Data:", companyData);
-        console.log("Company Data:", data);
-        // Optionally, you can save company data in state here
-      });
-    });
-
-    return () => unsubscribe();
+  
+    const snapshot = await getDocs(companyQuery);
+    if (!snapshot.empty) {
+      const companyData = snapshot.docs[0].data();
+      return companyData.ShortCompanyName || companyName; // Fallback to full name if short name not available
+    }
+    return companyName; // Return the original name if no match found
   };
 
   const fetchMotorcycles = (violationIDs) => {
@@ -131,14 +127,14 @@ const ViolationList = () => {
   };
 
   //For Comapny name; since its arabic
-  const normalizeText = (text) => {
-    return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  };
+  // const normalizeText = (text) => {
+  //   return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // };
 
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
     const driverName = drivers[violation.driverID]?.name || '  ';
-    const companyName = drivers[violation.driverID]?.companyName || '  '; 
+    const companyName = drivers[violation.driverID]?.shortCompanyName || ' '; 
     const licensePlate = motorcycles[violation.violationID] || '  ';
 
     let violationDate = '';
@@ -147,7 +143,8 @@ const ViolationList = () => {
     }
 
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              normalizeText(companyName).includes(normalizeText(searchQuery));
+    companyName.toLowerCase().includes(searchQuery.toLowerCase());
+    //normalizeText(companyName).includes(normalizeText(searchQuery));
     const matchesSearchDate = searchDate ? violationDate === searchDate : true;
 
     return matchesSearchQuery && matchesSearchDate;
@@ -173,7 +170,7 @@ const ViolationList = () => {
       title: 'Company Name',
       key: 'CompanyName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID]?.companyName || '   ',
+      render: (text, record) =>  drivers[record.driverID]?.shortCompanyName || '   ',
     },
     {
       title: 'Motorcycle License Plate',
@@ -201,7 +198,7 @@ const ViolationList = () => {
 
   return (
     <>
-      <Header active="violations" />
+      <Header active="gdtviolations" />
       <div className="breadcrumb">
         <a onClick={() => navigate('/gdt-home')}>Home</a>
         <span> / </span>

@@ -25,7 +25,7 @@ const ViolationGeneral = () => {
   const { violationId } = useParams();
   const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
-  const [companyName, setCompanyName] = useState("");
+  const [employerDetails, setEmployerDetails] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   useEffect(() => {
@@ -89,28 +89,48 @@ const ViolationGeneral = () => {
       where("DriverID", "==", DriverID)
     );
 
-    // Attach a real-time listener
-    const unsubscribe = onSnapshot(
-      driverCollection,
-      (snapshot) => {
-        if (!snapshot.empty) {
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            setDriverData({
-              name: `${data.Fname} ${data.Lname}`,
-              companyName: data.CompanyName,
-            });
+    const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          setDriverData({
+            name: `${data.Fname} ${data.Lname}`,
+            companyName: data.CompanyName,
           });
-        } else {
-          setDriverData(""); // No driver found, set empty or default data
-        }
-      },
-      (error) => {
-        console.error("Error fetching driver:", error);
+
+          if (data.CompanyName) {
+            fetchEmployerDetails(data.CompanyName);
+          }
+        });
+      } else {
+        setDriverData("");
       }
+    });
+
+    return unsubscribe;
+  };
+
+  const fetchEmployerDetails = (companyName) => {
+    const employerQuery = query(
+      collection(db, "Employer"),
+      where("CompanyName", "==", companyName)
     );
 
-    // Return unsubscribe function to clean up listener
+    const unsubscribe = onSnapshot(employerQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          setEmployerDetails({
+            CompanyEmail: data.CompanyEmail,
+            CompanyName: data.CompanyName,
+            PhoneNumber: data.PhoneNumber,
+            ShortCompanyName: data.ShortCompanyName,
+            commercialNumber: data.commercialNumber,
+          });
+        });
+      }
+    });
+
     return unsubscribe;
   };
 
@@ -215,7 +235,7 @@ const ViolationGeneral = () => {
         <span> / </span>
         <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
         <span> / </span>
-        <a onClick={() => navigate(`/violation/general/${violationId}`)}>
+        <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>
           Violation Details
         </a>
       </div>
@@ -375,7 +395,7 @@ const ViolationGeneral = () => {
                   Company Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                  {driverData?.companyName}
+                  {employerDetails?.ShortCompanyName}
                 </p>
               </div>
               <div>
