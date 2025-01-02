@@ -1,12 +1,12 @@
-/* import React, { useEffect, useState } from 'react';
-import { db } from '../firebase';
+import React, { useEffect, useState } from 'react';
+import { db } from '../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, doc, getDoc, query, where } from 'firebase/firestore';
-import EyeIcon from '../images/eye.png';
+import EyeIcon from '../../images/eye.png';
 import { Table } from 'antd';
-import Header from './Header';
-import s from "../css/Violations.module.css";
-import '../css/CustomModal.css';
+import Header from './GDTHeader';
+import s from "../../css/Violations.module.css";
+import  '../../css/CustomModal.css';
 
 const ViolationList = () => {
   const [motorcycles, setMotorcycles] = useState({});
@@ -15,29 +15,21 @@ const ViolationList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
-  const employerUID = sessionStorage.getItem('employerUID');
+  const gdtUID = sessionStorage.getItem('gdtUID');
 
   useEffect(() => {
     const fetchEmployerDrivers = async () => {
-      if (employerUID) {
-        const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
-        if (employerDoc.exists()) {
-          const companyName = employerDoc.data().CompanyName;
-          fetchDrivers(companyName);
-        } else {
-          console.error("No such employer!");
-        }
+      if (gdtUID){
+        const employerDoc = await getDoc(doc(db, 'GDT', gdtUID))
+        fetchDrivers();
       }
     };
 
     fetchEmployerDrivers();
-  }, [employerUID]);
+  }, [gdtUID]);
 
-  const fetchDrivers = (companyName) => {
-    const driverCollection = query(
-      collection(db, 'Driver'),
-      //where('CompanyName', '==', companyName)
-    );
+  const fetchDrivers = () => {
+    const driverCollection = query(collection(db, 'Driver'));
 
     const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
       const driverMap = {};
@@ -50,12 +42,46 @@ const ViolationList = () => {
         };
         driverIDs.push(data.DriverID);
       });
+
       setDrivers(driverMap);
+
+      // If there are valid driver IDs, fetch violations
       if (driverIDs.length > 0) {
         fetchViolations(driverIDs);
       } else {
         setViolations([]);
       }
+
+      // Iterate through all driverIDs and fetch company details for each driver
+      driverIDs.forEach((driverID) => {
+        const companyName = driverMap[driverID].companyName;
+        fetchCompany(companyName); // Fetch company info for each driver
+      });
+    });
+
+    return () => unsubscribe();
+  };
+
+  const fetchCompany = (companyName) => {
+    const companyCollection = query(
+      collection(db, 'Employer'),
+      where('CompanyName', '==', companyName)
+    );
+
+    const unsubscribe = onSnapshot(companyCollection, (snapshot) => {
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const companyData = {
+          CompanyEmail: data.CompanyEmail,
+          CompanyName: data.CompanyName,
+          PhoneNumber: data.PhoneNumber,
+          ShortCompanyName: data.ShortCompanyName,
+          commercialNumber: data.commercialNumber,
+        };
+        console.log("Fetched Company Data:", companyData);
+        console.log("Company Data:", data);
+        // Optionally, you can save company data in state here
+      });
     });
 
     return () => unsubscribe();
@@ -166,7 +192,7 @@ const ViolationList = () => {
       key: 'Details',
       align: 'center',
       render: (text, record) => (
-        <Link to={`/violation/general/${record.id}`}>
+        <Link to={`/gdtviolation/general/${record.id}`}> 
           <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
         </Link>
       ),
@@ -177,9 +203,9 @@ const ViolationList = () => {
     <>
       <Header active="violations" />
       <div className="breadcrumb">
-        <a onClick={() => navigate('/employer-home')}>Home</a>
+        <a onClick={() => navigate('/gdt-home')}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate('/violations')}>Violations List</a>
+        <a onClick={() => navigate('/GDTviolations')}>Violations List</a>
       </div>
       <main>
         <div className={s.container}>
@@ -221,4 +247,3 @@ const ViolationList = () => {
 };
 
 export default ViolationList;
-*/

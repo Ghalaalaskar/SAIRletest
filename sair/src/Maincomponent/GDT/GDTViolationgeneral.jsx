@@ -9,14 +9,14 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
-import { db, auth } from "../firebase";
-import Map from "./Map";
+import { db, auth } from '../../firebase';
+import Map from "../Map";
 import { Button, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import Header from "./Header";
-import s from "../css/ViolationDetail.module.css";
-import X from "../images/redx.webp";
-import "../css/CustomModal.css";
+import Header from './GDTHeader';
+import s from "../../css/ViolationDetail.module.css";
+import X from '../../images/eye.png';
+import '../../css/CustomModal.css';
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
@@ -125,22 +125,22 @@ const ViolationGeneral = () => {
 
   useEffect(() => {
     const fetchUserName = async () => {
-      const employerUID = sessionStorage.getItem("employerUID"); // Get the stored UID
+      const gdtUID = sessionStorage.getItem("gdtUID"); // Get the stored UID
 
-      if (employerUID) {
+      if (gdtUID) {
         try {
-          const userDocRef = doc(db, "Employer", employerUID); // Use the UID to fetch the document
+          const userDocRef = doc(db, "GDT", gdtUID); // Use the UID to fetch the document
           const docSnap = await getDoc(userDocRef);
 
           if (docSnap.exists()) {
-            const employerData = docSnap.data();
-            console.log("Employer Data:", employerData); // Log the fetched data
-            setCompanyName(employerData.CompanyName);
+            // const employerData = docSnap.data();
+            // console.log("Employer Data:", employerData); // Log the fetched data
+            // setCompanyName(employerData.CompanyName);
           } else {
             console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error fetching employer data:", error);
+          console.error("Error fetching gdt data:", error);
         }
       }
     };
@@ -168,7 +168,7 @@ const ViolationGeneral = () => {
   const handleViewComplaints = () => {
     if (complaints.length > 0) {
       navigate(`/complaint/general/${complaints[0].id}`, {
-        state: { from: "ViolationGeneral" },
+        state: { from: "GDTViolationGeneral" },
       }); // Navigate to the first complaint
     } else {
       setIsPopupVisible(true); // Show popup if no complaints exist
@@ -208,12 +208,12 @@ const ViolationGeneral = () => {
 
   return (
     <div>
-      <Header active="violations" />
+      <Header active="gdtviolations" />
 
       <div className="breadcrumb">
-        <a onClick={() => navigate("/employer-home")}>Home</a>
+        <a onClick={() => navigate("/gdt-home")}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate("/violations")}>Violations List</a>
+        <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
         <span> / </span>
         <a onClick={() => navigate(`/violation/general/${violationId}`)}>
           Violation Details
@@ -372,7 +372,7 @@ const ViolationGeneral = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  Driver's Company Name
+                  Company Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {driverData?.companyName}
