@@ -23,7 +23,7 @@ const GDTComplaints = () => {
 
   return (
     <div style={pageStyles}>
-      <Header active="gdthome" />
+      <Header active="gdtcomplaints" />
       <div style={h1WrapperStyles}>
         <h1>Compalints will be done in sprint 4</h1>
       </div>

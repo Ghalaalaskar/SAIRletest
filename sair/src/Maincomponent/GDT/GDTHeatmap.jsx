@@ -23,7 +23,7 @@ const GDTHeatMap = () => {
 
   return (
     <div style={pageStyles}>
-      <Header active="gdthome" />
+      <Header active="gdtheatmap" />
       <div style={h1WrapperStyles}>
         <h1>Heat-Map will be done in sprint 5</h1>
       </div>
