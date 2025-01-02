@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
-import Map from './Map'; 
+import { db } from '../../firebase';
+import Map from '../Map'; 
 import { Button, Modal } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import Header from './Header';
+import Header from './GDTHeader';
 import { useLocation } from 'react-router-dom';
-import s from "../css/ViolationDetail.module.css";
-import X from '../images/redx.webp';
-import '../css/CustomModal.css';
+import s from "../../css/ViolationDetail.module.css";
+import X from '../../images/redx.webp';
+import  '../../css/CustomModal.css';
 
 
 const ViolationDetail = () => {
@@ -154,15 +154,15 @@ const handleViewComplaints = () => {
 <Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
 
       <div className="breadcrumb">
-        <a onClick={() => navigate('/employer-home')}>Home</a>
+        <a onClick={() => navigate('/GDT-home')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/driverslist')}>Driver List</a>
         <span> / </span>
         <a onClick={() => navigate(`/driver-details/${violation.driverId}`)}>Drivers Details</a>
         <span> / </span>
-        <a onClick={() => navigate(`/drivers/:driverId/violations`)}>Violations List</a>
+        <a onClick={() => navigate(`/drivers/:driverId/GDTviolations`)}>Violations List</a>
         <span> / </span>
-        <a onClick={() => navigate(`/violation/detail/${violationId}`)}>Violation Details</a>
+        <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
       </div>
 
       <main  className={s.violation}>

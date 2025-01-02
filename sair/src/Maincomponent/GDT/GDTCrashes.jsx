@@ -1,13 +1,12 @@
-/*
 import React, { useEffect, useState } from 'react';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, doc, getDoc, query, where } from 'firebase/firestore';
-import EyeIcon from '../images/eye.png';
+import EyeIcon from '../../images/eye.png';
 import { Table } from 'antd';
-import Header from './Header';
-import s from "../css/CrashList.module.css"; // CSS module for CrashList
-import '../css/CustomModal.css';
+import Header from './GDTHeader';
+import s from "../../css/CrashList.module.css"; // CSS module for CrashList
+import '../../css/CustomModal.css';
 
 const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});
@@ -17,7 +16,7 @@ const CrashList = () => {
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState(''); // Single search input
-  const employerUID = sessionStorage.getItem('employerUID');
+  const gdtUID = sessionStorage.getItem('gdtUID');
 
  // State to track viewed crashes
  const [viewedCrashes, setViewedCrashes] = useState(() => {
@@ -27,23 +26,12 @@ const CrashList = () => {
 
   useEffect(() => {
     const fetchDriversAndCrashes = async () => {
-      if (!employerUID) return;
+      if (!gdtUID) return;
 
-  const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
-  if (!employerDoc.exists()) {
-    console.error("No such employer!");
-    return;
-  }
-
-  const companyName = employerDoc.data().CompanyName;
-  if (!companyName) {
-    console.error("No valid company name found.");
-    return;
-  }
+  const GDTDoc = await getDoc(doc(db, 'GDT', gdtUID));
 
   const driverCollection = query(
     collection(db, 'Driver'),
-    //where('CompanyName', '==', companyName)
   );
 
   const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
@@ -125,7 +113,7 @@ const CrashList = () => {
     };
 
     fetchDriversAndCrashes();
-  }, [employerUID]);
+  }, [gdtUID]);
 
     //For Comapny name; since its arabic
     const normalizeText = (text) => {
@@ -164,7 +152,7 @@ const CrashList = () => {
       setViewedCrashes(updatedViewedCrashes);
       sessionStorage.setItem('viewedCrashes', JSON.stringify(updatedViewedCrashes));
   
-      navigate(`/crash/general/${record.id}`);
+      navigate(`/gdtcrash/general/${record.id}`); {/**path?? */}
     };
 
   const columns = [
@@ -216,7 +204,7 @@ const CrashList = () => {
       key: 'Details',
       align: 'center',
       render: (text, record) => (
-        <Link to={`/crash/general/${record.id}`} onClick={() => handleViewDetails(record)}>
+        <Link to={`/gdtcrash/general/${record.id}`} onClick={() => handleViewDetails(record)}>
           <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
         </Link>
       ),
@@ -225,7 +213,7 @@ const CrashList = () => {
 
   return (
     <>
-      <Header active="crashes" />
+      <Header active="gdtcrashes" />
       <div className="breadcrumb">
         <a onClick={() => navigate('/employer-home')}>Home</a>
         <span> / </span>
@@ -277,4 +265,3 @@ const CrashList = () => {
 };
 
 export default CrashList;
-*/

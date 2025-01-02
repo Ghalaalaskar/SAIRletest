@@ -30,7 +30,10 @@ import ScrollToTop from './ScrollToTop';
 import { CrashNotification } from './CrashNotification';
 import GDTHome from './Maincomponent/GDT/GDTHome';
 import GDTViolations from './Maincomponent/GDT/GDTViolations';
+import GDTViolationGeneral from './Maincomponent/GDT/GDTViolationgeneral';
+import GDTViolationDetail from './Maincomponent/GDT/GDTViolationDetail';
 import GDTCrashes from './Maincomponent/GDT/GDTCrashes';
+import GDTCrashGeneral from './Maincomponent/GDT/GDTCrashGeneral';
 import GDTComplaints from './Maincomponent/GDT/GDTComplaints';
 import GDTHeatmap from './Maincomponent/GDT/GDTHeatmap';
 import GDTStafflist from './Maincomponent/GDT/GDTStafflist';
@@ -103,7 +106,10 @@ function App() {
         <Route path="/motorcycle/:motorcycleId/violations" element={<VMotorcycle />} />
         <Route path="/gdthome" element={<GDTHome />} />
         <Route path="/gdtviolations" element={<GDTViolations />} />
+        <Route path="/gdtviolation/general/:violationId" element={<GDTViolationGeneral />} />
+        <Route path="/gdtviolation/detail/:violationId" element={<GDTViolationDetail />} />
         <Route path="/gdtcrashes" element={<GDTCrashes />} />
+        <Route path="/gdtcrash/general/:crashId" element={<GDTCrashGeneral />} />
         <Route path="/gdtcomplaints" element={<GDTComplaints />} /> 
         <Route path="/gdtheatmap" element={<GDTHeatmap />} /> 
         <Route path="/gdtstafflist" element={<GDTStafflist />} /> 
