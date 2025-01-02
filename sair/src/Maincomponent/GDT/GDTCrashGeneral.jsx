@@ -1,4 +1,3 @@
-/*
 import { useEffect, useState } from "react";
 import {
   doc,
@@ -9,14 +8,14 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
-import { db, auth } from "../firebase";
-import Map from "./Map";
+import { db, auth } from "../../firebase";
+import Map from "../Map";
 import { Button } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import Header from "./Header";
-import s from "../css/ViolationDetail.module.css"; // Reusing the same CSS module
-import crashImage from "../images/crash.png";
-import "../css/CustomModal.css";
+import Header from "./GDTHeader";
+import s from "../../css/ViolationDetail.module.css"; // Reusing the same CSS module
+import crashImage from "../../images/crash.png";
+import "../../css/CustomModal.css";
 
 const CrashGeneral = () => {
   const [currentCrash, setCurrentCrash] = useState({});
@@ -81,14 +80,14 @@ const CrashGeneral = () => {
 
   return (
     <div>
-      <Header active="crashes" />
+      <Header active="gdtcrashes" />
 
       <div className="breadcrumb">
-        <a onClick={() => navigate("/employer-home")}>Home</a>
+        <a onClick={() => navigate("/GDT-home")}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate("/crashes")}>Crashes List</a>
+        <a onClick={() => navigate("/GDTcrashes")}>Crashes List</a>
         <span> / </span>
-        <a onClick={() => navigate(`/crash/general/${crashId}`)}>
+        <a onClick={() => navigate(`/gdtcrash/general/${crashId}`)}>
           Crash Details
         </a>
       </div>
@@ -799,4 +798,3 @@ const CrashGeneral = () => {
 };
 
 export default CrashGeneral;
-*/
