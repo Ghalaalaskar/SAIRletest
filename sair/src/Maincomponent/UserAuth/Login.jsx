@@ -155,9 +155,6 @@ if (Object.keys(newMissingFields).length > 0) {
             userFound = true;
             const gdtUID = querySnapshot.docs[0].id;
             sessionStorage.setItem('gdtUID', gdtUID);
-            setPopupMessage('Login successful!');
-            setPopupImage(successImage);
-            setPopupVisible(true);
             const isAdmin = querySnapshot.docs[0].data().isAdmin;
             if(isAdmin){
               setTimeout(() => {
