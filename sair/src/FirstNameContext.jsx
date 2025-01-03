@@ -1,15 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-export const FisrtNameContext = createContext();
+export const FirstNameContext = createContext();
 
-export const FirstName = ({ children }) => {
+export const FirstNameProvider = ({ children }) => {
   const [firstName, setFirstNameState] = useState(
     sessionStorage.getItem('FName') || ''
   );
 
   const setFirstName = (newName) => {
-    setFirstNameState(newName); // Update state
-    sessionStorage.setItem('FName', newName); // Update sessionStorage
+    setFirstNameState(newName);
+    sessionStorage.setItem('FName', newName);
   };
 
   useEffect(() => {
