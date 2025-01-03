@@ -25,7 +25,7 @@ import MotorcycleDetails from './Maincomponent/Motorcycledetails'
 import { LoadScript } from '@react-google-maps/api';
 import VMotorcycle from './Maincomponent/VMotorcycle'
 import { ShortCompanyNameProvider } from './ShortCompanyNameContext';
-import { FirstNameProvider } from './FirstNameContextContext';
+import { FirstNameProvider } from './FirstNameContext';
 import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
 import { CrashNotification } from './CrashNotification';
