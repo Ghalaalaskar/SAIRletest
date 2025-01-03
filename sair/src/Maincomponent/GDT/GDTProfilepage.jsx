@@ -9,10 +9,12 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import Header from "./GDTHeader" 
 import { Modal } from 'antd';
 import s from "../../css/Profile.module.css"
+import { FirstNameContext } from '../FirstNameContext';
 import { useContext } from 'react';
 import '../../css/CustomModal.css';
 
 const Profile = () => {
+  const { setFirstName } = useContext(FirstNameContext);
   const [GDT, setGDT] = useState({
     GDTEmail: '',
     Lname: '',
@@ -336,7 +338,7 @@ const Profile = () => {
       delete updateData.confirmNewPassword;
 
       await updateDoc(docRef, updateData);
-   
+      setFistName(GDT.Fname);
       if (GDT.newPassword && user) {
         const credential = EmailAuthProvider.credential(user.email, GDT.currentPassword);
         await reauthenticateWithCredential(user, credential);
