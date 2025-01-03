@@ -25,7 +25,7 @@ const GDTHome = () => {
     <div style={pageStyles}>
       <Header active="gdthome" />
       <div style={h1WrapperStyles}>
-        <h1>GDT dashbord will be done in sprint 5</h1>
+        <h1>Dashboard feature currently unavailable. Stay tuned for updates!</h1>
       </div>
     </div>
   );

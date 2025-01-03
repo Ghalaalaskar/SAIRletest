@@ -53,7 +53,12 @@ const GDTStafflist = () => {
       dataIndex: 'GDTEmail',
       key: 'GDTEmail',
       align: 'center',
-    },
+      render: (email) => (
+        <a href={`mailto:${email}`}>
+          {email}
+        </a>
+      ),
+    },    
     {
       title: 'Phone Number',
       dataIndex: 'PhoneNumber',

@@ -25,7 +25,7 @@ const GDTComplaints = () => {
     <div style={pageStyles}>
       <Header active="gdtcomplaints" />
       <div style={h1WrapperStyles}>
-        <h1>Compalints will be done in sprint 4</h1>
+        <h1>Compalints feature currently unavailable. Stay tuned for updates!</h1>
       </div>
     </div>
   );

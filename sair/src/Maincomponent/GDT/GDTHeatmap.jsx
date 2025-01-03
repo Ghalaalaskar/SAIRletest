@@ -25,7 +25,7 @@ const GDTHeatMap = () => {
     <div style={pageStyles}>
       <Header active="gdtheatmap" />
       <div style={h1WrapperStyles}>
-        <h1>Heat-Map will be done in sprint 5</h1>
+        <h1>Heat-Map feature currently unavailable. Stay tuned for updates!</h1>
       </div>
     </div>
   );

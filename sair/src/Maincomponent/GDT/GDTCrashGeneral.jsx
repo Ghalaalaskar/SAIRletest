@@ -259,7 +259,11 @@ const CrashGeneral = () => {
                 Driver Email
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+              <a
+                    href={`mailto:${driverDetails.Email}`}
+                  >
                 {driverDetails.Email}
+                </a>
               </p>
               <div id="company name">
                 <h3
