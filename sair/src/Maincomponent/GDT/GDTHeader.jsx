@@ -48,10 +48,7 @@ const GDTHeader = ({ active }) => {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      sessionStorage.removeItem('ShortCompanyName');
-      sessionStorage.removeItem('employerUID');
-      localStorage.removeItem('crashIds');
-      localStorage.removeItem('hasNewCrashes');
+      sessionStorage.removeItem('gdtUID');
       window.dispatchEvent(new Event('storage'));
       navigate('/');
     } catch (error) {
