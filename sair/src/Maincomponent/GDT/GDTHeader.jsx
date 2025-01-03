@@ -9,7 +9,7 @@ import s from '../../css/Header.module.css';
 import '../../css/CustomModal.css';
 import styles from "../../css/BadgeStyles.module.css";
 import'../../FirstNameContext';
-
+import { useContext } from 'react';
 const GDTHeader = ({ active }) => {
   const { FirstName , setFirstName} = useContext(FirstNameContext);
   const navigate = useNavigate();
@@ -23,9 +23,9 @@ const GDTHeader = ({ active }) => {
   ////For the header
   useEffect(() => {
     const fetchFirstName = async () => {
-      if (!FName) { // Only fetch if it's not set
+      if (!FirstName) { // Only fetch if it's not set
         const GDTUID = sessionStorage.getItem('gdtUID');
-        if (GDTUIDUID) {
+        if (GDTUID) {
           try {
             const userDocRef = doc(db, 'GDT', GDTUID);
             const docSnap = await getDoc(userDocRef);
@@ -41,7 +41,7 @@ const GDTHeader = ({ active }) => {
     };
 
     fetchFirstName();
-  }, [FName, setFirstName]);
+  }, [FirstName, setFirstName]);
   
   useEffect(() => {
     const fetchName = async () => {
