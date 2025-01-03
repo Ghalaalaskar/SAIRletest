@@ -1,6 +1,7 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx'; ///
+import { FaTrash } from 'react-icons/fa';
 import {
   collection,
   addDoc,
@@ -38,6 +39,7 @@ const AddDriver = () => {
     const [fileList, setFileList] = useState([]); /// Manage file as an array
     const [drivers, setDrivers] = useState([]); /// Store parsed driver data#
     const [fileData, setFileData] = useState([]); /// Store file data
+    const [fileName, setFileName] = useState('');
 
 
   const [validationMessages, setValidationMessages] = useState({
@@ -1181,6 +1183,9 @@ const handleFileUpload = (event) => {
     console.error("No file selected");
     return;
   }
+  if (file) {
+    setFileName(file.name);
+  }
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -1312,7 +1317,12 @@ if (newPhoneNumber.length > 4) {
   console.log('hh',fileData);
 }, [fileData]);
 
-
+const handleRemoveFile = () => {
+  setFileName(''); // Clear the file name
+  document.getElementById('fileInput').value = ''; 
+  setFileData([]);// Reset the file input
+  setDrivers([]);
+};
 
   
   return (
@@ -1331,11 +1341,27 @@ if (newPhoneNumber.length > 4) {
         <p>You can add drivers as batch file:</p>
         <div className={s.formRow}>
               <input
+        id="fileInput"
         type="file"
         onChange={handleFileUpload} // Attach the event handler here
         accept=".xls,.xlsx"
       />
-
+       {fileName && (
+   <div style={{ marginLeft:'10' , display: 'flex', alignItems: 'center' }}>
+          
+          <FaTrash
+            onClick={handleRemoveFile}
+            style={{
+              marginLeft: '10px',
+              color: '#059855',
+              cursor: 'pointer',
+              fontSize: '20px',
+            }}
+            title="Remove file"
+          />
+        </div>
+       )}
+        
           </div>
         
           {fileData.length === 0 ? (
