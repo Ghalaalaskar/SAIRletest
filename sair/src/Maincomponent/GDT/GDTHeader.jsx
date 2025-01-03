@@ -8,6 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import s from '../../css/Header.module.css';
 import '../../css/CustomModal.css';
 import styles from "../../css/BadgeStyles.module.css";
+import'../../FirstNameContext';
 
 const GDTHeader = ({ active }) => {
   const { FirstName , setFirstName} = useContext(FirstNameContext);
@@ -22,7 +23,7 @@ const GDTHeader = ({ active }) => {
   ////For the header
   useEffect(() => {
     const fetchFirstName = async () => {
-      if (!FirstName) { // Only fetch if it's not set
+      if (!FName) { // Only fetch if it's not set
         const GDTUID = sessionStorage.getItem('gdtUID');
         if (GDTUIDUID) {
           try {

@@ -338,7 +338,7 @@ const Profile = () => {
       delete updateData.confirmNewPassword;
 
       await updateDoc(docRef, updateData);
-      setFistName(GDT.Fname);
+      setFirstName(GDT.Fname);
       if (GDT.newPassword && user) {
         const credential = EmailAuthProvider.credential(user.email, GDT.currentPassword);
         await reauthenticateWithCredential(user, credential);

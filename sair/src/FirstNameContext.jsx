@@ -4,17 +4,17 @@ export const FisrtNameContext = createContext();
 
 export const FirstName = ({ children }) => {
   const [firstName, setFirstNameState] = useState(
-    sessionStorage.getItem('FirstName') || ''
+    sessionStorage.getItem('FName') || ''
   );
 
   const setFirstName = (newName) => {
     setFirstNameState(newName); // Update state
-    sessionStorage.setItem('FirstName', newName); // Update sessionStorage
+    sessionStorage.setItem('FName', newName); // Update sessionStorage
   };
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const updatedFirstName = sessionStorage.getItem('FirstName') || '';
+      const updatedFirstName = sessionStorage.getItem('FName') || '';
       setFirstNameState(updatedFirstName);
     };
 
