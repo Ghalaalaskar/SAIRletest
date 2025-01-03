@@ -9,7 +9,7 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import Header from "./GDTHeader" 
 import { Modal } from 'antd';
 import s from "../../css/Profile.module.css"
-import { FirstNameContext } from '../FirstNameContext';
+import { FirstNameContext } from '../../FirstNameContext';
 import { useContext } from 'react';
 import '../../css/CustomModal.css';
 
