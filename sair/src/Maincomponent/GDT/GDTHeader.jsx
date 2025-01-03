@@ -8,7 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import s from '../../css/Header.module.css';
 import '../../css/CustomModal.css';
 import styles from "../../css/BadgeStyles.module.css";
-import'../../FirstNameContext';
+import { FirstNameContext } from '../../FirstNameContext';
 import { useContext } from 'react';
 const GDTHeader = ({ active }) => {
   const { FirstName , setFirstName} = useContext(FirstNameContext);
