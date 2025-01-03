@@ -21,6 +21,7 @@ const CrashGeneral = () => {
   const [currentCrash, setCurrentCrash] = useState({});
   const [currentMotorCycle, setCurrentMotorCycle] = useState({});
   const [driverDetails, setDriverDetails] = useState({});
+  const [employerDetails, setEmployerDetails] = useState({});
   const { crashId } = useParams();
   const navigate = useNavigate();
 
@@ -42,7 +43,9 @@ const CrashGeneral = () => {
             const driverSnapshot = await getDocs(driverCollection);
             if (!driverSnapshot.empty) {
               const driverData = driverSnapshot.docs[0].data();
+              
               setDriverDetails(driverData);
+              fetchEmployerDetails(driverData.CompanyName);
             }
 
             // Fetch motorcycles using crashID from the Crash collection
@@ -64,6 +67,30 @@ const CrashGeneral = () => {
 
     fetchCrashDetails();
   }, [crashId]);
+
+  const fetchEmployerDetails = (companyName) => {
+    const employerQuery = query(
+      collection(db, "Employer"),
+      where("CompanyName", "==", companyName)
+    );
+
+    const unsubscribe = onSnapshot(employerQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          setEmployerDetails({
+            CompanyEmail: data.CompanyEmail,
+            CompanyName: data.CompanyName,
+            PhoneNumber: data.PhoneNumber,
+            ShortCompanyName: data.ShortCompanyName,
+            commercialNumber: data.commercialNumber,
+          });
+        });
+      }
+    });
+
+    return unsubscribe;
+  };
 
   const goBack = () => {
     navigate(-2); // Navigate back to the previous page
@@ -318,7 +345,7 @@ const CrashGeneral = () => {
                   Driver Company Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                {driverDetails.CompanyName}
+                {employerDetails.ShortCompanyName}
                 </p>
               </div>
 

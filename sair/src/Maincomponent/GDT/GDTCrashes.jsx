@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../../firebase';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, onSnapshot, doc, getDoc, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import EyeIcon from '../../images/eye.png';
 import { Table } from 'antd';
 import Header from './GDTHeader';
@@ -37,16 +37,24 @@ const CrashList = () => {
   const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
     const driverIds = [];
     const driverMap = {};
+    const companyPromises = [];
 
     snapshot.forEach((doc) => {
       const data = doc.data();
       if (data.DriverID) {
-        driverIds.push(data.DriverID);
         driverMap[data.DriverID] = {
           name: `${data.Fname} ${data.Lname}`,
           companyName: data.CompanyName,
+          shortCompanyName: '', // Placeholder for ShortCompanyName
         };
       }
+      
+      driverIds.push(data.DriverID);
+      companyPromises.push(
+        fetchCompany(data.CompanyName).then((shortName) => {
+          driverMap[data.DriverID].shortCompanyName = shortName;
+        })
+      );
     });
 
     if (driverIds.length === 0) {
@@ -60,6 +68,20 @@ const CrashList = () => {
 
   return () => unsubscribeDrivers();
 };
+
+  const fetchCompany = async (companyName) => {
+    const companyQuery = query(
+      collection(db, 'Employer'),
+      where('CompanyName', '==', companyName)
+    );
+  
+    const snapshot = await getDocs(companyQuery);
+    if (!snapshot.empty) {
+      const companyData = snapshot.docs[0].data();
+      return companyData.ShortCompanyName || companyName; // Fallback to full name if short name not available
+    }
+    return companyName; // Return the original name if no match found
+  };
 
     const fetchCrashes = (driverIds) => {
       if (!driverIds || driverIds.length === 0) {
@@ -172,7 +194,7 @@ const CrashList = () => {
       title: 'Company Name',
       key: 'CompanyName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID]?.companyName || '   ',
+      render: (text, record) => drivers[record.driverID]?.shortCompanyName || '   ',
     },
     {
       title: 'Motorcycle License Plate',
