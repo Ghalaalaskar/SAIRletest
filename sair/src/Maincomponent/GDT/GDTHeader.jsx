@@ -8,8 +8,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import s from '../../css/Header.module.css';
 import '../../css/CustomModal.css';
 import styles from "../../css/BadgeStyles.module.css";
-
+import { FirstNameContext } from '../../FirstNameContext';
+import { useContext } from 'react';
 const GDTHeader = ({ active }) => {
+  const { FirstName , setFirstName} = useContext(FirstNameContext);
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
@@ -18,7 +20,29 @@ const GDTHeader = ({ active }) => {
     const saved = localStorage.getItem("hasNewCrashes");
     return saved ? JSON.parse(saved) : false;
   });
+  ////For the header
+  useEffect(() => {
+    const fetchFirstName = async () => {
+      if (!FirstName) { // Only fetch if it's not set
+        const GDTUID = sessionStorage.getItem('gdtUID');
+        if (GDTUID) {
+          try {
+            const userDocRef = doc(db, 'GDT', GDTUID);
+            const docSnap = await getDoc(userDocRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setFirstName(data.Fname || '');
+            }
+          } catch (error) {
+            console.error('Error fetching short company name:', error);
+          }
+        }
+      }
+    };
 
+    fetchFirstName();
+  }, [FirstName, setFirstName]);
+  
   useEffect(() => {
     const fetchName = async () => {
       const GDTUID = sessionStorage.getItem('gdtUID');
@@ -48,10 +72,7 @@ const GDTHeader = ({ active }) => {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      sessionStorage.removeItem('ShortCompanyName');
-      sessionStorage.removeItem('employerUID');
-      localStorage.removeItem('crashIds');
-      localStorage.removeItem('hasNewCrashes');
+      sessionStorage.removeItem('gdtUID');
       window.dispatchEvent(new Event('storage'));
       navigate('/');
     } catch (error) {

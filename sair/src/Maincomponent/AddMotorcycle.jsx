@@ -306,6 +306,15 @@ const generateMotorcycleID = async (gpsNumber) => {
 >
   <option value="" disabled>Select a Driver</option> {/* Disabled placeholder option */}
   <option value={null}>None</option> {/* This will be treated as null */}
+  {motorcycle.DriverID && motorcycle.DriverID !== '' && (
+                  <option
+                    selected
+                    value={motorcycle.DriverID}
+                    key={motorcycle.DriverID}
+                  >
+                    {motorcycle.DriverID}
+                  </option>
+                )}
   {availableDrivers.length > 0 ? (
     availableDrivers.map(({ value, label }) => (
       <option key={value} value={value}>
