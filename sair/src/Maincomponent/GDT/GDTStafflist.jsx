@@ -122,7 +122,7 @@ const GDTStafflist = () => {
       setNotificationMessage('Staff deleted successfully!');
       setIsNotificationVisible(true);
       setTimeout(() => {
-        navigate('/gdtstafflist'); // Adjust the path as needed
+        navigate('/gdtstafflist'); 
       }, 2000);
     } catch (error) {
       console.error('Error deleting staff:', error);
