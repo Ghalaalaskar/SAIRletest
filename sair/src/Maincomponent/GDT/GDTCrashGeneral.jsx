@@ -300,6 +300,7 @@ const CrashGeneral = () => {
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
               <a
                     href={`mailto:${driverDetails.Email}`}
+                    style={{ color: "#444", textDecoration: "underline"}}
                   >
                 {driverDetails.Email}
                 </a>

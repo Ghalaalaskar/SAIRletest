@@ -425,8 +425,8 @@ const ViolationGeneral = () => {
                   </svg>
                   Driver Email
                 </h3>
-                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                  <a href={`mailto:${driverData.dEmail}`}>
+                <p style={{ fontSize: "18px", marginLeft: "45px", color: "#444" }}>
+                  <a href={`mailto:${driverData.dEmail}`} style={{ color: "#444", textDecoration: "underline"}}> 
                     {driverData.dEmail}
                   </a>
                 </p>
