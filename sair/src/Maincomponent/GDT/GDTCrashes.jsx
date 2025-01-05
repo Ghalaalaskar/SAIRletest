@@ -150,13 +150,13 @@ const CrashList = () => {
 
     const driverName = drivers[crash.driverID]?.name || ' ';
       const licensePlate = motorcycles[crash.crashID] || ' '; // Use crashID to fetch motorcycle
-      const companyName = drivers[crash.driverID]?.companyName || '  '; 
+      const companyName = drivers[crash.driverID]?.shortCompanyName || '  ';  
 
       const matchesSearchQuery = 
         driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        normalizeText(companyName).includes(normalizeText(searchQuery));
+        companyName.toLowerCase().includes(searchQuery.toLowerCase());
+        //normalizeText(companyName).includes(normalizeText(searchQuery));
         //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-
 
       return matchesSearchQuery && matchesSearchDate;
     });

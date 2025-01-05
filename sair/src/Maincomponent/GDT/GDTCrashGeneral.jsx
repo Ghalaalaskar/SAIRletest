@@ -46,7 +46,7 @@ const CrashGeneral = () => {
             const driverSnapshot = await getDocs(driverCollection);
             if (!driverSnapshot.empty) {
               const driverData = driverSnapshot.docs[0].data();
-              
+
               setDriverDetails(driverData);
               fetchEmployerDetails(driverData.CompanyName);
             }
@@ -108,7 +108,6 @@ const CrashGeneral = () => {
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
 
-  
   const handleShowPopupCompany = () => {
     setIsPopupVisibleComp(true);
   };
@@ -132,6 +131,22 @@ const CrashGeneral = () => {
       </div>
 
       <main className={s.violation}>
+
+        {!currentCrash.RespondedBy && (
+          <h3
+            style={{
+              color: "#059855",
+              fontWeight: "bold",
+              color: "red",
+              fontSize: "20px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            I will respond to this crash
+          </h3>
+        )}
+
         <h2 className={s.title}>Crash Details</h2>
         {currentCrash.GPSnumber && currentMotorCycle && (
           <>
@@ -298,11 +313,11 @@ const CrashGeneral = () => {
                 Driver Email
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-              <a
-                    href={`mailto:${driverDetails.Email}`}
-                    style={{ color: "#444", textDecoration: "underline"}}
-                  >
-                {driverDetails.Email}
+                <a
+                  href={`mailto:${driverDetails.Email}`}
+                  style={{ color: "#444", textDecoration: "underline" }}
+                >
+                  {driverDetails.Email}
                 </a>
               </p>
               <div id="company name">
@@ -397,13 +412,12 @@ const CrashGeneral = () => {
                 style={{
                   cursor: "pointer",
                 }}
-              >
-              </a>
+              ></a>
               {/*//////////////// POP-UP  ////////////////*/}
               <Modal
                 visible={isPopupVisibleComp}
                 onCancel={handleClosePopupCompany}
-                footer={null} 
+                footer={null}
                 width={700}
               >
                 <main className={formstyle.GDTcontainer}>
