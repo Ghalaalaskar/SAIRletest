@@ -131,20 +131,39 @@ const CrashGeneral = () => {
       </div>
 
       <main className={s.violation}>
-
         {!currentCrash.RespondedBy && (
-          <h3
+          <div
             style={{
-              color: "#059855",
-              fontWeight: "bold",
-              color: "red",
-              fontSize: "20px",
               display: "flex",
               alignItems: "center",
+              gap: "10px", // Adjust spacing between the checkbox and the text
+              justifyContent: "center",
             }}
           >
-            I will respond to this crash
-          </h3>
+            <label className={s["checkbox-wrapper"]}>
+              <input type={s.checkbox} />
+              <div className={s.checkmark}>
+                <svg viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    d="M20 6L9 17L4 12"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></path>
+                </svg>
+              </div>
+              <span
+                style={{
+                  color: "red",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  marginLeft: "10px",
+                }}
+              >
+                I will respond to this crash
+              </span>
+            </label>
+          </div>
         )}
 
         <h2 className={s.title}>Crash Details</h2>
