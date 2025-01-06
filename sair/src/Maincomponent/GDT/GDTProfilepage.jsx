@@ -319,8 +319,12 @@ const Profile = () => {
       }
     
       if (!GDT.ID) {
-        newMissingFields.ID = 'Please enter your ID (National Number)';
-      }
+          newMissingFields.ID = 'Please enter your ID (National Number)';
+        } else if (GDT.ID.length !== 10) {
+          newMissingFields.ID = 'ID must be exactly 10 digits';
+        } else if (!/^\d+$/.test(GDT.ID)) {
+          newMissingFields.ID = 'ID must contain only digits';
+        }
     
       // Check for required fields like PhoneNumber
       if (!GDT.PhoneNumber || (GDT.PhoneNumber === '+966')) {
