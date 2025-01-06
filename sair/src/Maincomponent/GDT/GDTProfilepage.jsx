@@ -40,6 +40,9 @@ const Profile = () => {
     currentPasswordEmpty: '',
     confirmNewPasswordError: '',
     currentPasswordsuccess: '',
+    Fnameempty:'',
+    Lnameempty:'',
+    IDempty:'',
   });
 
   const [loading, setLoading] = useState(false);
@@ -181,23 +184,46 @@ const Profile = () => {
   };
 
   const handleFNameChange = (e) => {
-    console.log(e.target.value);
-    let newname = e.target.value;
-    setGDT({ ...GDT, Fname: newname });  
-  };
-
-  const handleLNameChange = (e) => {
-    console.log(e.target.value);
-    let newname = e.target.value;
-    setGDT({ ...GDT, Lname: newname });  
-  };
-
-  const handleIDChange = (e) => {
-    console.log(e.target.value);
-    let newID = e.target.value;
-    setGDT({ ...GDT, ID: newID });  
-  };
-  
+      const value = e.target.value;
+      setGDT((prev) => ({ ...prev, Fname: value }));
+    
+      // Clear the missing field error as soon as the user fills it
+      if (value.trim() !== '' && missingFields.FirstName) {
+        setMissingFields((prev) => {
+          const updated = { ...prev };
+          delete updated.FirstName;
+          return updated;
+        });
+      }
+    };
+    
+    const handleLNameChange = (e) => {
+        const value = e.target.value;
+        setGDT((prev) => ({ ...prev, Lname: value }));
+      
+        // Clear the missing field error as soon as the user fills it
+        if (value.trim() !== '' && missingFields.LastName) {
+          setMissingFields((prev) => {
+            const updated = { ...prev };
+            delete updated.LastName;
+            return updated;
+          });
+        }
+      };
+      
+      const handleIDChange = (e) => {
+          const value = e.target.value;
+          setGDT((prev) => ({ ...prev, ID: value }));
+        
+          // Clear the missing field error as soon as the user fills it
+          if (value.trim() !== '' && missingFields.ID) {
+            setMissingFields((prev) => {
+              const updated = { ...prev };
+              delete updated.ID;
+              return updated;
+            });
+          }
+        };
   const validatePhoneNumber = (phoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/; // Example for a specific format
     const phoneRegex1 = /^\+96605\d{8}$/; // Example for a specific format
@@ -279,32 +305,34 @@ const Profile = () => {
 
  
   const handleSave = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const newMissingFields = {};
-    if (GDT.newPassword || GDT.confirmNewPassword) {
-      if (!GDT.newPassword) {
-        newMissingFields.newPassword = 'Please enter your new password';
-      }
-      if (!GDT.confirmNewPassword) {
-        newMissingFields.confirmNewPassword = 'Please confirm your new password';
-      }
-    }
-
-    // Check for other required fields like and PhoneNumber
-    ['PhoneNumber'].forEach((field) => {
-      if (!GDT[field] || (field === 'PhoneNumber' && GDT.PhoneNumber === '+966')) {
-        newMissingFields[field] = `Please enter your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
-      }
-    });
-  
-    // If there are missing fields, set them and stop form submission
-    if (Object.keys(newMissingFields).length > 0) {
-      setMissingFields(newMissingFields);
-      setLoading(false);
-      return;
-    }
-
+      e.preventDefault();
+      setLoading(true);
+      const newMissingFields = {};
+    
+      // Check empty fields for first name, last name, and ID
+      if (!GDT.Fname) {
+        newMissingFields.FirstName = 'Please enter your first name';
+      }
+    
+      if (!GDT.Lname) {
+        newMissingFields.LastName = 'Please enter your last name';
+      }
+    
+      if (!GDT.ID) {
+        newMissingFields.ID = 'Please enter your ID (National Number)';
+      }
+    
+      // Check for required fields like PhoneNumber
+      if (!GDT.PhoneNumber || (GDT.PhoneNumber === '+966')) {
+        newMissingFields.PhoneNumber = 'Please enter your phone number';
+      }
+    
+      // If there are missing fields, set them and stop form submission
+      if (Object.keys(newMissingFields).length > 0) {
+        setMissingFields(newMissingFields);
+        setLoading(false);
+        return;
+  }
     if (Object.values(validationMessages).some((msg) => msg)) {
       setLoading(false);
       return;
@@ -423,8 +451,9 @@ const Profile = () => {
       currentPasswordEmpty: '',
       confirmNewPasswordError: '',
       currentPasswordsuccess: '',
-
-
+      Fnameempty:'',
+      Lnameempty:'',
+      IDempty:'',
     });
 
     // Reset password requirements to default (all false)
@@ -500,7 +529,8 @@ const Profile = () => {
                 disabled={!editMode}
            
               />
-
+{missingFields.FirstName && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.FirstName}</span>}
+{validationMessages.Fnameempty && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.Fnameempty}</p>}
             </div>
             <div>
               <label className={s.profileLabel}>Last Name</label>
@@ -512,7 +542,8 @@ const Profile = () => {
                 disabled={!editMode}
                 
               />
-
+{missingFields.LastName && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.LastName}</span>}
+{validationMessages.Lnameempty && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.Lnameempty}</p>}
             </div>
           </div>
 
@@ -527,6 +558,7 @@ const Profile = () => {
                 disabled={!editMode}
                 
               />
+              {missingFields.ID && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.ID}</span>}
             </div>
             <div>
     <label className={s.profileLabel}>Position</label>
