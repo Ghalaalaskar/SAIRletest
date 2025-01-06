@@ -533,7 +533,7 @@ const Profile = () => {
                 disabled={!editMode}
            
               />
-{missingFields.FirstName && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.FirstName}</span>}
+            {missingFields.FirstName  && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields.FirstName }</p>}              
 {validationMessages.Fnameempty && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.Fnameempty}</p>}
             </div>
             <div>
@@ -546,8 +546,8 @@ const Profile = () => {
                 disabled={!editMode}
                 
               />
-{missingFields.LastName && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.LastName}</span>}
-{validationMessages.Lnameempty && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.Lnameempty}</p>}
+            {missingFields.LastName  && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields.LastName }</p>}
+            {validationMessages.Lnameempty && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.Lnameempty}</p>}
             </div>
           </div>
 
@@ -562,7 +562,7 @@ const Profile = () => {
                 disabled={!editMode}
                 
               />
-              {missingFields.ID && <span className="error"style={{ color: 'red', marginTop: '3px' }}>{missingFields.ID}</span>}
+                {missingFields.ID  && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields.ID }</p>}
             </div>
             <div>
     <label className={s.profileLabel}>Position</label>
