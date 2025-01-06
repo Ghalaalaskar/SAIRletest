@@ -42,7 +42,7 @@ import GDTDriverlist from './Maincomponent/GDT/GDTDriverlist';
 import GDTProfilepage from './Maincomponent/GDT/GDTProfilepage';
 import GDTAddStaff from './Maincomponent/GDT/GDTAddStaff';
 import GDTEditStaff from './Maincomponent/GDT/GDTEditStaff';
-
+import GDTRicklessDrivers from './Maincomponent/GDT/GDTRicklessDrivers';
 
 
 function App() {
@@ -118,6 +118,7 @@ function App() {
         <Route path="/gdtprofile" element={<GDTProfilepage />} /> 
         <Route path="/gdtaddstaff" element={<GDTAddStaff />} />
         <Route path="/gdteditstaff/:staffId" element={<GDTEditStaff />} />
+        <Route path="/gdtricklessdrives/:" element={<GDTRicklessDrivers />} />
       </Routes>
     </Router>
     </LoadScript>
