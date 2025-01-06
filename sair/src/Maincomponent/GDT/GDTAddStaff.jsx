@@ -324,7 +324,7 @@ const handleBatchUpload = async (staffArray) => {
         <div>   
             <Header active="gdtstafflist" />
             <div className={s.container}>
-                <h2 className={s.title}>Add Staff</h2>
+                <h2 className='title'>Add Staff</h2>
                 <p>You can add staff as a batch file:</p>
                 <div className={s.formRow}>
                     <input
