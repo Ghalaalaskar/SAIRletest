@@ -128,12 +128,12 @@ const DriverList = () => {
         <span> / </span>
         <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
         <span> / </span>
-        <a onClick={() => navigate('/driverslist')}>Rickless Drivers List</a>
+        <a>Rickless Drivers List</a>
       </div>
 
       <main>
         <div className={s.container}>
-          <h2 className={s.title}>Driver List</h2>
+          <h2 className={s.title}>Rickless Drivers List</h2>
 
           <div className={s.searchInputs}>
             <div className={s.searchContainer}>
@@ -146,11 +146,6 @@ const DriverList = () => {
                 style={{ width: "300px" }}
               />
             </div>
-            <Button type="primary" className={s.addButton}
-              onClick={() => navigate('/add-driver')}>
-              <UsergroupAddOutlined />
-              <span>Add Driver</span>
-            </Button>
           </div>
         </div>
 

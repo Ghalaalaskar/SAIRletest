@@ -118,7 +118,7 @@ function App() {
         <Route path="/gdtprofile" element={<GDTProfilepage />} /> 
         <Route path="/gdtaddstaff" element={<GDTAddStaff />} />
         <Route path="/gdteditstaff/:staffId" element={<GDTEditStaff />} />
-        <Route path="/gdtricklessdrives/:" element={<GDTRicklessDrivers />} />
+        <Route path="/gdtricklessdrives" element={<GDTRicklessDrivers />} />
       </Routes>
     </Router>
     </LoadScript>

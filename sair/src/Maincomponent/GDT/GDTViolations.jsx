@@ -107,7 +107,7 @@ const ViolationList = () => {
 
   const handleViewViolations= () => {
     if (violations.length > 0) {
-      navigate(`/complaint/general/${violations[0].id}`, { state: { from: 'ViolationGeneral' } }); // Navigate to the first violation
+      navigate(`/gdtricklessdrives`); // Navigate to the first violation
     } else {
       setIsPopupVisible(true); // Show popup if no violation exist
     }
