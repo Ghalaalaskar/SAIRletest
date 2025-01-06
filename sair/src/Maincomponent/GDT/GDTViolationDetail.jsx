@@ -146,39 +146,56 @@ const handleViewComplaints = () => {
     return num + "th"; // Fallback for numbers greater than 20
   };
   const renderBreadcrumb = () => {
-    if (location.pathname.includes('gdtricklessdrives')) {
-      return (
-        <>
-          <a onClick={() => navigate('/gdthome')}>Home</a>
-          <span> / </span>
-          <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
-          <span> / </span>
-          <a onClick={() => navigate('/gdtricklessdrives')}>Reckless Drivers List</a>
-          <span> / </span>
-          <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
-        </>
-      );
+    const breadcrumbs = [];
+  
+    // Always add the Home link
+    breadcrumbs.push({ label: "Home", path: "/gdthome" });
+  
+    // Add breadcrumbs based on the navigation source
+    switch (from) {
+      case "driver":
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        breadcrumbs.push({ label: "Reckless Drivers List", path: "/gdtricklessdrives" });
+        breadcrumbs.push({ label: "Driver Violations List", path: "/gdtviolationdriverlist" });
+        break;
+  
+      case "driverslist":
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        break;
+  
+      default:
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        break;
     }
-
-    if (location.pathname.includes('violations')) {
-      return (
-        <>
-          <a onClick={() => navigate('/gdthome')}>Home</a>
-          <span> / </span>
-          <a onClick={() => navigate('/gdtdriverslist')}>Driver List</a>
-          <span> / </span>
-          <a onClick={() => navigate(`/gdtdriverdetails/${violation?.driverId}`)}>Drivers Details</a>
-          <span> / </span>
-          <a onClick={() => navigate('/gdtviolations')}>Violations List</a>
-          <span> / </span>
-          <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
-        </>
-      );
+  
+    // Always add the current violation details link
+    if (violationId) {
+      breadcrumbs.push({
+        label: "Violation Details",
+        path: `/gdtviolation/detail/${violationId}`,
+      });
+    } else {
+      console.warn("Missing violationId for breadcrumb.");
     }
-
-    return null; // Return null if no condition matches
+  
+    return (
+      <nav className="breadcrumb">
+        {breadcrumbs.map((breadcrumb, index) => (
+          <span key={index}>
+            <a
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(breadcrumb.path);
+              }}
+            >
+              {breadcrumb.label}
+            </a>
+            {index < breadcrumbs.length - 1 && <span>/</span>} {/* Reduced space*/}
+          </span>
+        ))}
+      </nav>
+    );
   };
-
   return (
     <div>
       {/* Header Component */}

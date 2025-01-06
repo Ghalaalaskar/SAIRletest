@@ -110,9 +110,11 @@ const ViolationsTable = () => {
 <div className="breadcrumb">
         <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
+        <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
+        <span> / </span>
         <a onClick={() => navigate('/gdtricklessdrives')}>Reckless Drivers List</a>
         <span> / </span>
-        <a onClick={() => navigate(`/gdtviolationdriver/${driverId}`)}>Violations List</a>
+        <a onClick={() => navigate(`/gdtviolationdriver/${driverId}`)}>Driver Violations List</a>
       </div>
 
 
