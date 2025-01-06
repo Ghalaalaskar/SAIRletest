@@ -24,6 +24,7 @@ const Profile = () => {
     newPassword: '',
     confirmNewPassword: '',
     isAdmin:'',
+    ID:'',
   });
 
   const [originalGDTData, setOriginalGDTData] = useState({});
@@ -179,8 +180,24 @@ const Profile = () => {
     }));//removed when empty 
   };
 
+  const handleFNameChange = (e) => {
+    console.log(e.target.value);
+    let newname = e.target.value;
+    setGDT({ ...GDT, Fname: newname });  
+  };
 
+  const handleLNameChange = (e) => {
+    console.log(e.target.value);
+    let newname = e.target.value;
+    setGDT({ ...GDT, Lname: newname });  
+  };
 
+  const handleIDChange = (e) => {
+    console.log(e.target.value);
+    let newID = e.target.value;
+    setGDT({ ...GDT, ID: newID });  
+  };
+  
   const validatePhoneNumber = (phoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/; // Example for a specific format
     const phoneRegex1 = /^\+96605\d{8}$/; // Example for a specific format
@@ -479,9 +496,9 @@ const Profile = () => {
                 type="text"
                 name="Fname"
                 value={GDT.Fname}
-                onChange={handleChange}
+                onChange={handleFNameChange}
                 disabled={!editMode}
-                readOnly
+           
               />
 
             </div>
@@ -491,13 +508,38 @@ const Profile = () => {
                 type="text"
                 name="Lname"
                 value={GDT.Lname}
-                onChange={handleChange}
+                onChange={handleLNameChange}
                 disabled={!editMode}
-                readOnly
+                
               />
 
             </div>
           </div>
+
+          <div className={s.formRow}>
+          <div>
+              <label className={s.profileLabel}>ID(National Number)</label>
+              <input
+                type="text"
+                name="ID"
+                value={GDT.ID}
+                onChange={handleIDChange}
+                disabled={!editMode}
+                
+              />
+            </div>
+            <div>
+    <label className={s.profileLabel}>Position</label>
+    <input
+      type="text"
+      name="position"
+      value={GDT.isAdmin ? 'Admin' : 'Staff'}
+      onChange={handleChange}
+      disabled={!editMode}
+      readOnly
+    />
+  </div>
+           </div>
 
           <div className={s.formRow}>
           <div>
@@ -515,20 +557,6 @@ const Profile = () => {
               {missingFields['PhoneNumber'] && <p style={{ color: 'red', marginTop: '3px' }}>{missingFields['PhoneNumber']}</p>}
               {validationMessages.phoneError && <p style={{ color: 'red', marginTop: '3px' }}>{validationMessages.phoneError}</p>}
             </div>
-            <div>
-    <label className={s.profileLabel}>Position</label>
-    <input
-      type="text"
-      name="position"
-      value={GDT.isAdmin ? 'Admin' : 'Staff'}
-      onChange={handleChange}
-      disabled={!editMode}
-      readOnly
-    />
-  </div>
-           </div>
-
-          <div className={s.formRow}>
             <div>
               <label className={s.profileLabel}>Email</label>
               <input
