@@ -43,7 +43,7 @@ import GDTProfilepage from './Maincomponent/GDT/GDTProfilepage';
 import GDTAddStaff from './Maincomponent/GDT/GDTAddStaff';
 import GDTEditStaff from './Maincomponent/GDT/GDTEditStaff';
 import GDTRicklessDrivers from './Maincomponent/GDT/GDTRicklessDrivers';
-
+import GDTDriverDetails from './Maincomponent/GDT/GDTDriverDetails';
 
 function App() {
   useEffect(() => {
@@ -119,6 +119,7 @@ function App() {
         <Route path="/gdtaddstaff" element={<GDTAddStaff />} />
         <Route path="/gdteditstaff/:staffId" element={<GDTEditStaff />} />
         <Route path="/gdtricklessdrives" element={<GDTRicklessDrivers />} />
+        <Route path="/gdtdriverdetails/:driverId" element={<GDTDriverDetails />} />
       </Routes>
     </Router>
     </LoadScript>

@@ -23,7 +23,7 @@ const DriverList = () => {
   const [isSuccess, setIsSuccess] = useState(true);
   const navigate = useNavigate();
   const GDTUID = sessionStorage.getItem('gdtUID');
-  const columns = [
+ const columns = [
     {
       title: 'Driver ID',
       dataIndex: 'DriverID',
@@ -65,32 +65,100 @@ const DriverList = () => {
   ];
 
   const filteredData = driverData.filter(driver => {
-    const fullName = `${driver.Fname} ${driver.Lname}`.toLowerCase();
-    const driverID = driver.DriverID.toLowerCase();
+    const fullName = `${driver.Fname || ''} ${driver.Lname || ''}`.toLowerCase();
+    const driverID = (driver.DriverID || '').toLowerCase();
     const query = searchQuery.toLowerCase();
-
     return driverID.includes(query) || fullName.includes(query);
   });
 
+  
   useEffect(() => {
-    const fetchDrivers = () => {
-      const driverCollection = query(
-        collection(db, 'Driver'),
-      );
-      const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
-        const driverList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setDriverData(driverList);
-      });
-      return () => unsubscribe();
+    const fetchRecklessDrivers = async () => {
+      try {
+        // Step 1: Fetch drivers with count30
+        const count30Query = query(
+          collection(db, 'Violation'),
+          where('count30', '>=', 1)
+        );
+        
+        const count30Snapshot = await getDocs(count30Query);
+        console.log('Count30 Snapshot:', count30Snapshot.docs);
+    
+        const recklessDrivers = {};
+        console.log('Processing Count30 Drivers:');
+        
+        count30Snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          console.log(`Count30 DriverID: ${data.driverID}`);
+          if (data.driverID) {
+            if (!recklessDrivers[data.driverID]) {
+              recklessDrivers[data.driverID] = {
+                id: doc.id,
+                ...data,
+              };
+              console.log(`Added to Reckless Drivers: ${data.driverID}`);
+            }
+          }
+        });
+    
+        // Step 2: Fetch drivers with count50
+        const count50Query = query(
+          collection(db, 'Violation'),
+          where('count50', '>=', 1)
+        );
+    
+        const count50Snapshot = await getDocs(count50Query);
+        console.log('Processing Count50 Drivers:');
+        
+        count50Snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          console.log(`Count50 DriverID: ${data.driverID}`);
+          if (data.driverID) {
+            if (!recklessDrivers[data.driverID]) {
+              recklessDrivers[data.driverID] = {
+                id: doc.id,
+                ...data,
+              };
+              console.log(`Added to Reckless Drivers: ${data.driverID}`);
+            } else {
+              console.log(`Driver already exists: ${data.driverID}`);
+              recklessDrivers[data.driverID].count50 = data.count50; // Combine counts
+            }
+          }
+        });
+    
+        console.log('Reckless Drivers:', recklessDrivers);
+    
+        // Step 3: Fetch driver details from the Driver table
+        const driverIDs = Object.keys(recklessDrivers);
+    
+        // Use Promise.all to fetch all driver details in parallel
+        const driverDetailsPromises = driverIDs.map(async (id) => {
+          const driverQuery = query(
+            collection(db, 'Driver'),
+            where('DriverID', '==', id)
+          );
+          const driverSnapshot = await getDocs(driverQuery);
+          if (!driverSnapshot.empty) {
+            const driverData = driverSnapshot.docs[0].data();
+            return {
+              ...recklessDrivers[id],
+              ...driverData, // Merge driver data
+            };
+          }
+          return recklessDrivers[id]; // Return reckless driver if no match found
+        });
+    
+        const detailedRecklessDrivers = await Promise.all(driverDetailsPromises);
+    
+        console.log('Detailed Reckless Drivers:', detailedRecklessDrivers);
+        setDriverData(detailedRecklessDrivers);
+      } catch (error) {
+        console.error('Error fetching reckless drivers:', error);
+      }
     };
-
     const fetchMotorcycles = () => {
-      const motorcycleQuery = query(
-        collection(db, 'Motorcycle'),
-      );
+      const motorcycleQuery = query(collection(db, 'Motorcycle'));
       const unsubscribe = onSnapshot(motorcycleQuery, (snapshot) => {
         const bikes = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -100,15 +168,14 @@ const DriverList = () => {
       });
       return () => unsubscribe();
     };
-
-      fetchDrivers();
-      fetchMotorcycles();
-   
-  }, [GDTUID]);
+  
+    fetchRecklessDrivers();
+    fetchMotorcycles();
+  }, [GDTUID]);  
 
   const viewDriverDetails = (driverID) => {
     console.log('Navigating to details for driver ID:', driverID);
-    navigate(`/driver-details/${driverID}`);
+    navigate(`/gdtdriverdetails/${driverID}`);
   };
 
   const handleLogout = () => {
@@ -124,7 +191,7 @@ const DriverList = () => {
       <Header active="driverslist" />
 
       <div className="breadcrumb" style={{ marginRight: '100px' }}>
-        <a onClick={() => navigate('/gdt-home')}>Home</a>
+        <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
         <span> / </span>
@@ -133,7 +200,7 @@ const DriverList = () => {
 
       <main>
         <div className={s.container}>
-          <h2 className={s.title}>Rickless Drivers List</h2>
+          <h2 className={s.title}>Reckless Drivers List</h2>
 
           <div className={s.searchInputs}>
             <div className={s.searchContainer}>
