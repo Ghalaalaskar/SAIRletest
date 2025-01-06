@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom'; // Keep only one import for useNavigate and useLocation
 import { db } from '../../firebase';
 import Map from '../Map'; 
 import { Button, Modal } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './GDTHeader';
-import { useLocation } from 'react-router-dom';
 import s from "../../css/ViolationDetail.module.css";
 import X from '../../images/redx.webp';
 import  '../../css/CustomModal.css';
-
 
 const ViolationDetail = () => {
   const [violation, setViolation] = useState(null);
@@ -147,23 +145,47 @@ const handleViewComplaints = () => {
     // For numbers greater than 20, return "th"
     return num + "th"; // Fallback for numbers greater than 20
   };
+  const renderBreadcrumb = () => {
+    if (location.pathname.includes('gdtricklessdrives')) {
+      return (
+        <>
+          <a onClick={() => navigate('/gdthome')}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
+          <span> / </span>
+          <a onClick={() => navigate('/gdtricklessdrives')}>Reckless Drivers List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
+        </>
+      );
+    }
+
+    if (location.pathname.includes('violations')) {
+      return (
+        <>
+          <a onClick={() => navigate('/gdthome')}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate('/gdtdriverslist')}>Driver List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtdriverdetails/${violation?.driverId}`)}>Drivers Details</a>
+          <span> / </span>
+          <a onClick={() => navigate('/gdtviolations')}>Violations List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
+        </>
+      );
+    }
+
+    return null; // Return null if no condition matches
+  };
 
   return (
-    <div  >
+    <div>
+      {/* Header Component */}
+      <Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
 
-<Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
-
-      <div className="breadcrumb">
-        <a onClick={() => navigate('/GDT-home')}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate('/driverslist')}>Driver List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/driver-details/${violation.driverId}`)}>Drivers Details</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/drivers/:driverId/GDTviolations`)}>Violations List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
-      </div>
+      {/* Render Breadcrumb */}
+      <div className="breadcrumb">{renderBreadcrumb()}</div>
 
       <main  className={s.violation}>
       <h2 className="title">Violation Details</h2>

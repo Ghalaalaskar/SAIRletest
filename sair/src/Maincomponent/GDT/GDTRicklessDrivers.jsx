@@ -177,7 +177,7 @@ const goBack = () => navigate(-1); // Go back to the previous page
 
   const viewDriverDetails = (driverID) => {
     console.log('Navigating to details for driver ID:', driverID);
-    navigate(`/gdtdriverdetails/${driverID}`);
+    navigate(`/gdtviolationdriver/${driverID}`);
   };
 
   const handleLogout = () => {
