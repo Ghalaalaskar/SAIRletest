@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../firebase';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   collection, doc, onSnapshot, deleteDoc, query, where, getDoc, getDocs, updateDoc
 } from 'firebase/firestore';
@@ -8,10 +7,12 @@ import EyeIcon from '../../images/eye.png';
 import successImage from '../../images/Sucess.png';
 import errorImage from '../../images/Error.png';
 import { SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
-import { Button, Table, Modal } from 'antd';
+import { Button, Table, Modal, Pagination } from 'antd';
 import Header from './GDTHeader';
 import '../../css/CustomModal.css';
 import s from "../../css/DriverList.module.css";
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 
 const DriverList = () => {
   const [driverData, setDriverData] = useState([]);
@@ -22,6 +23,7 @@ const DriverList = () => {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(true);
   const navigate = useNavigate();
+const goBack = () => navigate(-1); // Go back to the previous page
   const GDTUID = sessionStorage.getItem('gdtUID');
  const columns = [
     {
@@ -189,19 +191,16 @@ const DriverList = () => {
   return (
     <div>
       <Header active="driverslist" />
-
       <div className="breadcrumb" style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/gdtviolations')}>Violation List</a>
         <span> / </span>
-        <a>Rickless Drivers List</a>
+        <a>Reckless Drivers List</a>
       </div>
-
       <main>
         <div className={s.container}>
           <h2 className={s.title}>Reckless Drivers List</h2>
-
           <div className={s.searchInputs}>
             <div className={s.searchContainer}>
               <SearchOutlined style={{ color: '#059855' }} />
@@ -215,29 +214,41 @@ const DriverList = () => {
             </div>
           </div>
         </div>
-
         <br />
-
+  
         <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-          style={{ width: '1200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto' }}
-        />
+  columns={columns}
+  dataSource={filteredData}
+  rowKey="id"
+  pagination={false} // Disable default pagination
+  style={{ width: '1200px', margin: '0 auto', marginBottom: '20px' }} 
+/>
 
+{/* Flexbox container for button and pagination */}
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+  <Button onClick={goBack} style={{
+    height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
+  }}>
+    <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
+  </Button>
+
+  {/* Pagination component */}
+  <Pagination
+    defaultCurrent={1}
+    total={filteredData.length}
+    pageSize={5}
+    showSizeChanger={false} // Optional: hide size changer if not needed
+  />
+</div>
+  
         {/* Notification Modal */}
         <Modal
           visible={isNotificationVisible}
           onCancel={() => setIsNotificationVisible(false)}
-          footer={<p style={{textAlign:'center'}}>{notificationMessage}</p>}
-          style={{top:'38%'}}
-          className="custom-modal" 
-          closeIcon={
-            <span className="custom-modal-close-icon">
-              ×
-            </span>
-          }
+          footer={<p style={{ textAlign: 'center' }}>{notificationMessage}</p>}
+          style={{ top: '38%' }}
+          className="custom-modal"
+          closeIcon={<span className="custom-modal-close-icon">×</span>}
         >
           <div style={{ textAlign: 'center' }}>
             <img
@@ -245,9 +256,7 @@ const DriverList = () => {
               alt={isSuccess ? 'Success' : 'Error'}
               style={{ width: '20%', marginBottom: '16px' }}
             />
-            
           </div>
-          
         </Modal>
       </main>
     </div>
