@@ -17,6 +17,8 @@ import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css";
 import X from "../../images/eye.png";
 import "../../css/CustomModal.css";
+import formstyle from "../../css/Profile.module.css";
+import { IoArrowForwardOutline } from "react-icons/io5";
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
@@ -27,6 +29,7 @@ const ViolationGeneral = () => {
   const [complaints, setComplaints] = useState([]);
   const [employerDetails, setEmployerDetails] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
 
   useEffect(() => {
     const fetchViolationDetails = async () => {
@@ -195,6 +198,14 @@ const ViolationGeneral = () => {
     } else {
       setIsPopupVisible(true); // Show popup if no complaints exist
     }
+  };
+
+  const handleShowPopupCompany = () => {
+    setIsPopupVisibleComp(true);
+  };
+
+  const handleClosePopupCompany = () => {
+    setIsPopupVisibleComp(false);
   };
 
   const getOrdinal = (num) => {
@@ -414,10 +425,8 @@ const ViolationGeneral = () => {
                   </svg>
                   Driver Email
                 </h3>
-                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                  <a
-                    href={`mailto:${driverData.dEmail}`}
-                  >
+                <p style={{ fontSize: "18px", marginLeft: "45px", color: "#444" }}>
+                  <a href={`mailto:${driverData.dEmail}`} style={{ color: "#444", textDecoration: "underline"}}> 
                     {driverData.dEmail}
                   </a>
                 </p>
@@ -478,6 +487,141 @@ const ViolationGeneral = () => {
                   {employerDetails?.ShortCompanyName}
                 </p>
               </div>
+
+              <div
+                style={{
+                  marginLeft: "45px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <a
+                  onClick={handleShowPopupCompany}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <span style={{ marginRight: "10px", color: "#059855" }}>
+                    Explore Company Details
+                  </span>
+                </a>
+                <a
+                  onClick={handleShowPopupCompany}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <IoArrowForwardOutline
+                    size={20}
+                    style={{ color: "#059855", marginTop: "5px" }}
+                  />
+                </a>
+              </div>
+              <p></p>
+              <a
+                onClick={handleShowPopupCompany}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+              </a>
+              {/*//////////////// POP-UP  ////////////////*/}
+              <Modal
+                visible={isPopupVisibleComp}
+                onCancel={handleClosePopupCompany}
+                footer={null} 
+                width={700}
+              >
+                <main className={formstyle.GDTcontainer}>
+                  <form>
+                    <h4 className={formstyle.GDTLabel}>Company Information</h4>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Commercial Number
+                        </label>
+                        <input
+                          type="text"
+                          name="commercialNumber"
+                          value={employerDetails?.commercialNumber}
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Company Name
+                        </label>
+                        <input
+                          type="text"
+                          name="CompanyName"
+                          value={employerDetails?.CompanyName}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="PhoneNumber"
+                          value={`${employerDetails?.PhoneNumber}`}
+                          readOnly
+                        />
+                      </div>
+
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Short Company Name
+                        </label>
+                        <input
+                          type="text"
+                          name="ShortCompanyName"
+                          value={`${employerDetails?.ShortCompanyName}`}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Company Email
+                        </label>
+                        <a
+                          href={`mailto:${employerDetails?.CompanyEmail}`}
+                          className={formstyle.profileLink}
+                          style={{ textDecoration: "none", color: "inherit" }} // Optional styling
+                        >
+                          <input
+                            type="text"
+                            name="CompanyEmail"
+                            value={employerDetails?.CompanyEmail}
+                            readOnly
+                            style={{
+                              pointerEvents: "none",
+                              textDecoration: "underline",
+                            }}
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  ></div>
+                </main>
+              </Modal>
+              {/*///////////////////////////////END POP-UP/////////////////////////////////////////// */}
               <hr />
               <div>
                 <h3

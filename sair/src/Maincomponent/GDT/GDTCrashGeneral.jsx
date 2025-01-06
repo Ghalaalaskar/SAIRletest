@@ -10,12 +10,14 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { db, auth } from "../../firebase";
 import Map from "../Map";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css"; // Reusing the same CSS module
 import crashImage from "../../images/crash.png";
 import "../../css/CustomModal.css";
+import formstyle from "../../css/Profile.module.css";
+import { IoArrowForwardOutline } from "react-icons/io5";
 
 const CrashGeneral = () => {
   const [currentCrash, setCurrentCrash] = useState({});
@@ -24,6 +26,7 @@ const CrashGeneral = () => {
   const [employerDetails, setEmployerDetails] = useState({});
   const { crashId } = useParams();
   const navigate = useNavigate();
+  const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
 
   useEffect(() => {
     const fetchCrashDetails = async () => {
@@ -43,7 +46,7 @@ const CrashGeneral = () => {
             const driverSnapshot = await getDocs(driverCollection);
             if (!driverSnapshot.empty) {
               const driverData = driverSnapshot.docs[0].data();
-              
+
               setDriverDetails(driverData);
               fetchEmployerDetails(driverData.CompanyName);
             }
@@ -105,6 +108,14 @@ const CrashGeneral = () => {
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
 
+  const handleShowPopupCompany = () => {
+    setIsPopupVisibleComp(true);
+  };
+
+  const handleClosePopupCompany = () => {
+    setIsPopupVisibleComp(false);
+  };
+
   return (
     <div>
       <Header active="gdtcrashes" />
@@ -120,6 +131,41 @@ const CrashGeneral = () => {
       </div>
 
       <main className={s.violation}>
+        {!currentCrash.RespondedBy && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px", // Adjust spacing between the checkbox and the text
+              justifyContent: "center",
+            }}
+          >
+            <label className={s["checkbox-wrapper"]}>
+              <input type={s.checkbox} />
+              <div className={s.checkmark}>
+                <svg viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    d="M20 6L9 17L4 12"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  ></path>
+                </svg>
+              </div>
+              <span
+                style={{
+                  color: "red",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  marginLeft: "10px",
+                }}
+              >
+                I will respond to this crash
+              </span>
+            </label>
+          </div>
+        )}
+
         <h2 className={s.title}>Crash Details</h2>
         {currentCrash.GPSnumber && currentMotorCycle && (
           <>
@@ -286,10 +332,11 @@ const CrashGeneral = () => {
                 Driver Email
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-              <a
-                    href={`mailto:${driverDetails.Email}`}
-                  >
-                {driverDetails.Email}
+                <a
+                  href={`mailto:${driverDetails.Email}`}
+                  style={{ color: "#444", textDecoration: "underline" }}
+                >
+                  {driverDetails.Email}
                 </a>
               </p>
               <div id="company name">
@@ -342,13 +389,146 @@ const CrashGeneral = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  Driver Company Name
+                  Company Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                {employerDetails.ShortCompanyName}
+                  {employerDetails?.ShortCompanyName}
                 </p>
               </div>
 
+              <div
+                style={{
+                  marginLeft: "45px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <a
+                  onClick={handleShowPopupCompany}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <span style={{ marginRight: "10px", color: "#059855" }}>
+                    Explore Company Details
+                  </span>
+                </a>
+                <a
+                  onClick={handleShowPopupCompany}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <IoArrowForwardOutline
+                    size={20}
+                    style={{ color: "#059855", marginTop: "5px" }}
+                  />
+                </a>
+              </div>
+              <p></p>
+              <a
+                onClick={handleShowPopupCompany}
+                style={{
+                  cursor: "pointer",
+                }}
+              ></a>
+              {/*//////////////// POP-UP  ////////////////*/}
+              <Modal
+                visible={isPopupVisibleComp}
+                onCancel={handleClosePopupCompany}
+                footer={null}
+                width={700}
+              >
+                <main className={formstyle.GDTcontainer}>
+                  <form>
+                    <h4 className={formstyle.GDTLabel}>Company Information</h4>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Commercial Number
+                        </label>
+                        <input
+                          type="text"
+                          name="commercialNumber"
+                          value={employerDetails?.commercialNumber}
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Company Name
+                        </label>
+                        <input
+                          type="text"
+                          name="CompanyName"
+                          value={employerDetails?.CompanyName}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="PhoneNumber"
+                          value={`${employerDetails?.PhoneNumber}`}
+                          readOnly
+                        />
+                      </div>
+
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Short Company Name
+                        </label>
+                        <input
+                          type="text"
+                          name="ShortCompanyName"
+                          value={`${employerDetails?.ShortCompanyName}`}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+
+                    <div className={formstyle.formRow}>
+                      <div>
+                        <label className={formstyle.profileLabel}>
+                          Company Email
+                        </label>
+                        <a
+                          href={`mailto:${employerDetails?.CompanyEmail}`}
+                          className={formstyle.profileLink}
+                          style={{ textDecoration: "none", color: "inherit" }} // Optional styling
+                        >
+                          <input
+                            type="text"
+                            name="CompanyEmail"
+                            value={employerDetails?.CompanyEmail}
+                            readOnly
+                            style={{
+                              pointerEvents: "none",
+                              textDecoration: "underline",
+                            }}
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  ></div>
+                </main>
+              </Modal>
+              {/*///////////////////////////////END POP-UP/////////////////////////////////////////// */}
               <hr />
 
               <h3
