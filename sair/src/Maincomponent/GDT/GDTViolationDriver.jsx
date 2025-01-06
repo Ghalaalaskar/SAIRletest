@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link,useNavigate, useParams } from 'react-router-dom';
-import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { Table } from 'antd';
 import { db } from '../../firebase';
 import Header from './GDTHeader';
 import s from "../../css/VDriver.module.css";
 import EyeIcon from '../../images/eye.png';
 import '../../css/CustomModal.css';
-
+import { collection, query, where, onSnapshot, doc, getDoc, getDocs } from 'firebase/firestore';
 
 const ViolationsTable = () => {
   const { driverId } = useParams(); // Get driverId from URL parameters
@@ -20,29 +19,22 @@ const ViolationsTable = () => {
       setError("Driver ID is missing.");
       return; // Exit early if driverId is not available
     }
-  
-    const fetchViolations = () => {
-      const violationsQuery = query(collection(db, 'Violation'), where('driverID', '==', driverId));
-  
-      const unsubscribe = onSnapshot(violationsQuery, (querySnapshot) => {
+    const fetchViolations = async () => {
+      try {
+        const violationsQuery = query(collection(db, 'Violation'), where('driverID', '==', driverId));
+        const querySnapshot = await getDocs(violationsQuery);
         const violationsList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-  
-        const sortedViolations = violationsList.sort((a, b) => {
-          return (b.time || 0) - (a.time || 0);
-        });
-  
+        const sortedViolations = violationsList.sort((a, b) => b.time - a.time);
         setViolations(sortedViolations);
-      }, (error) => {
+      } catch (error) {
         console.error('Error fetching violations:', error);
         setError('Failed to fetch violations.');
-      });
-  
-      return () => unsubscribe();
+      }
     };
-  
+    
     fetchViolations();
   }, [driverId]);
   
@@ -85,6 +77,19 @@ const ViolationsTable = () => {
       key: 'date',
       align: 'center',
       render: (text, record) => formatDate(record.time),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'violationType',
+      key: 'violationType',
+      align: 'center',
+      render: (text, record) => {
+        // Check if count30 or count50 is greater than 0
+        if (record.count30 > 0 || record.count50 > 0) {
+          return 'Reckless Violation'; // If either count30 or count50 is greater than 0, mark as Reckless Violation
+        }
+        return 'Regular Violation'; // Otherwise, mark as Regular Violation
+      },
     },
     {
       title: 'Details',

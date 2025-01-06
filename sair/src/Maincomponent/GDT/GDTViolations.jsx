@@ -119,10 +119,15 @@ const ViolationList = () => {
     );
 
     const unsubscribe = onSnapshot(violationCollection, (snapshot) => {
-      const violationList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const violationList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const isReckless = (data.count30 > 0 || data.count50 > 0);
+        return {
+          id: doc.id,
+          ...data,
+          isReckless, // Add reckless classification
+        };
+      });
       setViolations(violationList);
       if (violationList.length > 0) {
         const violationIDs = violationList.map(v => v.violationID); // Collecting violation IDs
@@ -186,6 +191,14 @@ const ViolationList = () => {
       dataIndex: 'driverSpeed',
       key: 'driverSpeed',
       align: 'center',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'violationType',
+      key: 'violationType',
+      align: 'center',
+      render: (text, record) => (record.isReckless ? 'Reckless Violation' : 'Regular Violation'),
+
     },
     {
       title: 'Details',
