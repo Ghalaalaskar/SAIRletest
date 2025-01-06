@@ -213,6 +213,25 @@ const ViolationList = () => {
             <h2 className={s.title}>Violations List</h2>
             <div className={s.searchInputs}>
               {/* Search inputs */}
+              <div className={s.searchContainer}>
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="#059855" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search by Driver Name or Company Name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ width: '280px' }}
+                />
+              </div>
+              <div className={s.searchContainer}>
+                <input
+                  type="date"
+                  value={searchDate}
+                  onChange={(e) => setSearchDate(e.target.value)}
+                  style={{ width: '120px', backgroundColor: 'transparent' }} />
+              </div>
             </div>
           </div>
 
