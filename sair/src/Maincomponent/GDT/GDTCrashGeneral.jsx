@@ -6,12 +6,15 @@ import {
   where,
   collection,
   onSnapshot,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
 import { db, auth } from "../../firebase";
 import Map from "../Map";
 import { Button, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import { UsergroupAddOutlined } from "@ant-design/icons";
 import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css"; // Reusing the same CSS module
 import crashImage from "../../images/crash.png";
@@ -24,9 +27,12 @@ const CrashGeneral = () => {
   const [currentMotorCycle, setCurrentMotorCycle] = useState({});
   const [driverDetails, setDriverDetails] = useState({});
   const [employerDetails, setEmployerDetails] = useState({});
+  const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
+  const [originalGDTData, setOriginalGDTData] = useState({});
   const { crashId } = useParams();
   const navigate = useNavigate();
   const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchCrashDetails = async () => {
@@ -67,6 +73,32 @@ const CrashGeneral = () => {
         console.error("Error fetching crash details:", error);
       }
     };
+
+    const GDTUID = sessionStorage.getItem("gdtUID");
+    if (!GDTUID) {
+      console.error("GDTUID is null or undefined");
+      return;
+    }
+
+    const fetchGDT = async () => {
+      try {
+        const docRef = doc(db, "GDT", GDTUID);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          console.log("Document data:", docSnap.data());
+          setGDT(docSnap.data()); // Set the retrieved data to the GDT state
+          setOriginalGDTData(docSnap.data()); // Store the original data
+        } else {
+          console.error("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error);
+      }
+    };
+
+    fetchGDT();
+    fetchEmployerDetails(GDT.Fname);
 
     fetchCrashDetails();
   }, [crashId]);
@@ -116,12 +148,53 @@ const CrashGeneral = () => {
     setIsPopupVisibleComp(false);
   };
 
+  const handleConfirmResponse = () => {
+    setModalVisible(true); // Show the confirmation modal
+  };
+
+  const handleResponse = async () => {
+    setModalVisible(false); // Close the modal
+
+    try {
+      // Check if crashID exists and is valid
+      if (!currentCrash.crashID) {
+        console.error("Crash ID is missing");
+        return;
+      }
+
+      // Ensure the GDT data is valid
+      if (!GDT.Fname || !GDT.Lname) {
+        console.error("Responder details are incomplete");
+        return;
+      }
+
+      // Update the RespondedBy field in the currentCrash object
+      const updatedCrash = {
+        ...currentCrash,
+        RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
+      };
+
+      // Reference to the Firestore document
+      const crashDocRef = doc(db, "Crash", currentCrash.crashID);
+
+      // Update Firestore with the new RespondedBy field
+      await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
+
+      // Update the local state with the new crash details
+      setCurrentCrash(updatedCrash);
+
+      console.log("Crash response updated successfully");
+    } catch (error) {
+      console.error("Error updating crash response:", error);
+    }
+  };
+
   return (
     <div>
       <Header active="gdtcrashes" />
 
       <div className="breadcrumb">
-        <a onClick={() => navigate("/GDT-home")}>Home</a>
+        <a onClick={() => navigate("/gdthome")}>Home</a>
         <span> / </span>
         <a onClick={() => navigate("/GDTcrashes")}>Crashes List</a>
         <span> / </span>
@@ -131,40 +204,51 @@ const CrashGeneral = () => {
       </div>
 
       <main className={s.violation}>
-        {!currentCrash.RespondedBy && (
+        {/* Conditionally show the prompt if status is 'confirm' and RespondedBy is not set */}
+        {currentCrash.Status === "Confirmed" && !currentCrash.RespondedBy && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "10px", // Adjust spacing between the checkbox and the text
+              gap: "10px",
               justifyContent: "center",
             }}
           >
-            <label className={s["checkbox-wrapper"]}>
-              <input type={s.checkbox} />
-              <div className={s.checkmark}>
-                <svg viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    d="M20 6L9 17L4 12"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                </svg>
-              </div>
-              <span
-                style={{
-                  color: "red",
-                  fontWeight: "bold",
-                  fontSize: "20px",
-                  marginLeft: "10px",
-                }}
-              >
-                I will respond to this crash
-              </span>
-            </label>
+            <span
+              style={{
+                color: "red",
+                fontWeight: "bold",
+                fontSize: "20px",
+              }}
+            >
+              Would you like to handle this crash report?
+            </span>
+
+            <Button type="primary" onClick={handleConfirmResponse}>
+              Confirm Response
+            </Button>
           </div>
         )}
+
+        <Modal
+          title="Confirm Response"
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)} // Close the modal when canceled
+          centered
+          footer={[
+            <Button key="cancel" onClick={() => setModalVisible(false)}>
+              Cancel
+            </Button>,
+            <Button key="confirm" type="primary" onClick={handleResponse}>
+              Confirm
+            </Button>,
+          ]}
+        >
+          <p>
+            I'm {GDT.Fname} {GDT.Lname} and I will take responsibility for
+            responding to this crash.
+          </p>
+        </Modal>
 
         <h2 className={s.title}>Crash Details</h2>
         {currentCrash.GPSnumber && currentMotorCycle && (
@@ -340,7 +424,7 @@ const CrashGeneral = () => {
                 </a>
               </p>
 
-              <hr/>
+              <hr />
               <div id="company name">
                 <h3
                   style={{
@@ -515,45 +599,45 @@ const CrashGeneral = () => {
                   }}
                 >
                   <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="35"
-                  height="35"
-                  style={{ marginBottom: "-5px", marginRight: "10px" }}
-                  color="#059855"
-                  fill="none"
-                >
-                  <path
-                    d="M2 5L8.91302 8.92462C11.4387 10.3585 12.5613 10.3585 15.087 8.92462L22 5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M10.5 19.5C10.0337 19.4939 9.56682 19.485 9.09883 19.4732C5.95033 19.3941 4.37608 19.3545 3.24496 18.2184C2.11383 17.0823 2.08114 15.5487 2.01577 12.4814C1.99475 11.4951 1.99474 10.5147 2.01576 9.52843C2.08114 6.46113 2.11382 4.92748 3.24495 3.79139C4.37608 2.6553 5.95033 2.61573 9.09882 2.53658C11.0393 2.4878 12.9607 2.48781 14.9012 2.53659C18.0497 2.61574 19.6239 2.65532 20.755 3.79141C21.8862 4.92749 21.9189 6.46114 21.9842 9.52844C21.9939 9.98251 21.9991 10.1965 21.9999 10.5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M19 17C19 17.8284 18.3284 18.5 17.5 18.5C16.6716 18.5 16 17.8284 16 17C16 16.1716 16.6716 15.5 17.5 15.5C18.3284 15.5 19 16.1716 19 17ZM19 17V17.5C19 18.3284 19.6716 19 20.5 19C21.3284 19 22 18.3284 22 17.5V17C22 14.5147 19.9853 12.5 17.5 12.5C15.0147 12.5 13 14.5147 13 17C13 19.4853 15.0147 21.5 17.5 21.5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                    color="#059855"
+                    fill="none"
+                  >
+                    <path
+                      d="M2 5L8.91302 8.92462C11.4387 10.3585 12.5613 10.3585 15.087 8.92462L22 5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M10.5 19.5C10.0337 19.4939 9.56682 19.485 9.09883 19.4732C5.95033 19.3941 4.37608 19.3545 3.24496 18.2184C2.11383 17.0823 2.08114 15.5487 2.01577 12.4814C1.99475 11.4951 1.99474 10.5147 2.01576 9.52843C2.08114 6.46113 2.11382 4.92748 3.24495 3.79139C4.37608 2.6553 5.95033 2.61573 9.09882 2.53658C11.0393 2.4878 12.9607 2.48781 14.9012 2.53659C18.0497 2.61574 19.6239 2.65532 20.755 3.79141C21.8862 4.92749 21.9189 6.46114 21.9842 9.52844C21.9939 9.98251 21.9991 10.1965 21.9999 10.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M19 17C19 17.8284 18.3284 18.5 17.5 18.5C16.6716 18.5 16 17.8284 16 17C16 16.1716 16.6716 15.5 17.5 15.5C18.3284 15.5 19 16.1716 19 17ZM19 17V17.5C19 18.3284 19.6716 19 20.5 19C21.3284 19 22 18.3284 22 17.5V17C22 14.5147 19.9853 12.5 17.5 12.5C15.0147 12.5 13 14.5147 13 17C13 19.4853 15.0147 21.5 17.5 21.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                   Company Email
                 </h3>
-              <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                <a
-                  href={`mailto:${employerDetails?.CompanyEmail}`}
-                  style={{ color: "#444", textDecoration: "underline" }}
-                >
-                  {employerDetails?.CompanyEmail}
-                </a>
-              </p>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  <a
+                    href={`mailto:${employerDetails?.CompanyEmail}`}
+                    style={{ color: "#444", textDecoration: "underline" }}
+                  >
+                    {employerDetails?.CompanyEmail}
+                  </a>
+                </p>
 
                 <h3
                   style={{
@@ -563,21 +647,21 @@ const CrashGeneral = () => {
                   }}
                 >
                   <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="35"
-                  height="35"
-                  style={{ marginBottom: "-5px", marginRight: "10px" }}
-                  color="#059855"
-                  fill="none"
-                >
-                  <path
-                    d="M9.1585 5.71223L8.75584 4.80625C8.49256 4.21388 8.36092 3.91768 8.16405 3.69101C7.91732 3.40694 7.59571 3.19794 7.23592 3.08785C6.94883 3 6.6247 3 5.97645 3C5.02815 3 4.554 3 4.15597 3.18229C3.68711 3.39702 3.26368 3.86328 3.09497 4.3506C2.95175 4.76429 2.99278 5.18943 3.07482 6.0397C3.94815 15.0902 8.91006 20.0521 17.9605 20.9254C18.8108 21.0075 19.236 21.0485 19.6496 20.9053C20.137 20.7366 20.6032 20.3131 20.818 19.8443C21.0002 19.4462 21.0002 18.9721 21.0002 18.0238C21.0002 17.3755 21.0002 17.0514 20.9124 16.7643C20.8023 16.4045 20.5933 16.0829 20.3092 15.8362C20.0826 15.6393 19.7864 15.5077 19.194 15.2444L18.288 14.8417C17.6465 14.5566 17.3257 14.4141 16.9998 14.3831C16.6878 14.3534 16.3733 14.3972 16.0813 14.5109C15.7762 14.6297 15.5066 14.8544 14.9672 15.3038C14.4304 15.7512 14.162 15.9749 13.834 16.0947C13.5432 16.2009 13.1588 16.2403 12.8526 16.1951C12.5071 16.1442 12.2426 16.0029 11.7135 15.7201C10.0675 14.8405 9.15977 13.9328 8.28011 12.2867C7.99738 11.7577 7.85602 11.4931 7.80511 11.1477C7.75998 10.8414 7.79932 10.457 7.90554 10.1663C8.02536 9.83828 8.24905 9.56986 8.69643 9.033C9.14586 8.49368 9.37058 8.22402 9.48939 7.91891C9.60309 7.62694 9.64686 7.3124 9.61719 7.00048C9.58618 6.67452 9.44362 6.35376 9.1585 5.71223Z"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                  />
-                </svg>
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                    color="#059855"
+                    fill="none"
+                  >
+                    <path
+                      d="M9.1585 5.71223L8.75584 4.80625C8.49256 4.21388 8.36092 3.91768 8.16405 3.69101C7.91732 3.40694 7.59571 3.19794 7.23592 3.08785C6.94883 3 6.6247 3 5.97645 3C5.02815 3 4.554 3 4.15597 3.18229C3.68711 3.39702 3.26368 3.86328 3.09497 4.3506C2.95175 4.76429 2.99278 5.18943 3.07482 6.0397C3.94815 15.0902 8.91006 20.0521 17.9605 20.9254C18.8108 21.0075 19.236 21.0485 19.6496 20.9053C20.137 20.7366 20.6032 20.3131 20.818 19.8443C21.0002 19.4462 21.0002 18.9721 21.0002 18.0238C21.0002 17.3755 21.0002 17.0514 20.9124 16.7643C20.8023 16.4045 20.5933 16.0829 20.3092 15.8362C20.0826 15.6393 19.7864 15.5077 19.194 15.2444L18.288 14.8417C17.6465 14.5566 17.3257 14.4141 16.9998 14.3831C16.6878 14.3534 16.3733 14.3972 16.0813 14.5109C15.7762 14.6297 15.5066 14.8544 14.9672 15.3038C14.4304 15.7512 14.162 15.9749 13.834 16.0947C13.5432 16.2009 13.1588 16.2403 12.8526 16.1951C12.5071 16.1442 12.2426 16.0029 11.7135 15.7201C10.0675 14.8405 9.15977 13.9328 8.28011 12.2867C7.99738 11.7577 7.85602 11.4931 7.80511 11.1477C7.75998 10.8414 7.79932 10.457 7.90554 10.1663C8.02536 9.83828 8.24905 9.56986 8.69643 9.033C9.14586 8.49368 9.37058 8.22402 9.48939 7.91891C9.60309 7.62694 9.64686 7.3124 9.61719 7.00048C9.58618 6.67452 9.44362 6.35376 9.1585 5.71223Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
                   Company Phone Numbr
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
