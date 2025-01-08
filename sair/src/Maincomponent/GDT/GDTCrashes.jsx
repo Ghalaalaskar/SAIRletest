@@ -11,10 +11,12 @@ import {
   where,
 } from "firebase/firestore";
 import EyeIcon from "../../images/eye.png";
+import { Button, Modal } from "antd";
 import { Table } from "antd";
 import Header from "./GDTHeader";
 import s from "../../css/CrashList.module.css"; // CSS module for CrashList
 import "../../css/CustomModal.css";
+import { Tooltip } from 'antd';
 
 const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});
@@ -25,6 +27,7 @@ const CrashList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState(""); // Single search input
   const gdtUID = sessionStorage.getItem("gdtUID");
+  const [modalVisible, setModalVisible] = useState(false);
 
   // State to track viewed crashes
   const [viewedCrashes, setViewedCrashes] = useState(() => {
@@ -189,6 +192,7 @@ const CrashList = () => {
   };
 
   const handleViewDetails = (record) => {
+    setModalVisible(false);
     const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
     setViewedCrashes(updatedViewedCrashes);
     sessionStorage.setItem(
@@ -201,6 +205,55 @@ const CrashList = () => {
       /**path?? */
     }
   };
+
+  const handleConfirmResponse = () => {
+      setModalVisible(true); // Show the confirmation modal
+    };
+  
+    const handleResponse = async () => {
+      // setModalVisible(false); // Close the modal
+  
+      // try {
+      //   // Check if crashID exists and is valid
+      //   if (!crashID) {
+      //     console.error("Crash ID is missing");
+      //     return;
+      //   }
+  
+      //   // Ensure the GDT data is valid
+      //   if (!GDT.Fname || !GDT.Lname) {
+      //     console.error("Responder details are incomplete");
+      //     return;
+      //   }
+  
+      //   console.log("Before updatedCrash");
+      //   const updatedCrash = {
+      //     ...currentCrash,
+      //     RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
+      //   };
+      //   console.log("After updatedCrash");
+  
+      //   const crashDocRef = doc(db, "Crash", crashId);
+      //   console.log("Firestore document reference:", crashDocRef.path);
+  
+      //   // Check if document exists
+      //   const docSnapshot = await getDoc(crashDocRef);
+      //   if (!docSnapshot.exists()) {
+      //     console.error("No document found with ID:", crashId);
+      //     return;
+      //   }
+  
+      //   // Update Firestore with the new RespondedBy field
+      //   await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
+  
+      //   // Update the local state with the new crash details
+      //   setCurrentCrash(updatedCrash);
+  
+      //   console.log("Crash response updated successfully");
+      // } catch (error) {
+      //   console.error("Error updating crash response:", error);
+      // }
+    };
 
   const columns = [
     {
@@ -246,42 +299,34 @@ const CrashList = () => {
       },
     },
     {
-      title: "Responded By",
-      key: "respondedby",
+      title: "Response By",
+      key: "responseby",
       align: "center",
       render: (text, record) => {
         const formattedStatus =
           record.Status.charAt(0).toUpperCase() +
           record.Status.slice(1).toLowerCase();
-
+      
         if (formattedStatus === "Rejected") {
-          // Render a black X icon
           return (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="#333"
-            >
-              <path d="M18.3 5.7a1 1 0 00-1.4 0L12 10.6 7.1 5.7a1 1 0 00-1.4 1.4L10.6 12l-4.9 4.9a1 1 0 001.4 1.4L12 13.4l4.9 4.9a1 1 0 001.4-1.4L13.4 12l4.9-4.9a1 1 0 000-1.4z" />
-            </svg>
+            <span style={{ color: "#FF0000" }}>No Response Needed</span>
           );
         } else if (formattedStatus === "Confirmed" && record.RespondedBy) {
-          // Render the RespondedBy value
+          // Render the RespondedBy value with an underline
           return <span>{record.RespondedBy}</span>;
         } else if (formattedStatus === "Confirmed" && !record.RespondedBy) {
-          // Render "Pending"
           return (
             <button
               style={{
-                backgroundColor: "#FFD700", 
+                backgroundColor: "#FFD700",
                 color: "#000",
                 border: "none",
                 borderRadius: "4px",
                 padding: "4px 8px",
                 cursor: "pointer",
               }}
+
+              onClick={handleConfirmResponse}
             >
               Pending
             </button>
@@ -289,8 +334,8 @@ const CrashList = () => {
         } else {
           return null;
         }
-      },
-    },
+      },      
+    },    
     {
       title: "Date",
       key: "date",
@@ -360,6 +405,26 @@ const CrashList = () => {
             </div>
           </div>
 
+          <Modal
+          title="Confirm Response"
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)} // Close the modal when canceled
+          centered
+          footer={[
+            <Button key="details" onClick={() => {setModalVisible(false)}}> {/* see crash details: handleViewDetails(record.id) */}
+              Crash Details
+            </Button>,
+            <Button key="confirm" type="primary" onClick={handleResponse}>
+              Confirm
+            </Button>,
+          ]}
+        >
+          <p>
+            I'm Flan I will take responsibility for
+            responding to this crash.
+          </p>
+        </Modal>
+
           <Table
             columns={columns}
             dataSource={filteredCrashes}
@@ -367,7 +432,7 @@ const CrashList = () => {
             pagination={{ pageSize: 5 }}
             onRow={(record) => ({
               style: {
-                backgroundColor: !viewedCrashes[record.id]
+                backgroundColor: !viewedCrashes[record.id] && !record.RespondedBy 
                   ? "#f0f8f0"
                   : "transparent",
               },

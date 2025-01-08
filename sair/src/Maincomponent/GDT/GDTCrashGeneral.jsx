@@ -253,7 +253,7 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-            I'm {GDT.Fname} {GDT.Lname} and I will take responsibility for
+            Are you sure you{GDT.Fname} {GDT.Lname} will take responsibility for
             responding to this crash.
           </p>
         </Modal>
