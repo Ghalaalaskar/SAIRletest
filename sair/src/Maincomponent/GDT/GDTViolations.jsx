@@ -7,6 +7,9 @@ import { Table } from 'antd';
 import Header from './GDTHeader';
 import s from "../../css/Violations.module.css";
 import  '../../css/CustomModal.css';
+import { Button, Modal } from 'antd';
+import X from '../../images/redx.webp';
+import { Pagination } from 'antd';
 
 const ViolationList = () => {
   const [motorcycles, setMotorcycles] = useState({});
@@ -16,7 +19,7 @@ const ViolationList = () => {
   const [searchDate, setSearchDate] = useState('');
   const navigate = useNavigate();
   const gdtUID = sessionStorage.getItem('gdtUID');
-
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
   useEffect(() => {
     const fetchEmployerDrivers = async () => {
       if (gdtUID){
@@ -88,7 +91,6 @@ const ViolationList = () => {
       collection(db, 'History'),
       where('ID', 'in', violationIDs) // Matching by violationID
     );
-
     const unsubscribe = onSnapshot(motorcycleCollection, (snapshot) => {
       const motorcycleMap = {};
       snapshot.forEach((doc) => {
@@ -103,6 +105,13 @@ const ViolationList = () => {
     return () => unsubscribe();
   };
 
+  const handleViewViolations= () => {
+    if (violations.length > 0) {
+      navigate(`/gdtricklessdrives`); // Navigate to the first violation
+    } else {
+      setIsPopupVisible(true); // Show popup if no violation exist
+    }
+  };
   const fetchViolations = (driverIDs) => {
     const violationCollection = query(
       collection(db, 'Violation'),
@@ -110,10 +119,15 @@ const ViolationList = () => {
     );
 
     const unsubscribe = onSnapshot(violationCollection, (snapshot) => {
-      const violationList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const violationList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const isReckless = (data.count30 > 0 || data.count50 > 0);
+        return {
+          id: doc.id,
+          ...data,
+          isReckless, // Add reckless classification
+        };
+      });
       setViolations(violationList);
       if (violationList.length > 0) {
         const violationIDs = violationList.map(v => v.violationID); // Collecting violation IDs
@@ -126,16 +140,10 @@ const ViolationList = () => {
     return () => unsubscribe();
   };
 
-  //For Comapny name; since its arabic
-  // const normalizeText = (text) => {
-  //   return text?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  // };
-
   // Filtering violations
   const filteredViolations = violations.filter((violation) => {
     const driverName = drivers[violation.driverID]?.name || '  ';
     const companyName = drivers[violation.driverID]?.shortCompanyName || ' '; 
-    const licensePlate = motorcycles[violation.violationID] || '  ';
 
     let violationDate = '';
     if (violation.time) {
@@ -185,6 +193,14 @@ const ViolationList = () => {
       align: 'center',
     },
     {
+      title: 'Type',
+      dataIndex: 'violationType',
+      key: 'violationType',
+      align: 'center',
+      render: (text, record) => (record.isReckless ? 'Reckless Violation' : 'Regular Violation'),
+
+    },
+    {
       title: 'Details',
       key: 'Details',
       align: 'center',
@@ -200,7 +216,7 @@ const ViolationList = () => {
     <>
       <Header active="gdtviolations" />
       <div className="breadcrumb">
-        <a onClick={() => navigate('/gdt-home')}>Home</a>
+        <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/GDTviolations')}>Violations List</a>
       </div>
@@ -209,6 +225,7 @@ const ViolationList = () => {
           <div className={s.searchHeader}>
             <h2 className={s.title}>Violations List</h2>
             <div className={s.searchInputs}>
+              {/* Search inputs */}
               <div className={s.searchContainer}>
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                   <path stroke="#059855" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
@@ -235,8 +252,47 @@ const ViolationList = () => {
             columns={columns}
             dataSource={filteredViolations}
             rowKey="id"
-            pagination={{ pageSize: 5 }}
+            pagination={false} 
           />
+
+          {/* Flex container for button and pagination */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <Button
+              onClick={handleViewViolations}
+              style={{
+                width: 'auto',
+                height: '60px',
+                fontSize: '15px',
+                color: '#059855',
+                borderColor: '#059855',
+              }}
+            >
+              <i className="fas fa-eye" style={{ marginRight: '8px' }}></i>
+              View Reckless Drivers
+            </Button>
+
+            <Pagination 
+              defaultCurrent={1} // Set the default current page
+              total={filteredViolations.length} // Total number of items
+              pageSize={5} // Number of items per page
+              style={{ marginLeft: 'auto' }} // Align pagination to the right
+            />
+          </div>
+
+          {/* Popup for no violations */}
+          <Modal
+            title={null}
+            visible={isPopupVisible}
+            onCancel={() => setIsPopupVisible(false)}
+            footer={<p style={{ textAlign: 'center' }}>There are no drivers with reckless violations.</p>}
+            style={{ top: '38%' }}
+            className="custom-modal"
+            closeIcon={<span className="custom-modal-close-icon">×</span>}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              <img src={X} alt="No Complaints" style={{ width: '20%', marginBottom: '16px' }} />
+            </div>
+          </Modal>
         </div>
       </main>
     </>

@@ -122,7 +122,7 @@ const GDTStafflist = () => {
       setNotificationMessage('Staff deleted successfully!');
       setIsNotificationVisible(true);
       setTimeout(() => {
-        navigate('/stafflist'); // Adjust the path as needed
+        navigate('/gdtstafflist'); 
       }, 2000);
     } catch (error) {
       console.error('Error deleting staff:', error);
@@ -169,7 +169,7 @@ const GDTStafflist = () => {
               />
             </div>
             <Button type="primary" className={s.addButton}
-              onClick={() => navigate('/add-staff')}>
+              onClick={() => navigate('/gdtaddstaff')}>
               <UsergroupAddOutlined />
               <span>Add Staff</span>
             </Button>

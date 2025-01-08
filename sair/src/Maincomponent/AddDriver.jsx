@@ -1430,7 +1430,16 @@ const handleRemoveFile = () => {
   onChange={handleInputChange}
 >
   <option value="" disabled>Select a Motorcycle</option>
+
   <option value="None">None</option>
+    {manualDriver.GPSnumber && manualDriver.GPSnumber !== '' && (
+                    <option
+                      key={manualDriver.GPSnumber}
+                      value={manualDriver.GPSnumber}
+                    >
+                      {manualDriver.GPSnumber}
+                    </option>
+                  )}
   {availableMotorcycles.length > 0 ? (
     availableMotorcycles.map((item) => (
       <option key={item.id} value={item.GPSnumber}>

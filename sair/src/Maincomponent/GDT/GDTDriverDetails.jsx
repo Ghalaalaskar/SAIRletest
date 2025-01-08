@@ -1,12 +1,10 @@
 import React from 'react';
-import homeBackground from '../../images/homebackground7.png';
 import Header from './GDTHeader';
 import '../../css/EmployerHome.module.css';
 import '../../css/CustomModal.css';
 
-const GDTDriverlist = () => {
+const GDTDriverDetails = () => {
   const pageStyles = {
-    backgroundImage: `url(${homeBackground})`,
     backgroundSize: '1000px', 
     backgroundPosition: 'right', 
     height: '100vh',
@@ -23,12 +21,12 @@ const GDTDriverlist = () => {
 
   return (
     <div style={pageStyles}>
-      <Header active="gdtriverlist" />
+      <Header active="gdtdriverdetails" />
       <div style={h1WrapperStyles}>
-        <h1>Driver list feature currently unavailable. Stay tuned for updates!</h1>
+        <h1>Driver details will be done in sprint4. Stay tuned for updates!</h1>
       </div>
     </div>
   );
 };
 
-export default GDTDriverlist;
+export default GDTDriverDetails;
