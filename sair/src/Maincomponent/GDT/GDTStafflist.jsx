@@ -37,8 +37,8 @@ const GDTStafflist = () => {
   const columns = [
     {
       title: 'Staff ID',
-      dataIndex: 'StaffID',
-      key: 'StaffID',
+      dataIndex: 'ID',
+      key: 'ID',
       align: 'center',
     },
     {
@@ -90,7 +90,7 @@ const GDTStafflist = () => {
 
   const filteredData = staffData.filter(staff => {
     const fullName = `${staff.Fname} ${staff.Lname}`.toLowerCase();
-    const staffID = staff.StaffID.toLowerCase();
+    const staffID = staff.ID.toLowerCase();
     const query = searchQuery.toLowerCase();
 
     return staffID.includes(query) || fullName.includes(query);

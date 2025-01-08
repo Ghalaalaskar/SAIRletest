@@ -151,14 +151,6 @@ const CrashList = () => {
     fetchDriversAndCrashes();
   }, [gdtUID]);
 
-  //For Comapny name; since its arabic
-  const normalizeText = (text) => {
-    return text
-      ?.normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-  };
-
   const filteredCrashes = crashes
     .filter(
       (crash) => crash.Status === "Confirmed" || crash.Status === "Rejected"
@@ -184,7 +176,7 @@ const CrashList = () => {
     });
 
   const formatDate = (time) => {
-    const date = new Date(time * 1000); // Assuming timestamp is in seconds
+    const date = new Date(time * 1000); 
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
     const day = date.getDate().toString().padStart(2, "0"); // Days are 1-based
@@ -201,9 +193,6 @@ const CrashList = () => {
     );
 
     navigate(`/gdtcrash/general/${record.id}`);
-    {
-      /**path?? */
-    }
   };
 
   const handleConfirmResponse = () => {
