@@ -168,14 +168,22 @@ const CrashGeneral = () => {
         return;
       }
 
-      // Update the RespondedBy field in the currentCrash object
+      console.log("Before updatedCrash");
       const updatedCrash = {
         ...currentCrash,
         RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
       };
+      console.log("After updatedCrash");
 
-      // Reference to the Firestore document
-      const crashDocRef = doc(db, "Crash", currentCrash.crashID);
+      const crashDocRef = doc(db, "Crash", crashId);
+      console.log("Firestore document reference:", crashDocRef.path);
+
+      // Check if document exists
+      const docSnapshot = await getDoc(crashDocRef);
+      if (!docSnapshot.exists()) {
+        console.error("No document found with ID:", crashId);
+        return;
+      }
 
       // Update Firestore with the new RespondedBy field
       await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
@@ -1124,6 +1132,18 @@ const CrashGeneral = () => {
               )}
             </div>
             <hr />
+
+            {currentCrash.RespondedBy && (
+              <div class={formstyle.banner}>
+                <strong>
+                  This crash was responded by
+                  <span class={formstyle.underline}>
+                    {currentCrash.RespondedBy}
+                  </span>
+                </strong>
+              </div>
+            )}
+
             <div style={{ marginBottom: "80px" }}>
               <Button
                 onClick={goBack}
