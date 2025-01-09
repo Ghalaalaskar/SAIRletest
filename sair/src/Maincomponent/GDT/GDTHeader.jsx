@@ -10,8 +10,9 @@ import '../../css/CustomModal.css';
 import styles from "../../css/BadgeStyles.module.css";
 import { FirstNameContext } from '../../FirstNameContext';
 import { useContext } from 'react';
+
 const GDTHeader = ({ active }) => {
-  const { FirstName , setFirstName} = useContext(FirstNameContext);
+  const { firstName , setFirstName} = useContext(FirstNameContext);
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
@@ -20,28 +21,31 @@ const GDTHeader = ({ active }) => {
     const saved = localStorage.getItem("hasNewCrashes");
     return saved ? JSON.parse(saved) : false;
   });
-  ////For the header
+
   useEffect(() => {
     const fetchFirstName = async () => {
-      if (!FirstName) { // Only fetch if it's not set
-        const GDTUID = sessionStorage.getItem('gdtUID');
-        if (GDTUID) {
+      console.log(firstName);
+      if (!firstName) { // Fetch only if not already set
+        const gdtUID = sessionStorage.getItem('gdtUID');
+        if (gdtUID) {
           try {
-            const userDocRef = doc(db, 'GDT', GDTUID);
+            const userDocRef = doc(db, 'GDT', gdtUID);
             const docSnap = await getDoc(userDocRef);
             if (docSnap.exists()) {
               const data = docSnap.data();
               setFirstName(data.Fname || '');
             }
           } catch (error) {
-            console.error('Error fetching short company name:', error);
+            console.error('Error fetching first name:', error);
           }
         }
       }
     };
 
     fetchFirstName();
-  }, [FirstName, setFirstName]);
+  }, [firstName, setFirstName]); // Only rerun when `firstName` or `setFirstName` changes
+
+ 
   
   useEffect(() => {
     const fetchName = async () => {
@@ -73,6 +77,7 @@ const GDTHeader = ({ active }) => {
     try {
       await auth.signOut();
       sessionStorage.removeItem('gdtUID');
+      sessionStorage.removeItem('FirstName');
       window.dispatchEvent(new Event('storage'));
       navigate('/');
     } catch (error) {
@@ -160,7 +165,7 @@ const GDTHeader = ({ active }) => {
               onMouseLeave={(e) => (e.currentTarget.style.color = 'black')}
             >
               <UserOutlined style={{ marginRight: 10 }} />
-              Hello {name || ''}
+              Hello {firstName || ''}
               <DownOutlined style={{ marginLeft: 15 }} />
             </Link>
           </Dropdown>

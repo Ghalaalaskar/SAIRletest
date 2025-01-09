@@ -15,6 +15,7 @@ import s from '../../css/Login.module.css';
 import "../../css/common.css";
 import { useContext } from 'react';
 import { ShortCompanyNameContext } from '../../ShortCompanyNameContext';
+import { FirstNameContext } from '../../FirstNameContext';
 import '../../css/CustomModal.css';
 import l from '../../css/Signup.module.css';
 const { Step } = Steps;
@@ -23,6 +24,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState('');
   const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
+  const { firstName , setFirstName} = useContext(FirstNameContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [passworde, setPassworde] = useState('');
@@ -312,6 +314,12 @@ if (Object.keys(newMissingFields).length > 0) {
               }
               else{
                 sessionStorage.setItem('gdtUID', gdtUID); 
+                const GDTData = querySnapshot.docs[0].data();
+                const Fname = GDTData.Fname || 'su';
+                sessionStorage.setItem('FirstName', Fname);
+                setFirstName(Fname); // Update the context
+                console.log('looooooog in',firstName);
+
                 setTimeout(() => {
                   navigate('/gdthome');
                 }, 1500);
@@ -325,6 +333,10 @@ if (Object.keys(newMissingFields).length > 0) {
             }
               else{
                 sessionStorage.setItem('gdtUID', gdtUID);
+                const GDTData = querySnapshot.docs[0].data();
+                const Fname = GDTData.Fname || '';
+                sessionStorage.setItem('FirstName', Fname);
+                setFirstName(Fname); // Update the context
                 setTimeout(() => {
                   navigate('/gdthome');
                 }, 1500);
@@ -383,6 +395,7 @@ if (Object.keys(newMissingFields).length > 0) {
              const shortCompanyName = employerData.ShortCompanyName || '';
              sessionStorage.setItem('ShortCompanyName', shortCompanyName);
              setShortCompanyName(shortCompanyName); // Update the context
+             console.log('in empllllllll',shortCompanyName);
 
             setTimeout(() => {
               navigate('/employer-home');
@@ -543,6 +556,10 @@ if(showDetailsFormAdmin===true){
 
           console.log(`Document with email ${email} updated successfully!`);
           sessionStorage.setItem('gdtUID', gdtUID);
+          const GDTData = querySnapshot.docs[0].data();
+                const Fname = GDTData.Fname || '';
+                sessionStorage.setItem('FirstName', Fname);
+                setFirstName(Fname); // Update the context
           setCurrent(current + 1);
           setTimeout(() => {
           navigate('/gdthome');
@@ -593,6 +610,10 @@ console.log('in stafffffffffff');
 
           console.log(`Document with email ${email} updated successfully!`);
           sessionStorage.setItem('gdtUID', gdtUID);
+          const GDTData = querySnapshot.docs[0].data();
+                const Fname = GDTData.Fname || '';
+                sessionStorage.setItem('FirstName', Fname);
+                setFirstName(Fname); // Update the context
           setCurrent(current + 1);
           setTimeout(() => {
           navigate('/gdthome');
@@ -831,7 +852,7 @@ const handleback = () => {
             <div  >
               {showDetailsFormAdmin && !showDetailsFormStaff  ? ( 
                 <div>
-              <Steps current={current} size="small">
+              <Steps current={current} size="small" className={s.customSteps}>
       <Step title="Step 1" description=""  />
       <Step title="Step 2" description=""  />
     </Steps>

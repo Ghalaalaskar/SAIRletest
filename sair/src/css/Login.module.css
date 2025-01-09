@@ -157,3 +157,13 @@
   .signupLink:hover {
     text-decoration: underline !important;
   }
+
+  .customSteps .ant-steps-item-icon {
+    color: #ccc; /* Default color for all icons */
+  }
+  
+  .customSteps .ant-steps-item-process .ant-steps-item-icon {
+    color: #98050a; /* Color for the active (current) step */
+  }
+  
+
