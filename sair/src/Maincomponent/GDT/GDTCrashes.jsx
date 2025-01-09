@@ -153,7 +153,7 @@ const CrashList = () => {
 
   const filteredCrashes = crashes
     .filter(
-      (crash) => crash.Status === "Confirmed" || crash.Status === "Rejected"
+      (crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied"
     ) // Only include Rejected or Confirmed statuses
     .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
     .filter((crash) => {
@@ -280,7 +280,7 @@ const CrashList = () => {
           record.Status.slice(1).toLowerCase();
         return (
           <span
-            style={{ color: formattedStatus === "Confirmed" ? "green" : "red" }}
+            style={{ color: formattedStatus === "Emergency sos" ? "green" : "red" }}
           >
             {formattedStatus}
           </span>
@@ -296,14 +296,14 @@ const CrashList = () => {
           record.Status.charAt(0).toUpperCase() +
           record.Status.slice(1).toLowerCase();
       
-        if (formattedStatus === "Rejected") {
+        if (formattedStatus === "Denied") {
           return (
-            <span style={{ color: "#FF0000" }}>No Response Needed</span>
+            <span style={{ color: "grey" }}>No Response Needed</span>
           );
-        } else if (formattedStatus === "Confirmed" && record.RespondedBy) {
+        } else if (formattedStatus === "Emergency sos" && record.RespondedBy) {
           // Render the RespondedBy value with an underline
           return <span>{record.RespondedBy}</span>;
-        } else if (formattedStatus === "Confirmed" && !record.RespondedBy) {
+        } else if (formattedStatus === "Emergency sos" && !record.RespondedBy) {
           return (
             <button
               style={{
