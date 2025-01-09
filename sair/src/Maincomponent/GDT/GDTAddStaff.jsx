@@ -325,22 +325,7 @@ const handleBatchUpload = async (staffArray) => {
             <Header active="gdtstafflist" />
             <div className={s.container}>
                 <h2 className='title'>Add Staff</h2>
-                <p>You can add staff as a batch file:</p>
-                <div className={s.formRow}>
-                    <input
-                        id="fileInput"
-                        type="file"
-                        onChange={handleFileUpload}
-                        accept=".xls,.xlsx"
-                        className={s.fileInput}
-                    />
-                    {fileName && (
-                        <div style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
-                            <FaTrash onClick={handleRemoveFile} style={{ marginLeft: '10px', color: '#059855', cursor: 'pointer', fontSize: '20px' }} title="Remove file" />
-                        </div>
-                    )}
-                </div>
-
+                
                 {fileData.length === 0 ? (
                     <form onSubmit={handleSubmit} className={s.form}>
                         <div className={s.formRow}>
@@ -370,20 +355,21 @@ const handleBatchUpload = async (staffArray) => {
                         <div className={s.formRow}>
                             <div>
                                 <label>Staff ID</label>
-                                <input type="text" name="StaffID" value={manualStaff.ID} onChange={handleInputChange} className={s.inputField} />
+                                <input type="text" name="ID" value={manualStaff.ID} onChange={handleInputChange} className={s.inputField} />
                                 {validationMessages.ID && <p className={s.valdationMessage}>{validationMessages.ID}</p>}
                             </div>
                         </div>
                         <div>
                             <button type="submit" className={s.editBtn}>Add Staff</button>
+                            <button type="button" className={s.editBtn} onClick={() => navigate('/gdtaddstaffbatch')}>Add Staff as Batch</button>
                         </div>
                     </form>
                 ) : (
-                    <div>
-                        <button onClick={() => handleBatchUpload(fileData)} className={s.editBtn} style={{marginBottom:"10px"}}>
-                            Add All Staff from File
-                        </button>
-                    </div>
+                <div>
+                        //<button onClick={() => handleBatchUpload(fileData)} className={s.editBtn} style={{marginBottom:"10px"}}>
+                        //    Add All Staff from File
+                        //</button>
+                   </div>
                 )}
 
                 {popupVisible && (

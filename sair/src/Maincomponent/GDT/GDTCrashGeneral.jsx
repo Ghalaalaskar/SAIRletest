@@ -426,7 +426,13 @@ const CrashGeneral = () => {
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 <a
                   href={`mailto:${driverDetails.Email}`}
-                  style={{ color: "#444", textDecoration: "underline" }}
+                  style={{
+                    color: 'black', // Default color
+                    textDecoration: 'underline', // Underline the text
+                    transition: 'color 0.3s', // Smooth transition for color change
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leaves
                 >
                   {driverDetails.Email}
                 </a>

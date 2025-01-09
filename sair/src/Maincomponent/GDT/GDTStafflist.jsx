@@ -54,7 +54,14 @@ const GDTStafflist = () => {
       key: 'GDTEmail',
       align: 'center',
       render: (email) => (
-        <a href={`mailto:${email}`}>
+        <a href={`mailto:${email}`} style={{
+          color: 'black', // Default color
+          textDecoration: 'underline', // Underline the text
+          transition: 'color 0.3s', // Smooth transition for color change
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
+      >
           {email}
         </a>
       ),
