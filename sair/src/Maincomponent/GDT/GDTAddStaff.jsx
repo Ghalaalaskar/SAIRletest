@@ -19,7 +19,7 @@ const GDTAddStaff = () => {
         Lname: '',
         PhoneNumber: '+966',
         Email: '',
-        StaffID: '',
+        ID: '',
     });
     const navigate = useNavigate();
     const [fileData, setFileData] = useState([]);
@@ -62,7 +62,7 @@ const GDTAddStaff = () => {
                 return validatePhoneNumber(value);
             case 'Email':
                 return validateEmail(value);
-            case 'StaffID':
+            case 'ID':
                 return validateStaffID(value);
             default:
                 return '';
@@ -89,7 +89,7 @@ const GDTAddStaff = () => {
         let isValid = true;
         let newValidationMessages = {};
 
-        const { Fname, Lname, PhoneNumber, Email, StaffID } = manualStaff;
+        const { Fname, Lname, PhoneNumber, Email, ID } = manualStaff;
 
         if (!Fname) {
             newValidationMessages.Fname = 'Please enter staff first name.';
@@ -123,16 +123,16 @@ const GDTAddStaff = () => {
             }
         }
 
-        const staffIDValidation = validateStaffID(StaffID);
+        const staffIDValidation = validateStaffID(ID);
         if (staffIDValidation) {
-            newValidationMessages.StaffID = staffIDValidation;
+            newValidationMessages.ID = staffIDValidation;
             isValid = false;
         }
 
         setValidationMessages(newValidationMessages);
 
         if (isValid) {
-            const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, StaffID);
+            const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, ID);
             if (!uniqueValidationResult.isUnique) {
                 setPopupMessage(uniqueValidationResult.message);
                 setPopupImage(errorImage);
@@ -150,7 +150,7 @@ const GDTAddStaff = () => {
                     Lname,
                     GDTEmail: Email,
                     PhoneNumber,
-                    StaffID,
+                    ID,
                     isAdmin: false,
                     isDefaultPassword: true,
                 });
@@ -175,7 +175,7 @@ const GDTAddStaff = () => {
 const checkUniqueness = async (phone, email, staffID) => {
     const phoneQuery = query(collection(db, 'GDT'), where("PhoneNumber", "==", phone));
     const emailQuery = query(collection(db, 'GDT'), where("GDTEmail", "==", email));
-    const staffIDQuery = query(collection(db, 'GDT'), where("StaffID", "==", staffID));
+    const staffIDQuery = query(collection(db, 'GDT'), where("ID", "==", staffID));
 
     const phoneSnapshot = await getDocs(phoneQuery);
     if (!phoneSnapshot.empty) {
@@ -223,9 +223,9 @@ const handleBatchUpload = async (staffArray) => {
     const errorList = [];
 
     for (const staff of staffArray) {
-        const { Fname, Lname, PhoneNumber, Email, StaffID } = staff;
+        const { Fname, Lname, PhoneNumber, Email, ID } = staff;
 
-        if (!Fname || !Lname || !PhoneNumber || !Email || !StaffID) {
+        if (!Fname || !Lname || !PhoneNumber || !Email || !ID) {
             errorList.push({ staff, message: 'All fields are required.' });
             continue;
         }
@@ -242,13 +242,13 @@ const handleBatchUpload = async (staffArray) => {
             continue;
         }
 
-        const staffIDValidation = validateStaffID(StaffID);
+        const staffIDValidation = validateStaffID(ID);
         if (staffIDValidation) {
             errorList.push({ staff, message: `Error adding ${Fname} ${Lname}: ${staffIDValidation}` });
             continue;
-        }
+        }   
 
-        const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, StaffID);
+        const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, ID);
         if (!uniqueValidationResult.isUnique) {
             errorList.push({ staff, message: `Error adding ${Fname} ${Lname}: ${uniqueValidationResult.message}` });
             continue;
@@ -264,7 +264,7 @@ const handleBatchUpload = async (staffArray) => {
                 Lname,
                 GDTEmail: Email,
                 PhoneNumber,
-                StaffID,
+                ID,
                 isAdmin: false,
                 isDefaultPassword: true,
             });
@@ -370,8 +370,8 @@ const handleBatchUpload = async (staffArray) => {
                         <div className={s.formRow}>
                             <div>
                                 <label>Staff ID</label>
-                                <input type="text" name="StaffID" value={manualStaff.StaffID} onChange={handleInputChange} className={s.inputField} />
-                                {validationMessages.StaffID && <p className={s.valdationMessage}>{validationMessages.StaffID}</p>}
+                                <input type="text" name="StaffID" value={manualStaff.ID} onChange={handleInputChange} className={s.inputField} />
+                                {validationMessages.ID && <p className={s.valdationMessage}>{validationMessages.ID}</p>}
                             </div>
                         </div>
                         <div>
