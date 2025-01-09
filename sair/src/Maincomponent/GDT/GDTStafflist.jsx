@@ -37,8 +37,8 @@ const GDTStafflist = () => {
   const columns = [
     {
       title: 'Staff ID',
-      dataIndex: 'StaffID',
-      key: 'StaffID',
+      dataIndex: 'ID',
+      key: 'ID',
       align: 'center',
     },
     {
@@ -54,7 +54,14 @@ const GDTStafflist = () => {
       key: 'GDTEmail',
       align: 'center',
       render: (email) => (
-        <a href={`mailto:${email}`}>
+        <a href={`mailto:${email}`} style={{
+          color: 'black', // Default color
+          textDecoration: 'underline', // Underline the text
+          transition: 'color 0.3s', // Smooth transition for color change
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
+      >
           {email}
         </a>
       ),
@@ -90,7 +97,7 @@ const GDTStafflist = () => {
 
   const filteredData = staffData.filter(staff => {
     const fullName = `${staff.Fname} ${staff.Lname}`.toLowerCase();
-    const staffID = staff.StaffID.toLowerCase();
+    const staffID = staff.ID.toLowerCase();
     const query = searchQuery.toLowerCase();
 
     return staffID.includes(query) || fullName.includes(query);

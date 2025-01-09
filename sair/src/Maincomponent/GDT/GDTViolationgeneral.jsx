@@ -426,7 +426,14 @@ const ViolationGeneral = () => {
                   Driver Email
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px", color: "#444" }}>
-                  <a href={`mailto:${driverData.dEmail}`} style={{ color: "#444", textDecoration: "underline"}}> 
+                  <a href={`mailto:${driverData.dEmail}`} style={{
+      color: 'black', // Default color
+      textDecoration: 'underline', // Underline the text
+      transition: 'color 0.3s', // Smooth transition for color change
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+    onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
+  > 
                     {driverData.dEmail}
                   </a>
                 </p>
@@ -641,7 +648,13 @@ const ViolationGeneral = () => {
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 <a
                   href={`mailto:${employerDetails?.CompanyEmail}`}
-                  style={{ color: "#444", textDecoration: "underline" }}
+                  style={{
+                    color: 'black', // Default color
+                    textDecoration: 'underline', // Underline the text
+                    transition: 'color 0.3s', // Smooth transition for color change
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leaves
                 >
                   {employerDetails?.CompanyEmail}
                 </a>

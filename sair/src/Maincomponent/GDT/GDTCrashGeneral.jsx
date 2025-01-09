@@ -168,14 +168,22 @@ const CrashGeneral = () => {
         return;
       }
 
-      // Update the RespondedBy field in the currentCrash object
+      console.log("Before updatedCrash");
       const updatedCrash = {
         ...currentCrash,
         RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
       };
+      console.log("After updatedCrash");
 
-      // Reference to the Firestore document
-      const crashDocRef = doc(db, "Crash", currentCrash.crashID);
+      const crashDocRef = doc(db, "Crash", crashId);
+      console.log("Firestore document reference:", crashDocRef.path);
+
+      // Check if document exists
+      const docSnapshot = await getDoc(crashDocRef);
+      if (!docSnapshot.exists()) {
+        console.error("No document found with ID:", crashId);
+        return;
+      }
 
       // Update Firestore with the new RespondedBy field
       await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
@@ -245,7 +253,7 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-            I'm {GDT.Fname} {GDT.Lname} and I will take responsibility for
+            Are you sure you{GDT.Fname} {GDT.Lname} will take responsibility for
             responding to this crash.
           </p>
         </Modal>
@@ -418,7 +426,13 @@ const CrashGeneral = () => {
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 <a
                   href={`mailto:${driverDetails.Email}`}
-                  style={{ color: "#444", textDecoration: "underline" }}
+                  style={{
+                    color: 'black', // Default color
+                    textDecoration: 'underline', // Underline the text
+                    transition: 'color 0.3s', // Smooth transition for color change
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leaves
                 >
                   {driverDetails.Email}
                 </a>
@@ -1124,6 +1138,18 @@ const CrashGeneral = () => {
               )}
             </div>
             <hr />
+
+            {currentCrash.RespondedBy && (
+              <div class={formstyle.banner}>
+                <strong>
+                  This crash was responded by
+                  <span class={formstyle.underline}>
+                    {currentCrash.RespondedBy}
+                  </span>
+                </strong>
+              </div>
+            )}
+
             <div style={{ marginBottom: "80px" }}>
               <Button
                 onClick={goBack}

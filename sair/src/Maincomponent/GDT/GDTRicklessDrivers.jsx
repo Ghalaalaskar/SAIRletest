@@ -50,6 +50,20 @@ const goBack = () => navigate(-1); // Go back to the previous page
       dataIndex: 'Email',
       key: 'Email',
       align: 'center',
+      render: (text) => (
+        <a
+          href={`mailto:${text}`}
+          style={{
+            color: 'black', 
+            textDecoration: 'underline', 
+            transition: 'color 0.3s', 
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
+        >
+          {text}
+        </a>
+      ),
     },
     {
       title: 'Details',
