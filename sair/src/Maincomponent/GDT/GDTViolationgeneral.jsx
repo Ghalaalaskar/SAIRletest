@@ -431,6 +431,8 @@ const ViolationGeneral = () => {
                   </a>
                 </p>
               </div>
+              
+              <hr/>
               <div id="company name">
                 <h3
                   style={{
@@ -484,144 +486,197 @@ const ViolationGeneral = () => {
                   Company Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  {employerDetails?.CompanyName}
+                </p>
+
+                <h3
+                  style={{
+                    color: "#059855",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    color="#059855"
+                    fill="none"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                  >
+                    <path
+                      d="M16 10L18.1494 10.6448C19.5226 11.0568 20.2092 11.2628 20.6046 11.7942C21 12.3256 21 13.0425 21 14.4761V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8 9L11 9M8 13L11 13"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 22V19C12 18.0572 12 17.5858 11.7071 17.2929C11.4142 17 10.9428 17 10 17H9C8.05719 17 7.58579 17 7.29289 17.2929C7 17.5858 7 18.0572 7 19V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M2 22L22 22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M3 22V6.71724C3 4.20649 3 2.95111 3.79118 2.32824C4.58237 1.70537 5.74742 2.04355 8.07752 2.7199L13.0775 4.17122C14.4836 4.57937 15.1867 4.78344 15.5933 5.33965C16 5.89587 16 6.65344 16 8.16857V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Company Short Name
+                </h3>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {employerDetails?.ShortCompanyName}
+                </p>
+
+                <h3
+                  style={{
+                    color: "#059855",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    color="#059855"
+                    fill="none"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                  >
+                    <path
+                      d="M16 10L18.1494 10.6448C19.5226 11.0568 20.2092 11.2628 20.6046 11.7942C21 12.3256 21 13.0425 21 14.4761V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8 9L11 9M8 13L11 13"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 22V19C12 18.0572 12 17.5858 11.7071 17.2929C11.4142 17 10.9428 17 10 17H9C8.05719 17 7.58579 17 7.29289 17.2929C7 17.5858 7 18.0572 7 19V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M2 22L22 22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M3 22V6.71724C3 4.20649 3 2.95111 3.79118 2.32824C4.58237 1.70537 5.74742 2.04355 8.07752 2.7199L13.0775 4.17122C14.4836 4.57937 15.1867 4.78344 15.5933 5.33965C16 5.89587 16 6.65344 16 8.16857V22"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Company Commercial Number
+                </h3>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  {employerDetails?.commercialNumber}
+                </p>
+
+                <h3
+                  style={{
+                    color: "#059855",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="35"
+                  height="35"
+                  style={{ marginBottom: "-5px", marginRight: "10px" }}
+                  color="#059855"
+                  fill="none"
+                >
+                  <path
+                    d="M2 5L8.91302 8.92462C11.4387 10.3585 12.5613 10.3585 15.087 8.92462L22 5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10.5 19.5C10.0337 19.4939 9.56682 19.485 9.09883 19.4732C5.95033 19.3941 4.37608 19.3545 3.24496 18.2184C2.11383 17.0823 2.08114 15.5487 2.01577 12.4814C1.99475 11.4951 1.99474 10.5147 2.01576 9.52843C2.08114 6.46113 2.11382 4.92748 3.24495 3.79139C4.37608 2.6553 5.95033 2.61573 9.09882 2.53658C11.0393 2.4878 12.9607 2.48781 14.9012 2.53659C18.0497 2.61574 19.6239 2.65532 20.755 3.79141C21.8862 4.92749 21.9189 6.46114 21.9842 9.52844C21.9939 9.98251 21.9991 10.1965 21.9999 10.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M19 17C19 17.8284 18.3284 18.5 17.5 18.5C16.6716 18.5 16 17.8284 16 17C16 16.1716 16.6716 15.5 17.5 15.5C18.3284 15.5 19 16.1716 19 17ZM19 17V17.5C19 18.3284 19.6716 19 20.5 19C21.3284 19 22 18.3284 22 17.5V17C22 14.5147 19.9853 12.5 17.5 12.5C15.0147 12.5 13 14.5147 13 17C13 19.4853 15.0147 21.5 17.5 21.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                  Company Email
+                </h3>
+              <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                <a
+                  href={`mailto:${employerDetails?.CompanyEmail}`}
+                  style={{ color: "#444", textDecoration: "underline" }}
+                >
+                  {employerDetails?.CompanyEmail}
+                </a>
+              </p>
+
+                <h3
+                  style={{
+                    color: "#059855",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="35"
+                  height="35"
+                  style={{ marginBottom: "-5px", marginRight: "10px" }}
+                  color="#059855"
+                  fill="none"
+                >
+                  <path
+                    d="M9.1585 5.71223L8.75584 4.80625C8.49256 4.21388 8.36092 3.91768 8.16405 3.69101C7.91732 3.40694 7.59571 3.19794 7.23592 3.08785C6.94883 3 6.6247 3 5.97645 3C5.02815 3 4.554 3 4.15597 3.18229C3.68711 3.39702 3.26368 3.86328 3.09497 4.3506C2.95175 4.76429 2.99278 5.18943 3.07482 6.0397C3.94815 15.0902 8.91006 20.0521 17.9605 20.9254C18.8108 21.0075 19.236 21.0485 19.6496 20.9053C20.137 20.7366 20.6032 20.3131 20.818 19.8443C21.0002 19.4462 21.0002 18.9721 21.0002 18.0238C21.0002 17.3755 21.0002 17.0514 20.9124 16.7643C20.8023 16.4045 20.5933 16.0829 20.3092 15.8362C20.0826 15.6393 19.7864 15.5077 19.194 15.2444L18.288 14.8417C17.6465 14.5566 17.3257 14.4141 16.9998 14.3831C16.6878 14.3534 16.3733 14.3972 16.0813 14.5109C15.7762 14.6297 15.5066 14.8544 14.9672 15.3038C14.4304 15.7512 14.162 15.9749 13.834 16.0947C13.5432 16.2009 13.1588 16.2403 12.8526 16.1951C12.5071 16.1442 12.2426 16.0029 11.7135 15.7201C10.0675 14.8405 9.15977 13.9328 8.28011 12.2867C7.99738 11.7577 7.85602 11.4931 7.80511 11.1477C7.75998 10.8414 7.79932 10.457 7.90554 10.1663C8.02536 9.83828 8.24905 9.56986 8.69643 9.033C9.14586 8.49368 9.37058 8.22402 9.48939 7.91891C9.60309 7.62694 9.64686 7.3124 9.61719 7.00048C9.58618 6.67452 9.44362 6.35376 9.1585 5.71223Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                  Company Phone Numbr
+                </h3>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  {employerDetails?.PhoneNumber}
                 </p>
               </div>
 
-              <div
-                style={{
-                  marginLeft: "45px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <a
-                  onClick={handleShowPopupCompany}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <span style={{ marginRight: "10px", color: "#059855" }}>
-                    Explore Company Details
-                  </span>
-                </a>
-                <a
-                  onClick={handleShowPopupCompany}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <IoArrowForwardOutline
-                    size={20}
-                    style={{ color: "#059855", marginTop: "5px" }}
-                  />
-                </a>
-              </div>
-              <p></p>
-              <a
-                onClick={handleShowPopupCompany}
-                style={{
-                  cursor: "pointer",
-                }}
-              >
-              </a>
-              {/*//////////////// POP-UP  ////////////////*/}
-              <Modal
-                visible={isPopupVisibleComp}
-                onCancel={handleClosePopupCompany}
-                footer={null} 
-                width={700}
-              >
-                <main className={formstyle.GDTcontainer}>
-                  <form>
-                    <h4 className={formstyle.GDTLabel}>Company Information</h4>
-
-                    <div className={formstyle.formRow}>
-                      <div>
-                        <label className={formstyle.profileLabel}>
-                          Commercial Number
-                        </label>
-                        <input
-                          type="text"
-                          name="commercialNumber"
-                          value={employerDetails?.commercialNumber}
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <label className={formstyle.profileLabel}>
-                          Company Name
-                        </label>
-                        <input
-                          type="text"
-                          name="CompanyName"
-                          value={employerDetails?.CompanyName}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-
-                    <div className={formstyle.formRow}>
-                      <div>
-                        <label className={formstyle.profileLabel}>
-                          Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          name="PhoneNumber"
-                          value={`${employerDetails?.PhoneNumber}`}
-                          readOnly
-                        />
-                      </div>
-
-                      <div>
-                        <label className={formstyle.profileLabel}>
-                          Short Company Name
-                        </label>
-                        <input
-                          type="text"
-                          name="ShortCompanyName"
-                          value={`${employerDetails?.ShortCompanyName}`}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-
-                    <div className={formstyle.formRow}>
-                      <div>
-                        <label className={formstyle.profileLabel}>
-                          Company Email
-                        </label>
-                        <a
-                          href={`mailto:${employerDetails?.CompanyEmail}`}
-                          className={formstyle.profileLink}
-                          style={{ textDecoration: "none", color: "inherit" }} // Optional styling
-                        >
-                          <input
-                            type="text"
-                            name="CompanyEmail"
-                            value={employerDetails?.CompanyEmail}
-                            readOnly
-                            style={{
-                              pointerEvents: "none",
-                              textDecoration: "underline",
-                            }}
-                          />
-                        </a>
-                      </div>
-                    </div>
-                  </form>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  ></div>
-                </main>
-              </Modal>
-              {/*///////////////////////////////END POP-UP/////////////////////////////////////////// */}
               <hr />
               <div>
                 <h3

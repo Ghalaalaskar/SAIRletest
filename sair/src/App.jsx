@@ -42,9 +42,9 @@ import GDTDriverlist from './Maincomponent/GDT/GDTDriverlist';
 import GDTProfilepage from './Maincomponent/GDT/GDTProfilepage';
 import GDTAddStaff from './Maincomponent/GDT/GDTAddStaff';
 import GDTEditStaff from './Maincomponent/GDT/GDTEditStaff';
-
-
-
+import GDTRicklessDrivers from './Maincomponent/GDT/GDTRicklessDrivers';
+import GDTDriverDetails from './Maincomponent/GDT/GDTDriverDetails';
+import GDTViolationDriver from"./Maincomponent/GDT/GDTViolationDriver";
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
@@ -118,6 +118,9 @@ function App() {
         <Route path="/gdtprofile" element={<GDTProfilepage />} /> 
         <Route path="/gdtaddstaff" element={<GDTAddStaff />} />
         <Route path="/gdteditstaff/:staffId" element={<GDTEditStaff />} />
+        <Route path="/gdtricklessdrives" element={<GDTRicklessDrivers />} />
+        <Route path="/gdtdriverdetails/:driverId" element={<GDTDriverDetails />} />
+        <Route path="/gdtviolationdriver/:driverId" element={<GDTViolationDriver />} />
       </Routes>
     </Router>
     </LoadScript>

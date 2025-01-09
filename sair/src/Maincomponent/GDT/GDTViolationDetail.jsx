@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc, getDocs, query, where, collection } from 'firebase/firestore';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom'; // Keep only one import for useNavigate and useLocation
 import { db } from '../../firebase';
 import Map from '../Map'; 
 import { Button, Modal } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Header from './GDTHeader';
-import { useLocation } from 'react-router-dom';
 import s from "../../css/ViolationDetail.module.css";
 import X from '../../images/redx.webp';
 import  '../../css/CustomModal.css';
-
 
 const ViolationDetail = () => {
   const [violation, setViolation] = useState(null);
@@ -147,23 +145,64 @@ const handleViewComplaints = () => {
     // For numbers greater than 20, return "th"
     return num + "th"; // Fallback for numbers greater than 20
   };
-
+  const renderBreadcrumb = () => {
+    const breadcrumbs = [];
+  
+    // Always add the Home link
+    breadcrumbs.push({ label: "Home", path: "/gdthome" });
+  
+    // Add breadcrumbs based on the navigation source
+    switch (from) {
+      case "driver":
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        breadcrumbs.push({ label: "Reckless Drivers List", path: "/gdtricklessdrives" });
+        breadcrumbs.push({ label: "Driver Violations List", path: "/gdtviolationdriverlist" });
+        break;
+  
+      case "driverslist":
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        break;
+  
+      default:
+        breadcrumbs.push({ label: "Violation List", path: "/gdtviolations" });
+        break;
+    }
+  
+    // Always add the current violation details link
+    if (violationId) {
+      breadcrumbs.push({
+        label: "Violation Details",
+        path: `/gdtviolation/detail/${violationId}`,
+      });
+    } else {
+      console.warn("Missing violationId for breadcrumb.");
+    }
+  
+    return (
+      <nav className="breadcrumb">
+        {breadcrumbs.map((breadcrumb, index) => (
+          <span key={index}>
+            <a
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(breadcrumb.path);
+              }}
+            >
+              {breadcrumb.label}
+            </a>
+            {index < breadcrumbs.length - 1 && <span>/</span>} {/* Reduced space*/}
+          </span>
+        ))}
+      </nav>
+    );
+  };
   return (
-    <div  >
+    <div>
+      {/* Header Component */}
+      <Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
 
-<Header active={from === 'motorcycle' ? 'motorcycleslist' : 'driverslist'} />
-
-      <div className="breadcrumb">
-        <a onClick={() => navigate('/GDT-home')}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate('/driverslist')}>Driver List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/driver-details/${violation.driverId}`)}>Drivers Details</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/drivers/:driverId/GDTviolations`)}>Violations List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/gdtviolation/detail/${violationId}`)}>Violation Details</a>
-      </div>
+      {/* Render Breadcrumb */}
+      <div className="breadcrumb">{renderBreadcrumb()}</div>
 
       <main  className={s.violation}>
       <h2 className="title">Violation Details</h2>

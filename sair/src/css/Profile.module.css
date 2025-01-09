@@ -136,6 +136,46 @@
   font-family: 'Open Sans';
 }
 
+/*Banner*/
+.banner {
+  background: linear-gradient(90deg, #059855, #05b06d); /* Gradient background */
+  color: #ffffff; 
+  font-size: 1.2rem; 
+  font-weight: bold;
+  text-align: center; 
+  padding: 15px 20px; 
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  margin: 20px auto; 
+  max-width: 90%; /* Ensure it doesn’t get too wide */
+  animation: fadeIn 1s ease-in-out; /* Smooth fade-in animation WE DONT NEED IT*/
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Make it responsive */
+@media (max-width: 600px) {
+  .banner {
+    font-size: 1rem; /* Smaller text size on small screens */
+    padding: 10px 15px;
+  }
+}
+
+.underline {
+  text-decoration: underline;
+  font-style: italic;
+  cursor: pointer;
+}
+
 /*=====================GDT pop up css=====================*/
 
 .GDTcontainer form {
