@@ -123,7 +123,7 @@ const CrashList = () => {
     fetchDriversAndCrashes();
   }, [employerUID]);
 
-  const filteredCrashes =  crashes.filter(crash => crash.Status === 'Confirmed'|| crash.Status === 'Rejected') // Only include Rejected or Confirmed statuses
+  const filteredCrashes =  crashes.filter(crash => crash.Status === 'Emergency SOS'|| crash.Status === 'Denied') // Only include Rejected or Confirmed statuses
   .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
   .filter((crash) => {
     const crashDate = crash.time ? new Date(crash.time * 1000).toISOString().split('T')[0] : '';
@@ -180,9 +180,12 @@ const CrashList = () => {
       key: 'Status',
       align: 'center',
       render: (text, record) => {
-        const formattedStatus = record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
+        const formattedStatus =
+          record.Status
         return (
-          <span style={{ color: formattedStatus === 'Confirmed' ? 'green' : 'red' }}>
+          <span
+            style={{ color: formattedStatus === "Emergency SOS" ? "red" : "green" }}
+          >
             {formattedStatus}
           </span>
         );

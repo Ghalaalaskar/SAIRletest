@@ -276,11 +276,10 @@ const CrashList = () => {
       align: "center",
       render: (text, record) => {
         const formattedStatus =
-          record.Status.charAt(0).toUpperCase() +
-          record.Status.slice(1).toLowerCase();
+          record.Status
         return (
           <span
-            style={{ color: formattedStatus === "Emergency sos" ? "green" : "red" }}
+            style={{ color: formattedStatus === "Emergency SOS" ? "red" : "green" }}
           >
             {formattedStatus}
           </span>
