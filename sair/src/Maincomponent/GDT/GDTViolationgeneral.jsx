@@ -200,6 +200,10 @@ const ViolationGeneral = () => {
     }
   };
 
+  const disableViewComplaints = () => {
+      setIsPopupVisible(true); // Show popup if no complaints exist
+  };
+
   const handleShowPopupCompany = () => {
     setIsPopupVisibleComp(true);
   };
@@ -1260,21 +1264,19 @@ const ViolationGeneral = () => {
               <div style={{ marginBottom: "10px" }}>
                 {/* View Complaints Button */}
                 <Button
-                  onClick={handleViewComplaints}
+                  // onClick={handleViewComplaints}
+                  onClick={disableViewComplaints}
                   style={{
-                    backgroundColor: "#059855",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: "20px 10px",
+                    float: "left",
+                    width: "auto",
                     height: "60px",
-                    fontFamily: "Open Sans",
+                    fontSize: "15px",
+                    color: "#059855",
+                    borderColor: "#059855",
                   }}
                 >
                   <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
-                  View Complaints
+                  View Complaint
                 </Button>
 
                 <Button
@@ -1301,8 +1303,11 @@ const ViolationGeneral = () => {
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
         footer={
+          // <p style={{ textAlign: "center" }}>
+          //   There is no complaint associated with this violation.
+          // </p>
           <p style={{ textAlign: "center" }}>
-            There is no complaint associated with this violation.
+            View associated complaint feature currently unavailable. Stay tuned for updates!
           </p>
         }
         style={{ top: "38%" }}
