@@ -37,6 +37,7 @@ const Header = ({ active }) => {
 
   useEffect(() => {
     const fetchShortCompanyName = async () => {
+      console.log('in headerr',shortCompanyName);
       if (!shortCompanyName) { // Only fetch if it's not set
         const employerUID = sessionStorage.getItem('employerUID');
         if (employerUID) {
@@ -46,6 +47,7 @@ const Header = ({ active }) => {
             if (docSnap.exists()) {
               const data = docSnap.data();
               setShortCompanyName(data.ShortCompanyName || '');
+              console.log('in headerr',shortCompanyName);
             }
           } catch (error) {
             console.error('Error fetching short company name:', error);

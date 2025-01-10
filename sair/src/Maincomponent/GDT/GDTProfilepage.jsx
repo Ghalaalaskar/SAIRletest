@@ -13,6 +13,7 @@ import { FirstNameContext } from '../../FirstNameContext';
 import { useContext } from 'react';
 import '../../css/CustomModal.css';
 
+
 const Profile = () => {
   const { setFirstName } = useContext(FirstNameContext);
   const [GDT, setGDT] = useState({
@@ -388,6 +389,7 @@ const Profile = () => {
 
       await updateDoc(docRef, updateData);
       setFirstName(GDT.Fname);
+
       if (GDT.newPassword && user) {
         const credential = EmailAuthProvider.credential(user.email, GDT.currentPassword);
         await reauthenticateWithCredential(user, credential);

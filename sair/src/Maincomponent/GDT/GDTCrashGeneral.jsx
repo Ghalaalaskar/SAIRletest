@@ -213,7 +213,7 @@ const CrashGeneral = () => {
 
       <main className={s.violation}>
         {/* Conditionally show the prompt if status is 'confirm' and RespondedBy is not set */}
-        {currentCrash.Status === "Confirmed" && !currentCrash.RespondedBy && (
+        {currentCrash.Status === "Emergency SOS" && !currentCrash.RespondedBy && (
           <div
             style={{
               display: "flex",
@@ -961,7 +961,7 @@ const CrashGeneral = () => {
                 <span
                   style={{
                     backgroundColor:
-                      currentCrash.Status === "Confirmed" ? "green" : "red", // Set backgroundColor
+                      currentCrash.Status === "Emergency SOS" ? "green" : "red", // Set backgroundColor
                     marginRight: "20px",
                     marginLeft: "5px",
                     borderRadius: "50%",
