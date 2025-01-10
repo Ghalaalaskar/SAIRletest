@@ -494,7 +494,7 @@ const GDTEditStaff = () => {
 
             <div className={s.formRow}>
               <div>
-                <label className={s.profileLabel}>ID(National Number)</label>
+                <label className={s.profileLabel}>ID (National Number)</label>
                 <input
                   type="text"
                   name="ID"
