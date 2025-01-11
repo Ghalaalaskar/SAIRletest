@@ -857,8 +857,8 @@ const handleback = () => {
               {showDetailsFormAdmin && !showDetailsFormStaff  ? ( 
                 <div>
               <Steps current={current} size="small" className={s.customSteps}>
-      <Step title="Step 1" description=""  />
-      <Step title="Step 2" description=""  />
+      <Step title="User Info" description=""  />
+      <Step title="Reset Password" description=""  />
     </Steps>
 
 </div>
@@ -868,7 +868,7 @@ const handleback = () => {
             
             <div >
             
-            <p style={{marginBottom: '20px', marginTop:'90px'}} //i add marginTop for the journey numbers
+            <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
               Please fill in the following information to log in to your
               account.
@@ -965,7 +965,7 @@ const handleback = () => {
 
 { showDetailsFormAdmin && !showDetailsFormStaff ?(
         <div>
-       <p style={{marginBottom: '20px', marginTop:'90px'}} //i add marginTop for the journey numbers
+       <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
               Please fill in the following information to log in to your
               account.
