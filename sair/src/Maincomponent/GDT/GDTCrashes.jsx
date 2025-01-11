@@ -22,6 +22,7 @@ const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});
   const [crashes, setCrashes] = useState([]);
   const [drivers, setDrivers] = useState({});
+  const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
   const [searchDriverID, setSearchDriverID] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const navigate = useNavigate();
@@ -34,6 +35,22 @@ const CrashList = () => {
     const storedViewedCrashes = sessionStorage.getItem("viewedCrashes");
     return storedViewedCrashes ? JSON.parse(storedViewedCrashes) : {};
   });
+
+  const fetchGDT = async () => {
+    try {
+      const docRef = doc(db, "GDT", gdtUID);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+        setGDT(docSnap.data()); // Set the retrieved data to the GDT state
+      } else {
+        console.error("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching document:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchDriversAndCrashes = async () => {
@@ -73,6 +90,7 @@ const CrashList = () => {
 
         setDrivers(driverMap);
         fetchCrashes(driverIds);
+        fetchGDT();
       });
 
       return () => unsubscribeDrivers();
@@ -408,8 +426,8 @@ const CrashList = () => {
           ]}
         >
           <p>
-            I'm Flan I will take responsibility for
-            responding to this crash.
+          {GDT.Fname} {GDT.Lname}, do you confirm your responsibility for managing this crash?
+          <br/>Please ensure that the driver has been contacted.
           </p>
         </Modal>
 

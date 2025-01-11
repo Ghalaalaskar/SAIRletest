@@ -253,8 +253,8 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-            Are you sure you{GDT.Fname} {GDT.Lname} will take responsibility for
-            responding to this crash.
+          {GDT.Fname} {GDT.Lname}, do you confirm your responsibility for managing this crash?
+          <br/>Please ensure that the driver has been contacted.
           </p>
         </Modal>
 
@@ -1142,9 +1142,9 @@ const CrashGeneral = () => {
             {currentCrash.RespondedBy && (
               <div class={formstyle.banner}>
                 <strong>
-                  This crash was responded by
-                  <span class={formstyle.underline}>
-                    {currentCrash.RespondedBy}
+                  This crash was responded by 
+                  <span class={formstyle.underline} style={{ marginLeft: "4px" }}>
+                  {currentCrash.RespondedBy}
                   </span>
                 </strong>
               </div>
