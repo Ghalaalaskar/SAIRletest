@@ -34,11 +34,10 @@ const ViolationGeneral = () => {
   const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const param = params.get("breadcrumbParam");
-    setBreadcrumbParam(param || "Violation List");
+    const state = location.state || {};
+    setBreadcrumbParam(state.breadcrumbParam || "Violation List");
   }, [location]);
-
+  
   useEffect(() => {
     const fetchViolationDetails = async () => {
       try {
@@ -89,7 +88,7 @@ const ViolationGeneral = () => {
         console.error("Error LOGGING out:", error);
       });
   };
- const generateBreadcrumb = () => {
+  const generateBreadcrumb = () => {
     if (breadcrumbParam === "Violation List") {
       return (
         <>
@@ -115,12 +114,13 @@ const ViolationGeneral = () => {
             Driver Violations List
           </a>
           <span> / </span>
-          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>Violation Details</a>        </>
+          <a>Violation Details</a>
+        </>
       );
     }
     return null;
   };
-
+  
   const goBack = () => {
     navigate(-1); // Navigate back to the previous page
   };
