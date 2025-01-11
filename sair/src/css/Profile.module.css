@@ -196,25 +196,17 @@
   font-weight: bold;
   color: #333;
   margin-left: 0; /* Remove custom left margin */
-  margin-top: 0; /* Remove custom top margin */
+  margin-top: 20px; 
   font-family: 'Open Sans';
 }
 
 .GDTcontainer input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #059855; /* Green border */
   border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s ease-in-out;
   font-family: 'Open Sans';
-}
-
-/* Change border color on focus */
-.GDTcontainer input:focus {
-  outline: none;
-  border-color: #1c7a50; /* Darker green when focused */
-  font-family: 'Open Sans';
+  border: none;
 }
 
 /* Form Layout Styling */
@@ -232,7 +224,7 @@
 
 .GDTcontainer input:focus {
   outline: none;
-  box-shadow: 0px 4px 8px rgba(60, 197, 133, 0.3);
+  border: none;
   font-family: 'Open Sans';
 }
 
@@ -300,10 +292,7 @@
 .GDTcontainer select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #059855; /* Green border */
-  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s ease-in-out;
   font-family: 'Open Sans';
 }
 
