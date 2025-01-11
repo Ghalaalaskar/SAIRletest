@@ -8,7 +8,7 @@ import {
   collection,
   onSnapshot,
 } from "firebase/firestore";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { db, auth } from "../../firebase";
 import Map from "../Map";
 import { Button, Modal } from "antd";
@@ -22,14 +22,22 @@ import { IoArrowForwardOutline } from "react-icons/io5";
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
+  const [breadcrumbParam, setBreadcrumbParam] = useState("");
   const [driverData, setDriverData] = useState("");
   const [currentMotorCycle, setCurrentMotorCycle] = useState({});
   const { violationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Use useLocation to get the location object
   const [complaints, setComplaints] = useState([]);
   const [employerDetails, setEmployerDetails] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const param = params.get("breadcrumbParam");
+    setBreadcrumbParam(param || "Violation List");
+  }, [location]);
 
   useEffect(() => {
     const fetchViolationDetails = async () => {
@@ -80,6 +88,37 @@ const ViolationGeneral = () => {
       .catch((error) => {
         console.error("Error LOGGING out:", error);
       });
+  };
+ const generateBreadcrumb = () => {
+    if (breadcrumbParam === "Violation List") {
+      return (
+        <>
+          <a onClick={() => navigate("/gdt-home")}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>Violation Details</a>
+        </>
+      );
+    } else if (breadcrumbParam === "Driver Violations List") {
+      return (
+        <>
+          <a onClick={() => navigate("/gdt-home")}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
+          <span> / </span>
+          <a onClick={() => navigate("/reckless-drivers")}>
+            Reckless Drivers List
+          </a>
+          <span> / </span>
+          <a onClick={() => navigate("/driver-violations")}>
+            Driver Violations List
+          </a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>Violation Details</a>        </>
+      );
+    }
+    return null;
   };
 
   const goBack = () => {
@@ -246,16 +285,7 @@ const ViolationGeneral = () => {
   return (
     <div>
       <Header active="gdtviolations" />
-
-      <div className="breadcrumb">
-        <a onClick={() => navigate("/gdt-home")}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>
-          Violation Details
-        </a>
-      </div>
+      <div className="breadcrumb">{generateBreadcrumb()}</div>
 
       <main className={s.violation}>
         <h2 className={s.title}>Violation Details</h2>
