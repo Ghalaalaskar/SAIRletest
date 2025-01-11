@@ -318,6 +318,7 @@ if (Object.keys(newMissingFields).length > 0) {
                 const Fname = GDTData.Fname || 'su';
                 sessionStorage.setItem('FirstName', Fname);
                 setFirstName(Fname); // Update the context
+                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
                 console.log('looooooog in',firstName);
 
                 setTimeout(() => {
@@ -337,6 +338,7 @@ if (Object.keys(newMissingFields).length > 0) {
                 const Fname = GDTData.Fname || '';
                 sessionStorage.setItem('FirstName', Fname);
                 setFirstName(Fname); // Update the context
+                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
                 setTimeout(() => {
                   navigate('/gdthome');
                 }, 1500);
@@ -560,6 +562,7 @@ if(showDetailsFormAdmin===true){
                 const Fname = GDTData.Fname || '';
                 sessionStorage.setItem('FirstName', Fname);
                 setFirstName(Fname); // Update the context
+                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
           setCurrent(current + 1);
           setTimeout(() => {
           navigate('/gdthome');
@@ -614,6 +617,7 @@ console.log('in stafffffffffff');
                 const Fname = GDTData.Fname || '';
                 sessionStorage.setItem('FirstName', Fname);
                 setFirstName(Fname); // Update the context
+                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
           setCurrent(current + 1);
           setTimeout(() => {
           navigate('/gdthome');
