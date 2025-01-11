@@ -32,6 +32,7 @@ const ViolationGeneral = () => {
   const [employerDetails, setEmployerDetails] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
+  const [driverID, setDriverID] = useState("");
 
   useEffect(() => {
     const state = location.state || {};
@@ -47,7 +48,10 @@ const ViolationGeneral = () => {
           if (doc.exists()) {
             const violationData = doc.data();
             setCurrentViolation(violationData);
-
+            if (violationData.driverID) {
+              setDriverID(violationData.driverID); // Add a state to hold the driverID
+          }
+          
             // Fetch motorcycle details from the History collection using violationID
             if (violationData.violationID) {
               const q = query(
@@ -92,7 +96,7 @@ const ViolationGeneral = () => {
     if (breadcrumbParam === "Violation List") {
       return (
         <>
-          <a onClick={() => navigate("/gdt-home")}>Home</a>
+          <a onClick={() => navigate("/gdthome")}>Home</a>
           <span> / </span>
           <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
           <span> / </span>
@@ -102,15 +106,15 @@ const ViolationGeneral = () => {
     } else if (breadcrumbParam === "Driver Violations List") {
       return (
         <>
-          <a onClick={() => navigate("/gdt-home")}>Home</a>
+          <a onClick={() => navigate("/gdthome")}>Home</a>
           <span> / </span>
           <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
           <span> / </span>
-          <a onClick={() => navigate("/reckless-drivers")}>
+          <a onClick={() => navigate("/gdtricklessdrives")}>
             Reckless Drivers List
           </a>
           <span> / </span>
-          <a onClick={() => navigate("/driver-violations")}>
+          <a onClick={() => navigate(`/gdtviolationdriver/${driverID}`)}>
             Driver Violations List
           </a>
           <span> / </span>
