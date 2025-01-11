@@ -85,7 +85,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 
 .selectWrapper {
   position: relative;
-  width: 200px;
+  width: auto; /* Allow it to grow naturally */
   height: 24px;
   display: flex;
   align-items: center;
@@ -96,6 +96,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   color: #1c7a50; /* Green color */
   margin-right: 8px; /* Space between icon and select */
 }
+
 
 .customSelect {
   flex-grow: 1; /* Takes up remaining space */
