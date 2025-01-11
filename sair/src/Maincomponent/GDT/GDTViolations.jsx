@@ -291,7 +291,7 @@ const ViolationList = () => {
                     <option value="Reckless Violations">
                       Reckless Violations
                     </option>
-                    <option value="Normal Violations">Normal Violations</option>
+                    <option value="Normal Violations">Regular Violations</option>
                   </select>
                 </div>
                 
