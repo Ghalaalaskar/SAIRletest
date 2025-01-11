@@ -98,7 +98,7 @@ const ViolationsTable = () => {
       className:'svg',
       render: (_, record) => (
         <Link to={`/gdtviolation/general/${record.id}`}
-        state={{ from: 'driver' }}>
+        state={{ breadcrumbParam: "Driver Violations List" }}>
         <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
       </Link>
       ),

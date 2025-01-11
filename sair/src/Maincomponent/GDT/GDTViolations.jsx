@@ -205,7 +205,8 @@ const ViolationList = () => {
       key: 'Details',
       align: 'center',
       render: (text, record) => (
-        <Link to={`/gdtviolation/general/${record.id}`}> 
+        <Link to={`/gdtviolation/general/${record.id}`}
+          state={{ breadcrumbParam: "Violation List" }}>
           <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
         </Link>
       ),
