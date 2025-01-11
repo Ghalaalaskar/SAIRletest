@@ -85,7 +85,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 
 .selectWrapper {
   position: relative;
-  width: auto; /* Allow it to grow naturally */
+  width: 215px; 
   height: 24px;
   display: flex;
   align-items: center;

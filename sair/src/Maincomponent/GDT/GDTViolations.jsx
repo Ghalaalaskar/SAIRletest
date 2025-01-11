@@ -251,9 +251,7 @@ const ViolationList = () => {
           <div className={s.container}>
             <div className={s.searchHeader}>
               <h2 className={s.title}>Violations List</h2>
-              <div className={s.searchInputs}>
-                {/* Search inputs */}
-                <div className={s.searchContainer}>
+              <div className={s.searchContainer}>
                   <svg
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
@@ -278,14 +276,7 @@ const ViolationList = () => {
                   />
                 </div>
                 <div className={s.searchContainer}>
-                  <input
-                    type="date"
-                    value={searchDate}
-                    onChange={(e) => setSearchDate(e.target.value)}
-                    style={{ width: "120px", backgroundColor: "transparent" }}
-                  />
-                </div>
-                <div className={s.searchContainer}>
+                  
                 <div className={s.selectWrapper}>
                   <FaFilter className={s.filterIcon} />
                   <select
@@ -303,6 +294,17 @@ const ViolationList = () => {
                     <option value="Normal Violations">Normal Violations</option>
                   </select>
                 </div>
+                
+                </div>
+                <div className={s.searchInputs}>
+                {/* Search inputs */}
+                <div className={s.searchContainer}>
+                  <input
+                    type="date"
+                    value={searchDate}
+                    onChange={(e) => setSearchDate(e.target.value)}
+                    style={{ width: "120px", backgroundColor: "transparent" }}
+                  />
                 </div>
               </div>
             </div>
