@@ -14,7 +14,9 @@ import EyeIcon from "../../images/eye.png";
 import { Button, Modal } from "antd";
 import { Table } from "antd";
 import Header from "./GDTHeader";
+import { FaFilter } from "react-icons/fa";
 import s from "../../css/CrashList.module.css"; // CSS module for CrashList
+import c from "../../css/ComplaintList.module.css";
 import "../../css/CustomModal.css";
 import { Tooltip } from "antd";
 
@@ -316,16 +318,16 @@ const CrashList = () => {
             <button
               style={{
                 backgroundColor: "transparent",
-                color: "#FFC107",
+                color: "red",
                 border: "none",
                 borderRadius: "4px",
                 padding: "4px 8px",
                 cursor: "pointer",
-                textDecoration: 'underline',
+                textDecoration: "underline",
               }}
               onClick={handleConfirmResponse}
             >
-              Pending
+              Need for Response
             </button>
           );
         } else {
@@ -391,15 +393,45 @@ const CrashList = () => {
                   style={{ width: "280px" }}
                 />
               </div>
-              <div className={s.searchContainer}>
+            </div>
+            <div className={s.searchContainer}>
+              <div className={c.selectWrapper}>
+                <FaFilter className={c.filterIcon} />
+                <select
+                  className={c.customSelect}
+                  //onChange={event => setSelectedStatus(event.target.value)}
+                  defaultValue="" 
+                  style={{
+                    width: "200px", // Widen the select bar
+                    padding: "8px", // Add padding
+                    fontSize: "14px", // Adjust font size
+                  }}
+                >
+                  <option value="" disabled>
+                    Filter by Response
+                  </option>
+                  <option value="">All</option>
+                  <option value="Pending">Responsed</option>
+                  <option value="Accepted">Unresponsed</option>
+                </select>
+              </div>
+            </div>
+              <div className={s.searchContainerdate}>
                 <input
                   type="date"
                   value={searchDate}
                   onChange={(e) => setSearchDate(e.target.value)}
-                  style={{ width: "120px", backgroundColor: "transparent" }}
+                  style={{
+                    width: "40px",
+                    height: "40px", 
+                    fontSize: "16px", 
+                    backgroundColor: "transparent",
+                    color: "",
+                    border: "none",
+                    marginLeft: "10px",
+                  }}
                 />
               </div>
-            </div>
           </div>
 
           <Modal
@@ -427,7 +459,9 @@ const CrashList = () => {
               {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you
               formally acknowledge your responsibility for overseeing the
               management of this crash.
-              <br /><br />Additionally, you affirm your obligation to ensure that the driver
+              <br />
+              <br />
+              Additionally, you affirm your obligation to ensure that the driver
               involved has been contacted.
             </p>
           </Modal>

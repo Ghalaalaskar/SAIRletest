@@ -29,6 +29,41 @@
     align-items: center;
     justify-content: center;
   }
+
+  .searchContainerdate {
+    outline: none;
+    border: none;
+    background-color: transparent; 
+    width: 40px; 
+    font-size: 14px; 
+  } 
+
+  .searchContainerdate svg {
+    height: 10rem;
+    width: 10.5rem;
+    border: none;
+  }
+
+  
+  .searchContainerdate input[type='date']::-webkit-calendar-picker-indicator {
+    height: 1.5rem; 
+    width: 1.5rem; 
+    transform: scale(1.5);
+    cursor: pointer; 
+    filter: invert(0.5) sepia(1) saturate(5) hue-rotate(90deg); /* Color filter */
+  }
+  
+  .searchContainerdate input[type='date']::-webkit-datetime-edit {
+    display: none; 
+    outline: none; 
+    border: none; 
+  }
+  
+  .searchContainerdate input[type='date']:focus {
+    outline: none; 
+    border: none;
+    box-shadow: none;
+  }
   
   .searchContainer svg {
     height: 1.5rem;
@@ -39,10 +74,6 @@
   .searchContainer:focus-within {
     border: 2px solid #1c7a50;
     border-radius: 20px;
-  }
-  
-  input[type='date']::-webkit-calendar-picker-indicator {
-    filter: invert(0.5) sepia(1) saturate(5) hue-rotate(90deg);
   }
   
   .searchContainer input {   
