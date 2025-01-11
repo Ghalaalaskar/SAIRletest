@@ -8,7 +8,7 @@ import {
   collection,
   onSnapshot,
 } from "firebase/firestore";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { db, auth } from "../../firebase";
 import Map from "../Map";
 import { Button, Modal } from "antd";
@@ -22,15 +22,23 @@ import { IoArrowForwardOutline } from "react-icons/io5";
 
 const ViolationGeneral = () => {
   const [currentViolation, setCurrentViolation] = useState({});
+  const [breadcrumbParam, setBreadcrumbParam] = useState("");
   const [driverData, setDriverData] = useState("");
   const [currentMotorCycle, setCurrentMotorCycle] = useState({});
   const { violationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Use useLocation to get the location object
   const [complaints, setComplaints] = useState([]);
   const [employerDetails, setEmployerDetails] = useState({});
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisibleComp, setIsPopupVisibleComp] = useState(false);
+  const [driverID, setDriverID] = useState("");
 
+  useEffect(() => {
+    const state = location.state || {};
+    setBreadcrumbParam(state.breadcrumbParam || "Violation List");
+  }, [location]);
+  
   useEffect(() => {
     const fetchViolationDetails = async () => {
       try {
@@ -40,7 +48,10 @@ const ViolationGeneral = () => {
           if (doc.exists()) {
             const violationData = doc.data();
             setCurrentViolation(violationData);
-
+            if (violationData.driverID) {
+              setDriverID(violationData.driverID); // Add a state to hold the driverID
+          }
+          
             // Fetch motorcycle details from the History collection using violationID
             if (violationData.violationID) {
               const q = query(
@@ -81,7 +92,39 @@ const ViolationGeneral = () => {
         console.error("Error LOGGING out:", error);
       });
   };
-
+  const generateBreadcrumb = () => {
+    if (breadcrumbParam === "Violation List") {
+      return (
+        <>
+          <a onClick={() => navigate("/gdthome")}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>Violation Details</a>
+        </>
+      );
+    } else if (breadcrumbParam === "Driver Violations List") {
+      return (
+        <>
+          <a onClick={() => navigate("/gdthome")}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtricklessdrives")}>
+            Reckless Drivers List
+          </a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolationdriver/${driverID}`)}>
+            Driver Violations List
+          </a>
+          <span> / </span>
+          <a>Violation Details</a>
+        </>
+      );
+    }
+    return null;
+  };
+  
   const goBack = () => {
     navigate(-1); // Navigate back to the previous page
   };
@@ -200,6 +243,10 @@ const ViolationGeneral = () => {
     }
   };
 
+  const disableViewComplaints = () => {
+      setIsPopupVisible(true); // Show popup if no complaints exist
+  };
+
   const handleShowPopupCompany = () => {
     setIsPopupVisibleComp(true);
   };
@@ -242,16 +289,7 @@ const ViolationGeneral = () => {
   return (
     <div>
       <Header active="gdtviolations" />
-
-      <div className="breadcrumb">
-        <a onClick={() => navigate("/gdt-home")}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>
-          Violation Details
-        </a>
-      </div>
+      <div className="breadcrumb">{generateBreadcrumb()}</div>
 
       <main className={s.violation}>
         <h2 className={s.title}>Violation Details</h2>
@@ -1260,21 +1298,19 @@ const ViolationGeneral = () => {
               <div style={{ marginBottom: "10px" }}>
                 {/* View Complaints Button */}
                 <Button
-                  onClick={handleViewComplaints}
+                  // onClick={handleViewComplaints}
+                  onClick={disableViewComplaints}
                   style={{
-                    backgroundColor: "#059855",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: "20px 10px",
+                    float: "left",
+                    width: "auto",
                     height: "60px",
-                    fontFamily: "Open Sans",
+                    fontSize: "15px",
+                    color: "#059855",
+                    borderColor: "#059855",
                   }}
                 >
                   <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
-                  View Complaints
+                  View Complaint
                 </Button>
 
                 <Button
@@ -1301,8 +1337,11 @@ const ViolationGeneral = () => {
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
         footer={
+          // <p style={{ textAlign: "center" }}>
+          //   There is no complaint associated with this violation.
+          // </p>
           <p style={{ textAlign: "center" }}>
-            There is no complaint associated with this violation.
+            View associated complaint feature currently unavailable. Stay tuned for updates!
           </p>
         }
         style={{ top: "38%" }}

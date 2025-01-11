@@ -66,3 +66,55 @@ input[type='date']::-webkit-calendar-picker-indicator {
   padding: 0;
   margin: 0;
 }
+.customSelect {
+  width: 200px;
+  margin-right: 16px;
+  border: none;
+  background-color: transparent;
+  padding: 8px;
+  font-size: 16px;
+  /* Optional: Add more styling here as needed */
+  appearance: none; /* Removes default dropdown arrow in some browsers */
+}
+
+/* Add focus style if needed */
+.customSelect:focus {
+  outline: none; /* Removes the default focus outline */
+  box-shadow: none;
+}
+
+.selectWrapper {
+  position: relative;
+  width: 215px; 
+  height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+}
+
+.filterIcon {
+  color: #1c7a50; /* Green color */
+  margin-right: 8px; /* Space between icon and select */
+}
+
+
+.customSelect {
+  flex-grow: 1; /* Takes up remaining space */
+  border: none;
+  background-color: transparent;
+  font-size: 16px;
+  appearance: none; /* Removes default dropdown arrow */
+  padding: 8px;
+  outline: none;
+}
+
+/* Custom arrow icon for dropdown */
+.selectWrapper::after {
+  content: '▼'; /* Unicode arrow or use a custom icon */
+  position: absolute;
+  right: 10px;
+  font-size: 12px;
+  color: #1c7a50;
+  pointer-events: none; /* Prevents arrow from blocking clicks */
+}
+

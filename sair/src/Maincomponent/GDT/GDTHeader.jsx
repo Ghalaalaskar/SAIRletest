@@ -16,7 +16,9 @@ const GDTHeader = ({ active }) => {
   const navigate = useNavigate();
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false); // New state for isAdmin
+  // const [isAdmin, setIsAdmin] = useState(false); // New state for isAdmin
+  const isAdmin = sessionStorage.getItem('isAdmin') === 'true'; // Retrieve isAdmin once
+
   const [hasNewCrashes, setHasNewCrashes] = useState(() => {
     const saved = localStorage.getItem("hasNewCrashes");
     return saved ? JSON.parse(saved) : false;
@@ -47,37 +49,38 @@ const GDTHeader = ({ active }) => {
 
  
   
-  useEffect(() => {
-    const fetchName = async () => {
-      const GDTUID = sessionStorage.getItem('gdtUID');
-      console.log('GDTUID:', GDTUID);
-      if (GDTUID) {
-        try {
-          const userDocRef = doc(db, 'GDT', GDTUID);
-          const docSnap = await getDoc(userDocRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            console.log('Fetched data:', data);
-            setName(data.Fname || '');
-            setIsAdmin(data.isAdmin || false); // Fetch and set isAdmin
-          } else {
-            console.log('No such document!');
-          }
-        } catch (error) {
-          console.error('Error fetching name:', error);
-        }
-      } else {
-        console.log('GDTUID is not set in session storage');
-      }
-    };
-    fetchName();
-  }, []);
+  // useEffect(() => {
+  //   const fetchName = async () => {
+  //     const GDTUID = sessionStorage.getItem('gdtUID');
+  //     console.log('GDTUID:', GDTUID);
+  //     if (GDTUID) {
+  //       try {
+  //         const userDocRef = doc(db, 'GDT', GDTUID);
+  //         const docSnap = await getDoc(userDocRef);
+  //         if (docSnap.exists()) {
+  //           const data = docSnap.data();
+  //           console.log('Fetched data:', data);
+  //           setName(data.Fname || '');
+           
+  //         } else {
+  //           console.log('No such document!');
+  //         }
+  //       } catch (error) {
+  //         console.error('Error fetching name:', error);
+  //       }
+  //     } else {
+  //       console.log('GDTUID is not set in session storage');
+  //     }
+  //   };
+  //   fetchName();
+  // }, []);
 
   const handleLogout = async () => {
     try {
       await auth.signOut();
       sessionStorage.removeItem('gdtUID');
       sessionStorage.removeItem('FirstName');
+      sessionStorage.removeItem('isAdmin');
       window.dispatchEvent(new Event('storage'));
       navigate('/');
     } catch (error) {
