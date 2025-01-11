@@ -213,7 +213,7 @@ const CrashGeneral = () => {
 
       <main className={s.violation}>
         {/* Conditionally show the prompt if status is 'confirm' and RespondedBy is not set */}
-        {currentCrash.Status === "Confirmed" && !currentCrash.RespondedBy && (
+        {currentCrash.Status === "Emergency SOS" && !currentCrash.RespondedBy && (
           <div
             style={{
               display: "flex",
@@ -431,8 +431,8 @@ const CrashGeneral = () => {
                     textDecoration: 'underline', // Underline the text
                     transition: 'color 0.3s', // Smooth transition for color change
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leaves
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} 
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} 
                 >
                   {driverDetails.Email}
                 </a>
@@ -961,7 +961,7 @@ const CrashGeneral = () => {
                 <span
                   style={{
                     backgroundColor:
-                      currentCrash.Status === "Confirmed" ? "green" : "red", // Set backgroundColor
+                      currentCrash.Status === "Emergency SOS" ? "red" : "green", // Set backgroundColor
                     marginRight: "20px",
                     marginLeft: "5px",
                     borderRadius: "50%",

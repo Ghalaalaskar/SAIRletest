@@ -206,7 +206,10 @@ const handleViewComplaints = () => {
     <path d="M11.992 15H12.001" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M12 12L12 8" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
-   According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong>{getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> offense. As a result, the penalty <span style={{marginLeft:'33px'}}>amount has been increased.</span>
+   According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong>{getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> offense. 
+   { (violation.count30 > 1 || violation.count50 > 1) && (
+        <p style={{marginLeft: '45px', color: 'grey' }}><span style={{marginLeft:'-12px'}}> As a result, the penalty amount has been increased.</span></p>
+    )}
   </p>
 )}
   <p style={{marginLeft: '45px', color: 'grey' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none" style={{marginBottom:'-5px'}}>

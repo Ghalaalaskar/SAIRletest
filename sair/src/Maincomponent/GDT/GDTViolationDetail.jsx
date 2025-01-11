@@ -240,10 +240,24 @@ const handleViewComplaints = () => {
 </svg>Violation Amount</h3>
             <p style={{fontSize:'18px', marginLeft:'45px'}}>{violation.price} SAR</p>
             {(violation.count30 > 0 || violation.count50 > 0) && (
-  <p style={{ fontSize: '15px', marginLeft: '45px', color: '#FF0000'}}>
-  According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong> {getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> offense. <br/> As a result, the penalty amount has been increased.
-</p>
+              <p style={{marginLeft: '45px', color: 'grey' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none" style={{marginBottom:'-5px'}}>
+    <circle cx="12" cy="12" r="10" stroke="red" stroke-width="1.5" />
+    <path d="M11.992 15H12.001" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M12 12L12 8" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+   According to the General Department of Traffic regulations, This speed violation is considered reckless and marks the driver's <strong>{getOrdinal(violation.count30 > 0 ? violation.count30 : violation.count50)}</strong> offense. 
+   { (violation.count30 > 1 || violation.count50 > 1) && (
+        <p style={{marginLeft: '45px', color: 'grey' }}><span style={{marginLeft:'-12px'}}> As a result, the penalty amount has been increased.</span></p>
+    )}
+  </p>
 )}
+  <p style={{marginLeft: '45px', color: 'grey' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none" style={{marginBottom:'-5px'}}>
+    <circle cx="12" cy="12" r="10" stroke="red" stroke-width="1.5" />
+    <path d="M11.992 15H12.001" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M12 12L12 8" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+   Disclaimer: This fee is an estimated amount, calculated based on the executive regulations issued under ministerial decision No.2249, Article 115.
+  </p>
             <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-10px', marginRight:'10px'}} color="#059855" fill="none">
     <path d="M18.952 8.60639L21.4621 8.45358C19.6628 3.70459 14.497 0.999731 9.46037 2.34456C4.09595 3.77692 0.909592 9.26089 2.34343 14.5933C3.77728 19.9258 9.28835 23.0874 14.6528 21.6551C18.6358 20.5916 21.418 17.2945 22 13.4842" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M12 7.99982V11.9998L14 13.9998" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
