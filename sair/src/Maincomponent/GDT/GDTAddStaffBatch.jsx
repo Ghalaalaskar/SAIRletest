@@ -32,7 +32,6 @@ const handleInputChange = async (index, field, value) => {
     // Validate the updated staff member
     await validateStaffMember(updatedData[index], index);
 
-
     // Check for duplicates and update error states
     checkForDuplicatesAndUpdateErrors(updatedData);
 
@@ -43,8 +42,8 @@ const handleInputChange = async (index, field, value) => {
     const hasErrors = updatedData.some(staff => Object.values(staff.errors).some(error => error));
     setIsButtonDisabled(hasErrors); // Update button state based on errors
 
-       // Call handleBatchUpload to validate all fields
-       await handleData(updatedData);
+    // Call handledata to validate all fields
+    await handleData(updatedData);
 };
 
 
@@ -437,9 +436,6 @@ const handleClosePopup = () => {
     setPopupVisible(false);
 };
 
-const handleRefresh = () => {
-    handleBatchUpload(); // Re-validate data
-};
 
 const handleAddStaff = async () => {
     for (let staff of fileData) {
