@@ -315,12 +315,13 @@ const CrashList = () => {
           return (
             <button
               style={{
-                backgroundColor: "#FFD700",
-                color: "#000",
+                backgroundColor: "transparent",
+                color: "#FFC107",
                 border: "none",
                 borderRadius: "4px",
                 padding: "4px 8px",
                 cursor: "pointer",
+                textDecoration: 'underline',
               }}
               onClick={handleConfirmResponse}
             >
