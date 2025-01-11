@@ -97,12 +97,14 @@ const ViolationsTable = () => {
       align: 'center',
       className:'svg',
       render: (_, record) => (
-        <Link to={`/gdtviolation/general/${record.id}`}
-        state={{ breadcrumbParam: "Driver Violations List" }}>
-        <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
-      </Link>
+        <Link 
+          to={`/gdtviolation/general/${record.id}`} 
+          state={{ breadcrumbParam: "Driver Violations List" }}
+        >
+          <img style={{ cursor: 'pointer' }} src={EyeIcon} alt="Details" />
+        </Link>
       ),
-    },
+      },
   ];
 
   if (error) {
