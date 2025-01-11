@@ -165,7 +165,7 @@ const GDTAddStaff = () => {
                   }, 2000);
             } catch (error) {
                 console.error('Error adding staff:', error);
-                setPopupMessage("Error adding staff.");
+                setPopupMessage("Email already exists.");
                 setPopupImage(errorImage);
             }
             setPopupVisible(true);
