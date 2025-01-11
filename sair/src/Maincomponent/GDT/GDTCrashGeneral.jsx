@@ -253,8 +253,8 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-          {GDT.Fname} {GDT.Lname}, do you confirm your responsibility for managing this crash?
-          <br/>Please ensure that the driver has been contacted.
+          {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you formally acknowledge your responsibility for overseeing the management of this crash. 
+          <br/><br/>Additionally, you affirm your obligation to ensure that the driver involved has been contacted.
           </p>
         </Modal>
 
