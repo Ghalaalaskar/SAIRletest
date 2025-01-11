@@ -15,7 +15,7 @@ import { Button, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css";
-import X from "../../images/eye.png";
+import X from "../../images/redx.webp";
 import "../../css/CustomModal.css";
 import formstyle from "../../css/Profile.module.css";
 import { IoArrowForwardOutline } from "react-icons/io5";
