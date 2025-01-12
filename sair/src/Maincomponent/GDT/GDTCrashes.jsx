@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   where,
+  updateDoc
 } from "firebase/firestore";
 import EyeIcon from "../../images/eye.png";
 import { Button, Modal } from "antd";
@@ -23,8 +24,10 @@ import { Tooltip } from "antd";
 const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});
   const [crashes, setCrashes] = useState([]);
+  const [currentCrash, setCurrentCrash] = useState({});
   const [drivers, setDrivers] = useState({});
   const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [searchDriverID, setSearchDriverID] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const navigate = useNavigate();
@@ -203,6 +206,20 @@ const CrashList = () => {
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
 
+  const filterByStatus = (record) => {
+    const formattedStatus =
+      record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
+  
+    if (selectedStatus === "Responsed") {
+      return formattedStatus === "Emergency sos" && record.RespondedBy;
+    } else if (selectedStatus === "Unresponsed") {
+      return formattedStatus === "Emergency sos" && !record.RespondedBy;
+    }
+    return true; // Show all if no filter is selected
+  };
+
+  const filteredData = crashes.filter(filterByStatus);
+
   const handleViewDetails = (record) => {
     setModalVisible(false);
     const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
@@ -215,45 +232,38 @@ const CrashList = () => {
     navigate(`/gdtcrash/general/${record.id}`);
   };
 
-  const handleConfirmResponse = () => {
+  const handleConfirmResponse = (record) => {
+    setCurrentCrash(record);
     setModalVisible(true); // Show the confirmation modal
   };
-
+  
   const handleResponse = async () => {
-    // setModalVisible(false); // Close the modal
-    // try {
-    //   // Check if crashID exists and is valid
-    //   if (!crashID) {
-    //     console.error("Crash ID is missing");
-    //     return;
-    //   }
-    //   // Ensure the GDT data is valid
-    //   if (!GDT.Fname || !GDT.Lname) {
-    //     console.error("Responder details are incomplete");
-    //     return;
-    //   }
-    //   console.log("Before updatedCrash");
-    //   const updatedCrash = {
-    //     ...currentCrash,
-    //     RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
-    //   };
-    //   console.log("After updatedCrash");
-    //   const crashDocRef = doc(db, "Crash", crashId);
-    //   console.log("Firestore document reference:", crashDocRef.path);
-    //   // Check if document exists
-    //   const docSnapshot = await getDoc(crashDocRef);
-    //   if (!docSnapshot.exists()) {
-    //     console.error("No document found with ID:", crashId);
-    //     return;
-    //   }
-    //   // Update Firestore with the new RespondedBy field
-    //   await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
-    //   // Update the local state with the new crash details
-    //   setCurrentCrash(updatedCrash);
-    //   console.log("Crash response updated successfully");
-    // } catch (error) {
-    //   console.error("Error updating crash response:", error);
-    // }
+    setModalVisible(false); // Close the modal
+  
+    try {
+      // Ensure the GDT data is valid
+      if (!GDT.Fname || !GDT.Lname) {
+        console.error("Responder details are incomplete");
+        return;
+      }
+  
+      const updatedCrash = {
+        ...currentCrash,
+        RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
+      };
+  
+      const crashDocRef = doc(db, "Crash", currentCrash.id);
+  
+      // Update Firestore with the new RespondedBy field
+      await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
+  
+      // Update the local state with the new crash details
+      setCurrentCrash(updatedCrash);
+  
+      console.log("Crash response updated successfully");
+    } catch (error) {
+      console.error("Error updating crash response:", error);
+    }
   };
 
   const columns = [
@@ -325,7 +335,7 @@ const CrashList = () => {
                 cursor: "pointer",
                 textDecoration: "underline",
               }}
-              onClick={handleConfirmResponse}
+              onClick={() => handleConfirmResponse(record)}
             >
               Need for Response
             </button>
@@ -399,7 +409,7 @@ const CrashList = () => {
                 <FaFilter className={c.filterIcon} />
                 <select
                   className={c.customSelect}
-                  //onChange={event => setSelectedStatus(event.target.value)}
+                  onChange={event => setSelectedStatus(event.target.value)}
                   defaultValue="" 
                   style={{
                     width: "200px", // Widen the select bar
@@ -411,8 +421,8 @@ const CrashList = () => {
                     Filter by Response
                   </option>
                   <option value="">All</option>
-                  <option value="Pending">Responsed</option>
-                  <option value="Accepted">Unresponsed</option>
+                  <option value="Responsed">Responsed</option>
+                  <option value="Unresponsed">Unresponsed</option>
                 </select>
               </div>
             </div>
