@@ -277,14 +277,21 @@ const CrashList = () => {
       title: "Driver Name",
       key: "driverName",
       align: "center",
-      render: (text, record) => drivers[record.driverID]?.name || "   ",
+      render: (text, record) => {
+        const driverName = drivers[record.driverID]?.name || "   ";
+        const capitalizeddriverName = driverName.charAt(0).toUpperCase() + driverName.slice(1);
+        return capitalizeddriverName;
+      },
     },
     {
       title: "Company Name",
       key: "CompanyName",
       align: "center",
-      render: (text, record) =>
-        drivers[record.driverID]?.shortCompanyName || "   ",
+      render: (text, record) => {
+        const companyName = drivers[record.driverID]?.shortCompanyName || "   ";
+        const capitalizedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
+        return capitalizedCompanyName;
+      },
     },
     {
       title: "Motorcycle License Plate",
@@ -352,7 +359,7 @@ const CrashList = () => {
       render: (text, record) => formatDate(record.time),
     },
     {
-      title: "Details",
+      title: "Crash Details",
       key: "Details",
       align: "center",
       render: (text, record) => (
@@ -454,6 +461,7 @@ const CrashList = () => {
                 key="details"
                 onClick={() => {
                   setModalVisible(false);
+                  handleViewDetails(currentCrash); // Navigate to crash details when the button is clicked
                 }}
               >
                 {" "}
@@ -466,7 +474,7 @@ const CrashList = () => {
             ]}
           >
             <p>
-              {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you
+              {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)} {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by clicking on confirm button, you
               formally acknowledge your responsibility for overseeing the
               management of this crash.
               <br />

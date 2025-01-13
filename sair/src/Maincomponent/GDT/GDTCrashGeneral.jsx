@@ -254,7 +254,7 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-            {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you formally
+            {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)} {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by clicking on confirm button, you formally
             acknowledge your responsibility for overseeing the management of
             this crash.
             <br />
@@ -553,7 +553,7 @@ const CrashGeneral = () => {
                   Company Short Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                  {employerDetails?.ShortCompanyName}
+                {employerDetails.ShortCompanyName.charAt(0).toUpperCase() + employerDetails.ShortCompanyName.slice(1)} 
                 </p>
 
                 <h3
@@ -1263,7 +1263,7 @@ const CrashGeneral = () => {
                       Staff Name
                     </h3>
                     <p style={{ fontSize: "18px", marginLeft: "45px", marginBottom: "20px" }}>
-                      {GDT.Fname} {GDT.Lname}
+                      {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)} {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}
                     </p>
 
                     <h3
