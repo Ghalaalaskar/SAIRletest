@@ -23,6 +23,7 @@ const [popupImage, setPopupImage] = useState('');
 const [fileName, setFileName] = useState('');
 const navigate = useNavigate();
 const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+const [errorMessage, setErrorMessage] = useState('');
 
 
 const handleInputChange = async (index, field, value) => {
@@ -30,77 +31,24 @@ const handleInputChange = async (index, field, value) => {
     updatedData[index][field] = value;
 
     // Validate the updated staff member
-    await validateStaffMember(updatedData[index], index);
-
-    // Check for duplicates and update error states
-    checkForDuplicatesAndUpdateErrors(updatedData);
-
-    // Update the state with the new data
+    const isValid = await validateStaffMember(updatedData[index], index, updatedData);
+    
+    // Update the state
     setFileData(updatedData);
 
     // Check if any staff member has errors
     const hasErrors = updatedData.some(staff => Object.values(staff.errors).some(error => error));
     setIsButtonDisabled(hasErrors); // Update button state based on errors
 
-    // Call handledata to validate all fields
-    await handleData(updatedData);
-};
-
-
-const handleData = async () => {
-    const tempData = [...fileData];
-    const errorList = [];
-
-    for (let index = 0; index < tempData.length; index++) {
-        const staff = tempData[index];
-        const { Fname, Lname, PhoneNumber, Email, ID } = staff;
-
-        // Validate required fields
-        staff.errors = {
-            Fname: !Fname,
-            Lname: !Lname,
-            PhoneNumber: !PhoneNumber,
-            Email: !Email,
-            ID: !ID,
-        };
-
-        // Collect error messages
-        if (!Fname) errorList.push({ staff, message: 'First name is required.' });
-        if (!Lname) errorList.push({ staff, message: 'Last name is required.' });
-        if (!PhoneNumber) errorList.push({ staff, message: 'Phone number is required.' });
-        if (!Email) errorList.push({ staff, message: 'Email is required.' });
-        if (!ID) errorList.push({ staff, message: 'Staff ID is required.' });
-
-        // Validate individual fields
-        if (validatePhoneNumber(PhoneNumber)) {
-            staff.errors.PhoneNumber = true;
-            setIsButtonDisabled(staff.errors.PhoneNumber); // Update button state based on errors
-            //errorList.push({ staff, message: `Invalid phone number.` });
+        // Update error message
+        if (hasErrors) {
+            setErrorMessage("Please fix the errors in the table highlighted with red borders.");
+        } else {
+            setErrorMessage(''); // Clear the error message if no errors
         }
-        if (validateEmail(Email)) {
-            staff.errors.Email = true;
-            setIsButtonDisabled(staff.errors.Email); // Update button state based on errors
-            //errorList.push({ staff, message: `Invalid email.` });
-        }
-        if (validateStaffID(ID)) {
-            staff.errors.ID = true;
-            setIsButtonDisabled(staff.errors.ID); // Update button state based on errors
-            //errorList.push({ staff, message: `Invalid staff ID.` });
-        }
-    }
+    };
 
-    setFileData(tempData); // Update state with validation errors
-    validateAllFields(); // Call to validate all fields
 
-    // Show success or error popup
-    if (errorList.length > 0) {
-        handleBatchUploadResults(errorList);
-    } else {
-        //setPopupMessage("All fields are correct!");
-        //setPopupImage(successImage);
-        //setPopupVisible(true);
-    }
-};
 
 const validateAllFields = async (updatedData) => {
     if (!Array.isArray(updatedData)) {
@@ -120,39 +68,29 @@ const validateAllFields = async (updatedData) => {
             continue;
         }
 
-        const isValid = await validateStaffMember(staff, i);
+        // Pass updatedData as allStaff to validateStaffMember
+        const isValid = await validateStaffMember(staff, i, updatedData);
         if (!isValid) {
             hasErrors = true;
         }
     }
 
-    // Check for duplicates after validating all fields
-    checkForDuplicatesAndUpdateErrors(updatedData);
-
-    // Re-evaluate errors after checking for duplicates
-    updatedData.forEach(staff => {
-        if (Object.values(staff.errors).some(error => error)) {
-            hasErrors = true;
-        }
-    });
-
     setIsButtonDisabled(hasErrors); // Update button state based on errors
     setFileData(updatedData); // Update state to reflect changes in errors
-
-    // Check for duplicates after validating all fields
-    checkForDuplicatesAndUpdateErrors(updatedData);
+    // Set error message if errors are present
+    setErrorMessage(hasErrors ? "Please fix the errors in the table highlighted with red borders." : '');
 };
 
-const validateStaffMember = async (staff, index) => {
-    const { Fname, Lname, PhoneNumber, Email, ID } = staff;
+const validateStaffMember = async (staff, index, allStaff) => {
+    const { 'First name': Fname, 'Last name': Lname, 'Mobile Phone Number': PhoneNumber, Email, 'Staff ID': ID } = staff;
 
     // Reset errors for the specific staff member
     staff.errors = {
         Fname: !Fname,
         Lname: !Lname,
-        PhoneNumber: !PhoneNumber,
-        Email: !Email,
-        ID: !ID,
+        PhoneNumber: false,
+        Email: false,
+        ID: false,
     };
 
     let isValid = true;
@@ -179,7 +117,21 @@ const validateStaffMember = async (staff, index) => {
         isValid = false;
     }
 
-    // Validate uniqueness
+    // Validate formats
+    if (PhoneNumber && validatePhoneNumber(PhoneNumber)) {
+        staff.errors.PhoneNumber = true;
+        isValid = false;
+    }
+    if (Email && validateEmail(Email)) {
+        staff.errors.Email = true;
+        isValid = false;
+    }
+    if (ID && validateStaffID(ID)) {
+        staff.errors.ID = true;
+        isValid = false;
+    }
+
+    // Validate uniqueness against the DB
     const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, ID);
     if (!uniqueValidationResult.isUnique) {
         if (uniqueValidationResult.message.includes("Phone number")) {
@@ -196,6 +148,19 @@ const validateStaffMember = async (staff, index) => {
         }
     }
 
+    // Validate uniqueness within the file
+    const duplicates = allStaff.filter((s, i) => 
+        i !== index && 
+    (s['Phone Number'] === PhoneNumber || s.Email === Email || s['Staff ID'] === ID));
+    if (duplicates.length > 0) {
+        duplicates.forEach(dup => {
+            if (dup['Mobile Phone Number'] === PhoneNumber) staff.errors.PhoneNumber = true;
+            if (dup.Email === Email) staff.errors.Email = true;
+            if (dup['Staff ID'] === ID) staff.errors.ID = true;
+        });
+        isValid = false;
+    }
+
     setFileData(prevData => {
         const updatedData = [...prevData];
         updatedData[index] = { ...staff }; // Update staff with errors
@@ -204,6 +169,7 @@ const validateStaffMember = async (staff, index) => {
 
     return isValid; // Return the validity of the staff member
 };
+
 
 const checkForDuplicatesAndUpdateErrors = (updatedData) => {
     const phoneNumbers = {};
@@ -270,58 +236,6 @@ const checkForDuplicatesAndUpdateErrors = (updatedData) => {
 };
 
 
-const handleBatchUpload = async () => {
-    const tempData = [...fileData];
-    const errorList = [];
-
-    for (let index = 0; index < tempData.length; index++) {
-        const staff = tempData[index];
-        const { Fname, Lname, PhoneNumber, Email, ID } = staff;
-
-        // Validate required fields
-        staff.errors = {
-            Fname: !Fname,
-            Lname: !Lname,
-            PhoneNumber: !PhoneNumber,
-            Email: !Email,
-            ID: !ID,
-        };
-
-        // Collect error messages
-        if (!Fname) errorList.push({ staff, message: 'First name is required.' });
-        if (!Lname) errorList.push({ staff, message: 'Last name is required.' });
-        if (!PhoneNumber) errorList.push({ staff, message: 'Phone number is required.' });
-        if (!Email) errorList.push({ staff, message: 'Email is required.' });
-        if (!ID) errorList.push({ staff, message: 'Staff ID is required.' });
-
-        // Validate individual fields
-        if (validatePhoneNumber(PhoneNumber)) {
-            staff.errors.PhoneNumber = true;
-            errorList.push({ staff, message: `Invalid phone number.` });
-        }
-        if (validateEmail(Email)) {
-            staff.errors.Email = true;
-            errorList.push({ staff, message: `Invalid email.` });
-        }
-        if (validateStaffID(ID)) {
-            staff.errors.ID = true;
-            errorList.push({ staff, message: `Invalid staff ID.` });
-        }
-    }
-
-    setFileData(tempData); // Update state with validation errors
-    validateAllFields(); // Call to validate all fields
-
-    // Show success or error popup
-    if (errorList.length > 0) {
-        handleBatchUploadResults(errorList);
-    } else {
-        setPopupMessage("All fields are correct!");
-        setPopupImage(successImage);
-        setPopupVisible(true);
-    }
-};
-
 const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     return phoneRegex.test(PhoneNumber) ? null : 'Phone number must start with +9665 and be followed by 8 digits.';
@@ -346,7 +260,6 @@ const checkUniqueness = async (phone, email, staffID) => {
     const emailSnapshot = await getDocs(emailQuery);
     const staffIDSnapshot = await getDocs(staffIDQuery);
 
-    // Debugging outputs
     console.log(`Checking uniqueness: Phone: ${phone}, Email: ${email}, Staff ID: ${staffID}`);
     console.log(`Phone exists: ${!phoneSnapshot.empty}, Email exists: ${!emailSnapshot.empty}, Staff ID exists: ${!staffIDSnapshot.empty}`);
 
@@ -423,6 +336,8 @@ const handleFileUpload = (event) => {
 
         setFileData(validatedData);
         validateAllFields(validatedData); // Validate after setting data
+        checkForDuplicatesAndUpdateErrors(validatedData); // Check for duplicates
+
     };
     reader.readAsBinaryString(file);
 };
@@ -438,16 +353,23 @@ const handleClosePopup = () => {
 
 
 const handleAddStaff = async () => {
+    // Check if there are any errors before proceeding
+    const hasErrors = fileData.some(staff => Object.values(staff.errors).some(error => error));
+    if (hasErrors) {
+        setPopupMessage("Please fix the errors before adding staff.");
+        setPopupImage(errorImage);
+        setPopupVisible(true);
+        return; // Prevent adding staff if there are errors
+    }
+
     for (let staff of fileData) {
-        if (!staff.error) {
-            await addStaffToDatabase(staff);
-        }
+        await addStaffToDatabase(staff);
     }
     setPopupMessage("Staff added successfully!");
     setPopupImage(successImage);
     setPopupVisible(true);
     setTimeout(() => {
-        navigate('/gdtstafflist'); 
+        navigate('/gdtstafflist');
     }, 2000);
 };
 
@@ -480,9 +402,9 @@ return (
         <Header active="gdtstafflist" />
         <div className={s.container}>
             <h2 className='title'>Add Staff as Batch</h2>
-            <p style={{color:'grey'}}> 
-                To download the add staff batch template <a href={templateFile} download style={{ color: '#059855', textDecoration: 'underline' }}>click here</a>.
-            </p>
+            <p>
+  To download the staff batch template, which must follow exactly the format to add the staff correctly, <a href={templateFile} download style={{ cursor: 'pointer', color: '#059855', textDecoration: 'underline' }}>click here</a>.
+</p>
 
             <br/>
             <div className={s.formRow}>
@@ -500,8 +422,14 @@ return (
                 )}
             </div>
 
+                
+
             {fileData.length > 0 && (
 <div>
+    {/* Add error message display here */}
+                {errorMessage && (
+                    <p style={{ color: 'red', marginBottom:'10px'}}>{errorMessage} <br/></p>
+                )}
     <table>
         <thead>
             <tr>
@@ -514,81 +442,92 @@ return (
             </tr>
         </thead>
         <tbody>
-        {fileData.map((staff, index) => (
-<tr key={index}>
-    <td>
-        <input 
-            type="text" 
-            value={staff.Fname || ''}
-            onChange={(e) => handleInputChange(index, 'Fname', e.target.value)}
-            style={{ 
-                borderColor: staff.errors.Fname ? 'red' : '#059855'
-            }}
-        />
-    </td>
-    <td>
-        <input 
-            type="text" 
-            value={staff.Lname || ''}
-            onChange={(e) => handleInputChange(index, 'Lname', e.target.value)}
-            style={{ 
-                borderColor: staff.errors.Lname ? 'red' : '#059855'
-            }}
-        />
-    </td>
-    <td>
-    <input 
-        type="text" 
-        value={staff.PhoneNumber || ''}
-        onChange={(e) => handleInputChange(index, 'PhoneNumber', e.target.value)}
-        style={{ 
-            borderColor: staff.errors.PhoneNumber ? 'red' : '#059855'
-        }}
-    />
-</td>
-<td>
-    <input 
-        type="email" 
-        value={staff.Email || ''}
-        onChange={(e) => handleInputChange(index, 'Email', e.target.value)}
-        style={{ 
-            borderColor: staff.errors.Email ? 'red' : '#059855'
-        }}
-    />
-</td>
-<td>
-    <input 
-        type="text" 
-        value={staff.ID || ''}
-        onChange={(e) => handleInputChange(index, 'ID', e.target.value)}
-        style={{ 
-            borderColor: staff.errors.ID ? 'red' : '#059855'
-        }}
-    />
-</td>
-    <td style={{ textAlign: 'center' }}>
-    {staff.errors.Fname || staff.errors.Lname || staff.errors.PhoneNumber || staff.errors.Email || staff.errors.ID ? 
-        <FaTimes style={{ color: 'red', marginLeft:'10px', marginTop:'5px' }} title="Not Valid" /> : 
-        <FaCheck style={{ color: 'green', marginLeft:'10px', marginTop:'5px'  }} title="Valid" />
-    }    </td>
-</tr>
+{fileData.map((staff, index) => (
+    <tr key={index}>
+        <td>
+            <input 
+                type="text" 
+                value={staff['First name'] || ''}
+                onChange={(e) => handleInputChange(index, 'First name', e.target.value)}
+                style={{ 
+                    borderColor: staff.errors.Fname ? 'red' : '#059855',
+                    boxShadow: staff.errors.Fname ? '0 0 5px red' : 'none',
+                    outline: 'none',
+                    transition: 'border-color 0.3s, box-shadow 0.3s'
+                }}
+            />
+        </td>
+        <td>
+            <input 
+                type="text" 
+                value={staff['Last name'] || ''}
+                onChange={(e) => handleInputChange(index, 'Last name', e.target.value)}
+                style={{ 
+                    borderColor: staff.errors.Lname ? 'red' : '#059855',
+                    boxShadow: staff.errors.Lname ? '0 0 5px red' : 'none', // Corrected this line
+                    outline: 'none',
+                    transition: 'border-color 0.3s, box-shadow 0.3s'
+                }}
+            />
+        </td>
+        <td>
+            <input 
+                type="text" 
+                value={staff['Mobile Phone Number'] || ''}
+                onChange={(e) => handleInputChange(index, 'Mobile Phone Number', e.target.value)}
+                style={{ 
+                    borderColor: staff.errors.PhoneNumber ? 'red' : '#059855',
+                    boxShadow: staff.errors.PhoneNumber ? '0 0 5px red' : 'none', // Corrected this line
+                    outline: 'none',
+                    transition: 'border-color 0.3s, box-shadow 0.3s'
+                }}
+            />
+        </td>
+        <td>
+            <input 
+                type="email" 
+                value={staff.Email || ''}
+                onChange={(e) => handleInputChange(index, 'Email', e.target.value)}
+                style={{ 
+                    borderColor: staff.errors.Email ? 'red' : '#059855',
+                    boxShadow: staff.errors.Email ? '0 0 5px red' : 'none', // Corrected this line
+                    outline: 'none',
+                    transition: 'border-color 0.3s, box-shadow 0.3s'
+                }}
+            />
+        </td>
+        <td>
+            <input 
+                type="text" 
+                value={staff['Staff ID'] || ''}
+                onChange={(e) => handleInputChange(index, 'Staff ID', e.target.value)}
+                style={{ 
+                    borderColor: staff.errors.ID ? 'red' : '#059855',
+                    boxShadow: staff.errors.ID ? '0 0 5px red' : 'none', // Corrected this line
+                    outline: 'none',
+                    transition: 'border-color 0.3s, box-shadow 0.3s'
+                }}
+            />
+        </td>
+        <td style={{ textAlign: 'center' }}>
+            {staff.errors.Fname || staff.errors.Lname || staff.errors.PhoneNumber || staff.errors.Email || staff.errors.ID ? 
+                <FaTimes style={{ color: 'red', marginLeft:'10px', marginTop:'5px' }} title="Not Valid" /> : 
+                <FaCheck style={{ color: 'green', marginLeft:'10px', marginTop:'5px' }} title="Valid" />
+            }
+        </td>
+    </tr>
 ))}
 
 </tbody>
 
 </table>
 
-<button onClick={handleBatchUpload} className={s.editBtn} style={{ marginBottom: "10px" }}>
-
-Validate Staff Data
-
-</button>
 
 <button onClick={handleAddStaff} disabled={isButtonDisabled} className={s.editBtn} style={{ marginBottom: "10px", backgroundColor: isButtonDisabled ? 'gray' : '#059855', color: 'white',
 
 cursor: isButtonDisabled ? 'not-allowed' : 'pointer',opacity: isButtonDisabled ? 0.6 : 1, }}>
 
-Add Staff
+Add Staff List
 
 </button>
 

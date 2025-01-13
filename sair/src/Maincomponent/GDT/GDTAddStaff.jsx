@@ -360,9 +360,17 @@ const handleBatchUpload = async (staffArray) => {
                             </div>
                         </div>
                         <div>
+                        <p style={{ marginTop: '10px' }}>
+  Alternatively, you can add staff as a batch to the staff list. To proceed,{'  '}
+  <span 
+    onClick={() => navigate('/gdtaddstaffbatch')} 
+    style={{ cursor: 'pointer', color: '#059855', textDecoration: 'underline' }}
+  >
+    click here
+  </span>.
+</p>
                             <button type="submit" className={s.editBtn}>Add Staff</button>
-                            <button type="button" className={s.editBtn} onClick={() => navigate('/gdtaddstaffbatch')}>Add Staff as Batch</button>
-                        </div>
+                                                 </div>
                     </form>
                 ) : (
                 <div>
