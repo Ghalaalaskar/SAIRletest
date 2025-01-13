@@ -38,7 +38,7 @@ const ViolationGeneral = () => {
     const state = location.state || {};
     setBreadcrumbParam(state.breadcrumbParam || "Violation List");
   }, [location]);
-  
+
   useEffect(() => {
     const fetchViolationDetails = async () => {
       try {
@@ -50,8 +50,8 @@ const ViolationGeneral = () => {
             setCurrentViolation(violationData);
             if (violationData.driverID) {
               setDriverID(violationData.driverID); // Add a state to hold the driverID
-          }
-          
+            }
+
             // Fetch motorcycle details from the History collection using violationID
             if (violationData.violationID) {
               const q = query(
@@ -100,7 +100,9 @@ const ViolationGeneral = () => {
           <span> / </span>
           <a onClick={() => navigate("/gdtviolations")}>Violations List</a>
           <span> / </span>
-          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>Violation Details</a>
+          <a onClick={() => navigate(`/gdtviolation/general/${violationId}`)}>
+            Violation Details
+          </a>
         </>
       );
     } else if (breadcrumbParam === "Driver Violations List") {
@@ -124,9 +126,16 @@ const ViolationGeneral = () => {
     }
     return null;
   };
-  
+
   const goBack = () => {
     navigate(-1); // Navigate back to the previous page
+  };
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return "";
+    return string
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
 
   const fetchDriverData = (DriverID) => {
@@ -139,8 +148,12 @@ const ViolationGeneral = () => {
       if (!snapshot.empty) {
         snapshot.forEach((doc) => {
           const data = doc.data();
+          // Capitalize the first and last names
+          const fullName = `${capitalizeFirstLetter(
+            data.Fname
+          )} ${capitalizeFirstLetter(data.Lname)}`;
           setDriverData({
-            name: `${data.Fname} ${data.Lname}`,
+            name: fullName,
             companyName: data.CompanyName,
             dPhone: data.PhoneNumber,
             dEmail: data.Email,
@@ -168,11 +181,13 @@ const ViolationGeneral = () => {
       if (!snapshot.empty) {
         snapshot.forEach((doc) => {
           const data = doc.data();
+          const CapitalizCompanyName = capitalizeFirstLetter(data.ShortCompanyName);
+
           setEmployerDetails({
             CompanyEmail: data.CompanyEmail,
             CompanyName: data.CompanyName,
             PhoneNumber: data.PhoneNumber,
-            ShortCompanyName: data.ShortCompanyName,
+            ShortCompanyName: CapitalizCompanyName,
             commercialNumber: data.commercialNumber,
           });
         });
@@ -244,7 +259,7 @@ const ViolationGeneral = () => {
   };
 
   const disableViewComplaints = () => {
-      setIsPopupVisible(true); // Show popup if no complaints exist
+    setIsPopupVisible(true); // Show popup if no complaints exist
   };
 
   const handleShowPopupCompany = () => {
@@ -463,21 +478,33 @@ const ViolationGeneral = () => {
                   </svg>
                   Driver Email
                 </h3>
-                <p style={{ fontSize: "18px", marginLeft: "45px", color: "#444" }}>
-                  <a href={`mailto:${driverData.dEmail}`} style={{
-      color: 'black', // Default color
-      textDecoration: 'underline', // Underline the text
-      transition: 'color 0.3s', // Smooth transition for color change
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
-    onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
-  > 
+                <p
+                  style={{
+                    fontSize: "18px",
+                    marginLeft: "45px",
+                    color: "#444",
+                  }}
+                >
+                  <a
+                    href={`mailto:${driverData.dEmail}`}
+                    style={{
+                      color: "black", // Default color
+                      textDecoration: "underline", // Underline the text
+                      transition: "color 0.3s", // Smooth transition for color change
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "green")
+                    } // Change color on hover
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "black")
+                    } // Revert color on mouse leave
+                  >
                     {driverData.dEmail}
                   </a>
                 </p>
               </div>
-              
-              <hr/>
+
+              <hr />
               <div id="company name">
                 <h3
                   style={{
@@ -652,51 +679,55 @@ const ViolationGeneral = () => {
                   }}
                 >
                   <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="35"
-                  height="35"
-                  style={{ marginBottom: "-5px", marginRight: "10px" }}
-                  color="#059855"
-                  fill="none"
-                >
-                  <path
-                    d="M2 5L8.91302 8.92462C11.4387 10.3585 12.5613 10.3585 15.087 8.92462L22 5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M10.5 19.5C10.0337 19.4939 9.56682 19.485 9.09883 19.4732C5.95033 19.3941 4.37608 19.3545 3.24496 18.2184C2.11383 17.0823 2.08114 15.5487 2.01577 12.4814C1.99475 11.4951 1.99474 10.5147 2.01576 9.52843C2.08114 6.46113 2.11382 4.92748 3.24495 3.79139C4.37608 2.6553 5.95033 2.61573 9.09882 2.53658C11.0393 2.4878 12.9607 2.48781 14.9012 2.53659C18.0497 2.61574 19.6239 2.65532 20.755 3.79141C21.8862 4.92749 21.9189 6.46114 21.9842 9.52844C21.9939 9.98251 21.9991 10.1965 21.9999 10.5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M19 17C19 17.8284 18.3284 18.5 17.5 18.5C16.6716 18.5 16 17.8284 16 17C16 16.1716 16.6716 15.5 17.5 15.5C18.3284 15.5 19 16.1716 19 17ZM19 17V17.5C19 18.3284 19.6716 19 20.5 19C21.3284 19 22 18.3284 22 17.5V17C22 14.5147 19.9853 12.5 17.5 12.5C15.0147 12.5 13 14.5147 13 17C13 19.4853 15.0147 21.5 17.5 21.5"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                    color="#059855"
+                    fill="none"
+                  >
+                    <path
+                      d="M2 5L8.91302 8.92462C11.4387 10.3585 12.5613 10.3585 15.087 8.92462L22 5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M10.5 19.5C10.0337 19.4939 9.56682 19.485 9.09883 19.4732C5.95033 19.3941 4.37608 19.3545 3.24496 18.2184C2.11383 17.0823 2.08114 15.5487 2.01577 12.4814C1.99475 11.4951 1.99474 10.5147 2.01576 9.52843C2.08114 6.46113 2.11382 4.92748 3.24495 3.79139C4.37608 2.6553 5.95033 2.61573 9.09882 2.53658C11.0393 2.4878 12.9607 2.48781 14.9012 2.53659C18.0497 2.61574 19.6239 2.65532 20.755 3.79141C21.8862 4.92749 21.9189 6.46114 21.9842 9.52844C21.9939 9.98251 21.9991 10.1965 21.9999 10.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M19 17C19 17.8284 18.3284 18.5 17.5 18.5C16.6716 18.5 16 17.8284 16 17C16 16.1716 16.6716 15.5 17.5 15.5C18.3284 15.5 19 16.1716 19 17ZM19 17V17.5C19 18.3284 19.6716 19 20.5 19C21.3284 19 22 18.3284 22 17.5V17C22 14.5147 19.9853 12.5 17.5 12.5C15.0147 12.5 13 14.5147 13 17C13 19.4853 15.0147 21.5 17.5 21.5"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                   Company Email
                 </h3>
-              <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                <a
-                  href={`mailto:${employerDetails?.CompanyEmail}`}
-                  style={{
-                    color: 'black', // Default color
-                    textDecoration: 'underline', // Underline the text
-                    transition: 'color 0.3s', // Smooth transition for color change
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leaves
-                >
-                  {employerDetails?.CompanyEmail}
-                </a>
-              </p>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  <a
+                    href={`mailto:${employerDetails?.CompanyEmail}`}
+                    style={{
+                      color: "black", // Default color
+                      textDecoration: "underline", // Underline the text
+                      transition: "color 0.3s", // Smooth transition for color change
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "green")
+                    } // Change color on hover
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "black")
+                    } // Revert color on mouse leaves
+                  >
+                    {employerDetails?.CompanyEmail}
+                  </a>
+                </p>
 
                 <h3
                   style={{
@@ -706,21 +737,21 @@ const ViolationGeneral = () => {
                   }}
                 >
                   <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="35"
-                  height="35"
-                  style={{ marginBottom: "-5px", marginRight: "10px" }}
-                  color="#059855"
-                  fill="none"
-                >
-                  <path
-                    d="M9.1585 5.71223L8.75584 4.80625C8.49256 4.21388 8.36092 3.91768 8.16405 3.69101C7.91732 3.40694 7.59571 3.19794 7.23592 3.08785C6.94883 3 6.6247 3 5.97645 3C5.02815 3 4.554 3 4.15597 3.18229C3.68711 3.39702 3.26368 3.86328 3.09497 4.3506C2.95175 4.76429 2.99278 5.18943 3.07482 6.0397C3.94815 15.0902 8.91006 20.0521 17.9605 20.9254C18.8108 21.0075 19.236 21.0485 19.6496 20.9053C20.137 20.7366 20.6032 20.3131 20.818 19.8443C21.0002 19.4462 21.0002 18.9721 21.0002 18.0238C21.0002 17.3755 21.0002 17.0514 20.9124 16.7643C20.8023 16.4045 20.5933 16.0829 20.3092 15.8362C20.0826 15.6393 19.7864 15.5077 19.194 15.2444L18.288 14.8417C17.6465 14.5566 17.3257 14.4141 16.9998 14.3831C16.6878 14.3534 16.3733 14.3972 16.0813 14.5109C15.7762 14.6297 15.5066 14.8544 14.9672 15.3038C14.4304 15.7512 14.162 15.9749 13.834 16.0947C13.5432 16.2009 13.1588 16.2403 12.8526 16.1951C12.5071 16.1442 12.2426 16.0029 11.7135 15.7201C10.0675 14.8405 9.15977 13.9328 8.28011 12.2867C7.99738 11.7577 7.85602 11.4931 7.80511 11.1477C7.75998 10.8414 7.79932 10.457 7.90554 10.1663C8.02536 9.83828 8.24905 9.56986 8.69643 9.033C9.14586 8.49368 9.37058 8.22402 9.48939 7.91891C9.60309 7.62694 9.64686 7.3124 9.61719 7.00048C9.58618 6.67452 9.44362 6.35376 9.1585 5.71223Z"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                  />
-                </svg>
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                    color="#059855"
+                    fill="none"
+                  >
+                    <path
+                      d="M9.1585 5.71223L8.75584 4.80625C8.49256 4.21388 8.36092 3.91768 8.16405 3.69101C7.91732 3.40694 7.59571 3.19794 7.23592 3.08785C6.94883 3 6.6247 3 5.97645 3C5.02815 3 4.554 3 4.15597 3.18229C3.68711 3.39702 3.26368 3.86328 3.09497 4.3506C2.95175 4.76429 2.99278 5.18943 3.07482 6.0397C3.94815 15.0902 8.91006 20.0521 17.9605 20.9254C18.8108 21.0075 19.236 21.0485 19.6496 20.9053C20.137 20.7366 20.6032 20.3131 20.818 19.8443C21.0002 19.4462 21.0002 18.9721 21.0002 18.0238C21.0002 17.3755 21.0002 17.0514 20.9124 16.7643C20.8023 16.4045 20.5933 16.0829 20.3092 15.8362C20.0826 15.6393 19.7864 15.5077 19.194 15.2444L18.288 14.8417C17.6465 14.5566 17.3257 14.4141 16.9998 14.3831C16.6878 14.3534 16.3733 14.3972 16.0813 14.5109C15.7762 14.6297 15.5066 14.8544 14.9672 15.3038C14.4304 15.7512 14.162 15.9749 13.834 16.0947C13.5432 16.2009 13.1588 16.2403 12.8526 16.1951C12.5071 16.1442 12.2426 16.0029 11.7135 15.7201C10.0675 14.8405 9.15977 13.9328 8.28011 12.2867C7.99738 11.7577 7.85602 11.4931 7.80511 11.1477C7.75998 10.8414 7.79932 10.457 7.90554 10.1663C8.02536 9.83828 8.24905 9.56986 8.69643 9.033C9.14586 8.49368 9.37058 8.22402 9.48939 7.91891C9.60309 7.62694 9.64686 7.3124 9.61719 7.00048C9.58618 6.67452 9.44362 6.35376 9.1585 5.71223Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
                   Company Phone Numbr
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
@@ -1107,31 +1138,135 @@ const ViolationGeneral = () => {
                 </p>
               </div>
               <div>
-              <h3 style={{color:"#059855", fontWeight:'bold',fontSize:'20px' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" style={{marginBottom:'-5px', marginRight:'10px'}} color="#059855" fill="none">
-    <path d="M20.016 2C18.9026 2 18 4.68629 18 8H20.016C20.9876 8 21.4734 8 21.7741 7.66455C22.0749 7.32909 22.0225 6.88733 21.9178 6.00381C21.6414 3.67143 20.8943 2 20.016 2Z" stroke="currentColor" stroke-width="1.5" />
-    <path d="M18 8.05426V18.6458C18 20.1575 18 20.9133 17.538 21.2108C16.7831 21.6971 15.6161 20.6774 15.0291 20.3073C14.5441 20.0014 14.3017 19.8485 14.0325 19.8397C13.7417 19.8301 13.4949 19.9768 12.9709 20.3073L11.06 21.5124C10.5445 21.8374 10.2868 22 10 22C9.71321 22 9.45546 21.8374 8.94 21.5124L7.02913 20.3073C6.54415 20.0014 6.30166 19.8485 6.03253 19.8397C5.74172 19.8301 5.49493 19.9768 4.97087 20.3073C4.38395 20.6774 3.21687 21.6971 2.46195 21.2108C2 20.9133 2 20.1575 2 18.6458V8.05426C2 5.20025 2 3.77325 2.87868 2.88663C3.75736 2 5.17157 2 8 2H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M10 8C8.89543 8 8 8.67157 8 9.5C8 10.3284 8.89543 11 10 11C11.1046 11 12 11.6716 12 12.5C12 13.3284 11.1046 14 10 14M10 8C10.8708 8 11.6116 8.4174 11.8862 9M10 8V7M10 14C9.12919 14 8.38836 13.5826 8.1138 13M10 14V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-    </svg>Violation Amount</h3>
-<p style={{fontSize:'18px', marginLeft:'45px'}}>{currentViolation.price} SAR</p>
-<p style={{marginLeft: '45px', color: 'grey' }}>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none" style={{marginBottom:'-5px'}}>
-        <circle cx="12" cy="12" r="10" stroke="red" strokeWidth="1.5" />
-        <path d="M11.992 15H12.001" stroke="red" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 12L12 8" stroke="red" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-    According to the General Department of Traffic regulations, this speed violation is considered reckless and marks the driver's <strong>{getOrdinal(currentViolation.count30 > 0 ? currentViolation.count30 : currentViolation.count50)}</strong> offense.
-    { (currentViolation.count30 > 1 || currentViolation.count50 > 1) && (
-        <p style={{marginLeft: '45px', color: 'grey' }}><span style={{marginLeft:'-12px'}}> As a result, the penalty amount has been increased.</span></p>
-    )}
-</p>
-<p style={{marginLeft: '45px', color: 'grey' }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#000000" fill="none" style={{marginBottom:'-5px'}}>
-    <circle cx="12" cy="12" r="10" stroke="red" stroke-width="1.5" />
-    <path d="M11.992 15H12.001" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M12 12L12 8" stroke="red" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-</svg>
-   Disclaimer: This fee is an estimated amount, calculated based on the executive regulations issued under ministerial decision No.2249, Article 115.
-  </p>
-               
+                <h3
+                  style={{
+                    color: "#059855",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="35"
+                    height="35"
+                    style={{ marginBottom: "-5px", marginRight: "10px" }}
+                    color="#059855"
+                    fill="none"
+                  >
+                    <path
+                      d="M20.016 2C18.9026 2 18 4.68629 18 8H20.016C20.9876 8 21.4734 8 21.7741 7.66455C22.0749 7.32909 22.0225 6.88733 21.9178 6.00381C21.6414 3.67143 20.8943 2 20.016 2Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
+                    <path
+                      d="M18 8.05426V18.6458C18 20.1575 18 20.9133 17.538 21.2108C16.7831 21.6971 15.6161 20.6774 15.0291 20.3073C14.5441 20.0014 14.3017 19.8485 14.0325 19.8397C13.7417 19.8301 13.4949 19.9768 12.9709 20.3073L11.06 21.5124C10.5445 21.8374 10.2868 22 10 22C9.71321 22 9.45546 21.8374 8.94 21.5124L7.02913 20.3073C6.54415 20.0014 6.30166 19.8485 6.03253 19.8397C5.74172 19.8301 5.49493 19.9768 4.97087 20.3073C4.38395 20.6774 3.21687 21.6971 2.46195 21.2108C2 20.9133 2 20.1575 2 18.6458V8.05426C2 5.20025 2 3.77325 2.87868 2.88663C3.75736 2 5.17157 2 8 2H20"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M10 8C8.89543 8 8 8.67157 8 9.5C8 10.3284 8.89543 11 10 11C11.1046 11 12 11.6716 12 12.5C12 13.3284 11.1046 14 10 14M10 8C10.8708 8 11.6116 8.4174 11.8862 9M10 8V7M10 14C9.12919 14 8.38836 13.5826 8.1138 13M10 14V15"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Violation Amount
+                </h3>
+                <p style={{ fontSize: "18px", marginLeft: "45px" }}>
+                  {currentViolation.price} SAR
+                </p>
+                <p style={{ marginLeft: "45px", color: "grey" }}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    color="#000000"
+                    fill="none"
+                    style={{ marginBottom: "-5px" }}
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="red"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M11.992 15H12.001"
+                      stroke="red"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 12L12 8"
+                      stroke="red"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  According to the General Department of Traffic regulations,
+                  this speed violation is considered reckless and marks the
+                  driver's{" "}
+                  <strong>
+                    {getOrdinal(
+                      currentViolation.count30 > 0
+                        ? currentViolation.count30
+                        : currentViolation.count50
+                    )}
+                  </strong>{" "}
+                  offense.
+                  {(currentViolation.count30 > 1 ||
+                    currentViolation.count50 > 1) && (
+                    <p style={{ marginLeft: "45px", color: "grey" }}>
+                      <span style={{ marginLeft: "-12px" }}>
+                        {" "}
+                        As a result, the penalty amount has been increased.
+                      </span>
+                    </p>
+                  )}
+                </p>
+                <p style={{ marginLeft: "45px", color: "grey" }}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    color="#000000"
+                    fill="none"
+                    style={{ marginBottom: "-5px" }}
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="red"
+                      stroke-width="1.5"
+                    />
+                    <path
+                      d="M11.992 15H12.001"
+                      stroke="red"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M12 12L12 8"
+                      stroke="red"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Disclaimer: This fee is an estimated amount, calculated based
+                  on the executive regulations issued under ministerial decision
+                  No.2249, Article 115.
+                </p>
               </div>
               <div>
                 <h3
@@ -1341,7 +1476,8 @@ const ViolationGeneral = () => {
           //   There is no complaint associated with this violation.
           // </p>
           <p style={{ textAlign: "center" }}>
-            View associated complaint feature currently unavailable. Stay tuned for updates!
+            View associated complaint feature currently unavailable. Stay tuned
+            for updates!
           </p>
         }
         style={{ top: "38%" }}
