@@ -173,30 +173,37 @@ const CrashList = () => {
 
     fetchDriversAndCrashes();
   }, [gdtUID]);
+  
+  const filterByStatus = (record) => {
+    const formattedStatus = record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
+  
+    if (selectedStatus === "Responsed") {
+      return formattedStatus === "Emergency sos" && record.RespondedBy != null; // Responded
+    } else if (selectedStatus === "Unresponsed") {
+      return formattedStatus === "Emergency sos" && record.RespondedBy == null; // Unresponded
+    }
+    return true; // Show all if no filter is selected
+  };
 
   const filteredCrashes = crashes
-    .filter(
-      (crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied"
-    ) // Only include Rejected or Confirmed statuses
-    .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
-    .filter((crash) => {
-      const crashDate = crash.time
-        ? new Date(crash.time * 1000).toISOString().split("T")[0]
-        : "";
-      const matchesSearchDate = searchDate ? crashDate === searchDate : true;
+  .filter((crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied") // Filter by status
+  .filter((crash) => {
+    const crashDate = crash.time
+      ? new Date(crash.time * 1000).toISOString().split("T")[0]
+      : "";
+    const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-      const driverName = drivers[crash.driverID]?.name || " ";
-      const licensePlate = motorcycles[crash.crashID] || " "; // Use crashID to fetch motorcycle
-      const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
+    const driverName = drivers[crash.driverID]?.name || " ";
+    const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
 
-      const matchesSearchQuery =
-        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        companyName.toLowerCase().includes(searchQuery.toLowerCase());
-      //normalizeText(companyName).includes(normalizeText(searchQuery));
-      //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearchQuery =
+      driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      companyName.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesSearchQuery && matchesSearchDate;
-    });
+    return matchesSearchQuery && matchesSearchDate;
+  })
+  .filter(filterByStatus) // Apply the filterByStatus function here
+  .sort((a, b) => (b.time || 0) - (a.time || 0)); // Sort by time in descending order
 
   const formatDate = (time) => {
     const date = new Date(time * 1000);
@@ -205,20 +212,6 @@ const CrashList = () => {
     const day = date.getDate().toString().padStart(2, "0"); // Days are 1-based
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
-
-  const filterByStatus = (record) => {
-    const formattedStatus =
-      record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
-  
-    if (selectedStatus === "Responsed") {
-      return formattedStatus === "Emergency sos" && record.RespondedBy;
-    } else if (selectedStatus === "Unresponsed") {
-      return formattedStatus === "Emergency sos" && !record.RespondedBy;
-    }
-    return true; // Show all if no filter is selected
-  };
-
-  const filteredData = crashes.filter(filterByStatus);
 
   const handleViewDetails = (record) => {
     setModalVisible(false);
