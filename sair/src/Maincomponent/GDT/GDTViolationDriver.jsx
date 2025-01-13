@@ -117,7 +117,7 @@ const ViolationsTable = () => {
       },
     },
     {
-      title: "Details",
+      title: "Violation Details",
       key: "actions",
       align: "center",
       className: "svg",

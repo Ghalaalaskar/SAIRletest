@@ -235,7 +235,7 @@ const ViolationList = () => {
         record.isReckless ? "Reckless Violation" : "Regular Violation",
     },
     {
-      title: "Details",
+      title: "Violation Details",
       key: "Details",
       align: "center",
       render: (text, record) => (
