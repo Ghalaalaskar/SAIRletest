@@ -23,13 +23,11 @@ import {
 import Header from "./GDTHeader";
 import { Modal } from "antd";
 import s from "../../css/Profile.module.css";
-import { FirstNameContext } from "../../FirstNameContext";
 import { useContext } from "react";
 import "../../css/CustomModal.css";
 
 const GDTEditStaff = () => {
   const { staffId } = useParams(); //from the URL
-  const { setFirstName } = useContext(FirstNameContext);
   const [GDT, setGDT] = useState({
     GDTEmail: "",
     Lname: "",
@@ -307,7 +305,6 @@ const GDTEditStaff = () => {
       delete updateData.confirmNewPassword;
 
       await updateDoc(docRef, updateData);
-      setFirstName(GDT.Fname);
       if (GDT.newPassword && user) {
         const credential = EmailAuthProvider.credential(
           user.email,

@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   where,
+  updateDoc
 } from "firebase/firestore";
 import EyeIcon from "../../images/eye.png";
 import { Button, Modal } from "antd";
@@ -23,8 +24,10 @@ import { Tooltip } from "antd";
 const CrashList = () => {
   const [motorcycles, setMotorcycles] = useState({});
   const [crashes, setCrashes] = useState([]);
+  const [currentCrash, setCurrentCrash] = useState({});
   const [drivers, setDrivers] = useState({});
   const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [searchDriverID, setSearchDriverID] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const navigate = useNavigate();
@@ -170,30 +173,37 @@ const CrashList = () => {
 
     fetchDriversAndCrashes();
   }, [gdtUID]);
+  
+  const filterByStatus = (record) => {
+    const formattedStatus = record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
+  
+    if (selectedStatus === "Responsed") {
+      return formattedStatus === "Emergency sos" && record.RespondedBy != null; // Responded
+    } else if (selectedStatus === "Unresponsed") {
+      return formattedStatus === "Emergency sos" && record.RespondedBy == null; // Unresponded
+    }
+    return true; // Show all if no filter is selected
+  };
 
   const filteredCrashes = crashes
-    .filter(
-      (crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied"
-    ) // Only include Rejected or Confirmed statuses
-    .sort((a, b) => (b.time || 0) - (a.time || 0)) // Sort by time in descending order
-    .filter((crash) => {
-      const crashDate = crash.time
-        ? new Date(crash.time * 1000).toISOString().split("T")[0]
-        : "";
-      const matchesSearchDate = searchDate ? crashDate === searchDate : true;
+  .filter((crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied") // Filter by status
+  .filter((crash) => {
+    const crashDate = crash.time
+      ? new Date(crash.time * 1000).toISOString().split("T")[0]
+      : "";
+    const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-      const driverName = drivers[crash.driverID]?.name || " ";
-      const licensePlate = motorcycles[crash.crashID] || " "; // Use crashID to fetch motorcycle
-      const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
+    const driverName = drivers[crash.driverID]?.name || " ";
+    const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
 
-      const matchesSearchQuery =
-        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        companyName.toLowerCase().includes(searchQuery.toLowerCase());
-      //normalizeText(companyName).includes(normalizeText(searchQuery));
-      //licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearchQuery =
+      driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      companyName.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesSearchQuery && matchesSearchDate;
-    });
+    return matchesSearchQuery && matchesSearchDate;
+  })
+  .filter(filterByStatus) // Apply the filterByStatus function here
+  .sort((a, b) => (b.time || 0) - (a.time || 0)); // Sort by time in descending order
 
   const formatDate = (time) => {
     const date = new Date(time * 1000);
@@ -215,45 +225,38 @@ const CrashList = () => {
     navigate(`/gdtcrash/general/${record.id}`);
   };
 
-  const handleConfirmResponse = () => {
+  const handleConfirmResponse = (record) => {
+    setCurrentCrash(record);
     setModalVisible(true); // Show the confirmation modal
   };
-
+  
   const handleResponse = async () => {
-    // setModalVisible(false); // Close the modal
-    // try {
-    //   // Check if crashID exists and is valid
-    //   if (!crashID) {
-    //     console.error("Crash ID is missing");
-    //     return;
-    //   }
-    //   // Ensure the GDT data is valid
-    //   if (!GDT.Fname || !GDT.Lname) {
-    //     console.error("Responder details are incomplete");
-    //     return;
-    //   }
-    //   console.log("Before updatedCrash");
-    //   const updatedCrash = {
-    //     ...currentCrash,
-    //     RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
-    //   };
-    //   console.log("After updatedCrash");
-    //   const crashDocRef = doc(db, "Crash", crashId);
-    //   console.log("Firestore document reference:", crashDocRef.path);
-    //   // Check if document exists
-    //   const docSnapshot = await getDoc(crashDocRef);
-    //   if (!docSnapshot.exists()) {
-    //     console.error("No document found with ID:", crashId);
-    //     return;
-    //   }
-    //   // Update Firestore with the new RespondedBy field
-    //   await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
-    //   // Update the local state with the new crash details
-    //   setCurrentCrash(updatedCrash);
-    //   console.log("Crash response updated successfully");
-    // } catch (error) {
-    //   console.error("Error updating crash response:", error);
-    // }
+    setModalVisible(false); // Close the modal
+  
+    try {
+      // Ensure the GDT data is valid
+      if (!GDT.Fname || !GDT.Lname) {
+        console.error("Responder details are incomplete");
+        return;
+      }
+  
+      const updatedCrash = {
+        ...currentCrash,
+        RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
+      };
+  
+      const crashDocRef = doc(db, "Crash", currentCrash.id);
+  
+      // Update Firestore with the new RespondedBy field
+      await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
+  
+      // Update the local state with the new crash details
+      setCurrentCrash(updatedCrash);
+  
+      console.log("Crash response updated successfully");
+    } catch (error) {
+      console.error("Error updating crash response:", error);
+    }
   };
 
   const columns = [
@@ -267,14 +270,21 @@ const CrashList = () => {
       title: "Driver Name",
       key: "driverName",
       align: "center",
-      render: (text, record) => drivers[record.driverID]?.name || "   ",
+      render: (text, record) => {
+        const driverName = drivers[record.driverID]?.name || "   ";
+        const capitalizeddriverName = driverName.charAt(0).toUpperCase() + driverName.slice(1);
+        return capitalizeddriverName;
+      },
     },
     {
       title: "Company Name",
       key: "CompanyName",
       align: "center",
-      render: (text, record) =>
-        drivers[record.driverID]?.shortCompanyName || "   ",
+      render: (text, record) => {
+        const companyName = drivers[record.driverID]?.shortCompanyName || "   ";
+        const capitalizedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
+        return capitalizedCompanyName;
+      },
     },
     {
       title: "Motorcycle License Plate",
@@ -325,7 +335,7 @@ const CrashList = () => {
                 cursor: "pointer",
                 textDecoration: "underline",
               }}
-              onClick={handleConfirmResponse}
+              onClick={() => handleConfirmResponse(record)}
             >
               Need for Response
             </button>
@@ -342,7 +352,7 @@ const CrashList = () => {
       render: (text, record) => formatDate(record.time),
     },
     {
-      title: "Details",
+      title: "Crash Details",
       key: "Details",
       align: "center",
       render: (text, record) => (
@@ -399,7 +409,7 @@ const CrashList = () => {
                 <FaFilter className={c.filterIcon} />
                 <select
                   className={c.customSelect}
-                  //onChange={event => setSelectedStatus(event.target.value)}
+                  onChange={event => setSelectedStatus(event.target.value)}
                   defaultValue="" 
                   style={{
                     width: "200px", // Widen the select bar
@@ -411,8 +421,8 @@ const CrashList = () => {
                     Filter by Response
                   </option>
                   <option value="">All</option>
-                  <option value="Pending">Responsed</option>
-                  <option value="Accepted">Unresponsed</option>
+                  <option value="Responsed">Responsed</option>
+                  <option value="Unresponsed">Unresponsed</option>
                 </select>
               </div>
             </div>
@@ -444,6 +454,7 @@ const CrashList = () => {
                 key="details"
                 onClick={() => {
                   setModalVisible(false);
+                  handleViewDetails(currentCrash); // Navigate to crash details when the button is clicked
                 }}
               >
                 {" "}
@@ -456,7 +467,7 @@ const CrashList = () => {
             ]}
           >
             <p>
-              {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you
+              {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)} {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by clicking on confirm button, you
               formally acknowledge your responsibility for overseeing the
               management of this crash.
               <br />

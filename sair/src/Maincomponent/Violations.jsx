@@ -180,7 +180,7 @@ const ViolationList = () => {
       render: (text, record) => formatDate(record.time),
     },
     {
-      title: 'Details',
+      title: 'Violation Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (

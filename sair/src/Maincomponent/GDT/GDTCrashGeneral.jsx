@@ -254,9 +254,10 @@ const CrashGeneral = () => {
           ]}
         >
           <p>
-            {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you formally
-            acknowledge your responsibility for overseeing the management of
-            this crash.
+            {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
+            clicking on confirm button, you formally acknowledge your
+            responsibility for overseeing the management of this crash.
             <br />
             <br />
             Additionally, you affirm your obligation to ensure that the driver
@@ -359,8 +360,16 @@ const CrashGeneral = () => {
                 Driver Name
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                {driverDetails.Fname} {driverDetails.Lname}
+                {driverDetails?.Fname
+                  ? driverDetails.Fname.charAt(0).toUpperCase() +
+                    driverDetails.Fname.slice(1).toLowerCase()
+                  : ""}{" "}
+                {driverDetails?.Lname
+                  ? driverDetails.Lname.charAt(0).toUpperCase() +
+                    driverDetails.Lname.slice(1).toLowerCase()
+                  : ""}
               </p>
+
               <h3
                 style={{
                   color: "#059855",
@@ -553,7 +562,10 @@ const CrashGeneral = () => {
                   Company Short Name
                 </h3>
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
-                  {employerDetails?.ShortCompanyName}
+                  {employerDetails?.ShortCompanyName
+                    ? employerDetails.ShortCompanyName.charAt(0).toUpperCase() +
+                      employerDetails.ShortCompanyName.slice(1)
+                    : ""}
                 </p>
 
                 <h3
@@ -1215,7 +1227,13 @@ const CrashGeneral = () => {
                       </svg>
                       Staff ID (National Number)
                     </h3>
-                    <p style={{ fontSize: "18px", marginLeft: "45px", marginBottom: "20px" }}>
+                    <p
+                      style={{
+                        fontSize: "18px",
+                        marginLeft: "45px",
+                        marginBottom: "20px",
+                      }}
+                    >
                       {GDT.ID}
                     </p>
 
@@ -1262,7 +1280,13 @@ const CrashGeneral = () => {
                       </svg>
                       Staff Name
                     </h3>
-                    <p style={{ fontSize: "18px", marginLeft: "45px", marginBottom: "20px" }}>
+                    <p
+                      style={{
+                        fontSize: "18px",
+                        marginLeft: "45px",
+                        marginBottom: "20px",
+                      }}
+                    >
                       {GDT.Fname} {GDT.Lname}
                     </p>
 
@@ -1291,7 +1315,13 @@ const CrashGeneral = () => {
                       </svg>
                       Staff Phone Numbr
                     </h3>
-                    <p style={{ fontSize: "18px", marginLeft: "45px", marginBottom: "20px" }}>
+                    <p
+                      style={{
+                        fontSize: "18px",
+                        marginLeft: "45px",
+                        marginBottom: "20px",
+                      }}
+                    >
                       {GDT.PhoneNumber}
                     </p>
 
