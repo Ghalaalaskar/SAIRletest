@@ -32,6 +32,7 @@ const Login = () => {
   const [showDetailsFormAdmin, setShowDetailsFormAdmin] = useState(false); // State to toggle details form
   const [showDetailsFormStaff, setShowDetailsFormStaff] = useState(false); // State to toggle details form
   const [showPasswordDetails, setshowPasswordDetails] = useState(false); // State to toggle details form
+  const [showConfirmLogin, setshowConfirmLogin] = useState(false); // State to toggle details form
   const [showConfirmNewPassword, setshowConfirmNewPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -557,16 +558,9 @@ if(showDetailsFormAdmin===true){
           await updateDoc(docRef, newFields);
 
           console.log(`Document with email ${email} updated successfully!`);
-          sessionStorage.setItem('gdtUID', gdtUID);
-          const GDTData = querySnapshot.docs[0].data();
-                const Fname = GDTData.Fname || '';
-                sessionStorage.setItem('FirstName', Fname);
-                setFirstName(Fname); // Update the context
-                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
           setCurrent(current + 1);
-          setTimeout(() => {
-          navigate('/gdthome');
-         }, 1500);
+          setshowPasswordDetails(false);
+          setshowConfirmLogin(true);
       } else {
         console.log("No user is signed in.");
       }
@@ -578,7 +572,7 @@ if(showDetailsFormAdmin===true){
     console.error("Error updating document:", error.message);
   }
 
-
+  
 }
 else if(showDetailsFormStaff===true){
 console.log('in stafffffffffff');
@@ -640,16 +634,27 @@ else{
 
 };
 
-const handleback = () => {
-  setCurrent(current - 1);
 
+const handleNext3 = async (e) => {
+  const GDTCollection = collection(db, 'GDT');
 
+    // Query for the document with the matching email
+    const q = query(GDTCollection, where('GDTEmail', '==', email));
+    console.log('in 3',email);
+    const querySnapshot = await getDocs(q);
+    const gdtUID = querySnapshot.docs[0].id;
+    console.log('in 3',gdtUID);
 
-
-
-
-
-
+     sessionStorage.setItem('gdtUID', gdtUID);
+          const GDTData = querySnapshot.docs[0].data();
+                const Fname = GDTData.Fname || '';
+                sessionStorage.setItem('FirstName', Fname);
+                setFirstName(Fname); // Update the context
+                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
+          setCurrent(current + 1);
+          setTimeout(() => {
+          navigate('/gdthome');
+         }, 1500);
 };
 
 
@@ -855,23 +860,23 @@ const handleback = () => {
           ) : (
             <div  >
               {showDetailsFormAdmin && !showDetailsFormStaff  ? ( 
-                <div>
+                <div style={{ width: '110%', margin: '0 auto' }}>
               <Steps current={current} size="small" className={s.customSteps}>
       <Step title="User Info" description=""  />
       <Step title="Reset Password" description=""  />
+      <Step title="Registration Completed" description=""  />
     </Steps>
 
 </div>
               ):null}
 
-            {showDetailsFormAdmin && !showPasswordDetails   ? (
+            {showDetailsFormAdmin && !showPasswordDetails && !showConfirmLogin  ? (
             
             <div >
             
             <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
-              Please fill in the following information to log in to your
-              account.
+              Please fill in the following information to complete your registration.
             </p>
          
             <style>
@@ -951,24 +956,22 @@ const handleback = () => {
           </button>
 
       </div>
-    ) : showPasswordDetails ? (<div>
+    ) : showPasswordDetails && !showConfirmLogin  ? (<div>
 
-      { showDetailsFormStaff && !showDetailsFormAdmin ?(
+      { showDetailsFormStaff && !showDetailsFormAdmin&& showPasswordDetails ?(
         <div>
        <p style={{marginBottom: '20px'}} //i add marginTop for the journey numbers
             >
-              Please fill in the following information to log in to your
-              account.
+              For security reasons, we require you to reset your password.
             </p>
 </div>
       ):null}
 
-{ showDetailsFormAdmin && !showDetailsFormStaff ?(
+{ showDetailsFormAdmin && !showDetailsFormStaff && showPasswordDetails ?(
         <div>
        <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
-              Please fill in the following information to log in to your
-              account.
+              For security reasons, we require you to reset your password.
             </p>
 </div>
       ):null}
@@ -1051,6 +1054,25 @@ const handleback = () => {
 
 
           </div>) : null}
+          { showConfirmLogin && showDetailsFormAdmin && !showDetailsFormStaff && !showPasswordDetails ?(
+            <div>
+              <img
+          style={{marginBottom: '20px', marginTop:'60px', width: '180px', height: 'auto', marginLeft:'170px'}}
+          src={successImage}
+          alt='success'
+          
+        />
+            <p style={{marginLeft:'60px'}} >
+              Your registration has been successfully completed.</p><p style={{marginLeft:'185px'}} > 
+                Click Next to log in.
+            </p> <br></br>
+            <button style={{marginLeft:'167px'}} className={s.submitButton} onClick={handleNext3} type='button'>
+            Next
+          </button>
+            </div>
+            
+
+          ): null}
           
 </div>
         )}
