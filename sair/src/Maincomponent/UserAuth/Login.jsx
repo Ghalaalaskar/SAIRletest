@@ -962,7 +962,7 @@ const handleNext3 = async (e) => {
         <div>
        <p style={{marginBottom: '20px'}} //i add marginTop for the journey numbers
             >
-              For security reasons, we require you to reset your password.
+              For security reasons, please reset your password.
             </p>
 </div>
       ):null}
@@ -971,7 +971,7 @@ const handleNext3 = async (e) => {
         <div>
        <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
-              For security reasons, we require you to reset your password.
+              For security reasons, please reset your password.
             </p>
 </div>
       ):null}
