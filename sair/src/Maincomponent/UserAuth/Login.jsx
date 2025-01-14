@@ -860,7 +860,7 @@ const handleNext3 = async (e) => {
           ) : (
             <div  >
               {showDetailsFormAdmin && !showDetailsFormStaff  ? ( 
-                <div style={{ width: '110%', margin: '0 auto' }}>
+                <div style={{ width: '120%', margin: '0 auto' }}>
               <Steps current={current} size="small" className={s.customSteps}>
       <Step title="User Info" description=""  />
       <Step title="Reset Password" description=""  />
@@ -1057,16 +1057,16 @@ const handleNext3 = async (e) => {
           { showConfirmLogin && showDetailsFormAdmin && !showDetailsFormStaff && !showPasswordDetails ?(
             <div>
               <img
-          style={{marginBottom: '20px', marginTop:'60px', width: '180px', height: 'auto', marginLeft:'170px'}}
+          style={{marginBottom: '20px', marginTop:'60px', width: '180px', height: 'auto', marginLeft:'178px'}}
           src={successImage}
           alt='success'
           
         />
-            <p style={{marginLeft:'60px'}} >
-              Your registration has been successfully completed.</p><p style={{marginLeft:'185px'}} > 
+            <p style={{marginLeft:'65px'}} >
+              Your registration has been successfully completed.</p><p style={{marginLeft:'190px'}} > 
                 Click Next to log in.
             </p> <br></br>
-            <button style={{marginLeft:'167px'}} className={s.submitButton} onClick={handleNext3} type='button'>
+            <button style={{marginLeft:'170px'}} className={s.submitButton} onClick={handleNext3} type='button'>
             Next
           </button>
             </div>
