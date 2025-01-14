@@ -323,6 +323,13 @@ const handleBatchUpload = async (staffArray) => {
     return (        
         <div>   
             <Header active="gdtstafflist" />
+            <div className="breadcrumb" style={{ marginRight: '100px' }}>
+        <a onClick={() => navigate('/gdthome')}>Home</a>
+        <span> / </span>
+        <a onClick={() => navigate('/gdtstafflist')}>Staff List</a>
+        <span> / </span>
+        <a onClick={() => navigate('/gdtaddstaff')}>Add Staff</a>
+      </div>
             <div className={s.container}>
                 <h2 className='title'>Add Staff</h2>
                 
