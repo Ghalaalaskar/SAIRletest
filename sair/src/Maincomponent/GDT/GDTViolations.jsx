@@ -181,7 +181,14 @@ const ViolationList = () => {
     .sort((a, b) => {
       return (b.time || 0) - (a.time || 0);
     });
-
+    const capitalizeFirstLetter = (string) => {
+      if (!string) return "";
+      return string
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    };
+    
   const columns = [
     {
       title: "Violation ID",
@@ -193,14 +200,19 @@ const ViolationList = () => {
       title: "Driver Name",
       key: "driverName",
       align: "center",
-      render: (text, record) => drivers[record.driverID]?.name || "   ",
+      render: (text, record) => {
+        const driverName = drivers[record.driverID]?.name || "";
+        return capitalizeFirstLetter(driverName);
+      },
     },
     {
       title: "Company Name",
       key: "CompanyName",
       align: "center",
-      render: (text, record) =>
-        drivers[record.driverID]?.shortCompanyName || "   ",
+      render: (text, record) => {
+        const companyName = drivers[record.driverID]?.shortCompanyName || "";
+        return capitalizeFirstLetter(companyName);
+      },
     },
     {
       title: "Motorcycle License Plate",
@@ -223,7 +235,7 @@ const ViolationList = () => {
         record.isReckless ? "Reckless Violation" : "Regular Violation",
     },
     {
-      title: "Details",
+      title: "Violation Details",
       key: "Details",
       align: "center",
       render: (text, record) => (

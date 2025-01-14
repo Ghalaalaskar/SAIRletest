@@ -323,6 +323,13 @@ const handleBatchUpload = async (staffArray) => {
     return (        
         <div>   
             <Header active="gdtstafflist" />
+            <div className="breadcrumb" style={{ marginRight: '100px' }}>
+        <a onClick={() => navigate('/gdthome')}>Home</a>
+        <span> / </span>
+        <a onClick={() => navigate('/gdtstafflist')}>Staff List</a>
+        <span> / </span>
+        <a onClick={() => navigate('/gdtaddstaff')}>Add Staff</a>
+      </div>
             <div className={s.container}>
                 <h2 className='title'>Add Staff</h2>
                 
@@ -360,9 +367,17 @@ const handleBatchUpload = async (staffArray) => {
                             </div>
                         </div>
                         <div>
+                        <p style={{ marginTop: '10px' }}>
+  Alternatively, you can add staff as a batch to the staff list. To proceed,{'  '}
+  <span 
+    onClick={() => navigate('/gdtaddstaffbatch')} 
+    style={{ cursor: 'pointer', color: '#059855', textDecoration: 'underline' }}
+  >
+    click here
+  </span>.
+</p>
                             <button type="submit" className={s.editBtn}>Add Staff</button>
-                            <button type="button" className={s.editBtn} onClick={() => navigate('/gdtaddstaffbatch')}>Add Staff as Batch</button>
-                        </div>
+                                                 </div>
                     </form>
                 ) : (
                 <div>
