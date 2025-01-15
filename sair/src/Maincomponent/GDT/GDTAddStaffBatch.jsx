@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import { db, auth } from '../../firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, runTransaction, getFirestore   } from 'firebase/firestore';
 import { Modal } from 'antd';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FaTrash } from 'react-icons/fa';
@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 import { generateRandomPassword } from '../../utils/common';
 import templateFile from './template.xlsx';
+import debounce from 'lodash.debounce';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const GDTAddStaffBatch = () => {
@@ -24,151 +25,150 @@ const [fileName, setFileName] = useState('');
 const navigate = useNavigate();
 const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 const [errorMessage, setErrorMessage] = useState('');
+const firestore = getFirestore(); // Get Firestore instance once
+
+useEffect(() => {
+    // Validate only when fileData changes
+    validateAllFields(fileData);
+}, [fileData]);
+
+const debouncedValidateStaffMember = debounce((staff, index, allStaff) => {
+    validateStaffMember(staff, index, allStaff);
+}, 300);
+
+const handleInputChange = (index, field, value) => {
+    const updatedFileData = [...fileData];
+    updatedFileData[index] = { ...updatedFileData[index], [field]: value };
+    const isValid = validateField(field, value, index, updatedFileData);
+    setFileData(updatedFileData);
+
+    const hasErrors = updatedFileData.some(staff => Object.values(staff.errors).some(error => error));
+    setErrorMessage(hasErrors ? "Please fix the errors in the table highlighted with red borders." : '');
+    setIsButtonDisabled(hasErrors);
+};
 
 
-const handleInputChange = async (index, field, value) => {
-    const updatedData = [...fileData];
-    updatedData[index][field] = value;
+    const validateField = (field, value, index, allStaff) => {
+        const staff = allStaff[index];
+        staff.errors = staff.errors || {};
 
-    // Validate the updated staff member
-    const isValid = await validateStaffMember(updatedData[index], index, updatedData);
-    
-    // Update the state
-    setFileData(updatedData);
+        let isValid = true;
 
-    // Check if any staff member has errors
-    const hasErrors = updatedData.some(staff => Object.values(staff.errors).some(error => error));
-    setIsButtonDisabled(hasErrors); // Update button state based on errors
-
-        // Update error message
-        if (hasErrors) {
-            setErrorMessage("Please fix the errors in the table highlighted with red borders.");
-        } else {
-            setErrorMessage(''); // Clear the error message if no errors
+        switch (field) {
+            case 'First name':
+                staff.errors['First name'] = !validateName(value);
+                isValid = !staff.errors['First name'];
+                break;
+            case 'Last name':
+                staff.errors['Last name'] = !validateName(value);
+                isValid = !staff.errors['Last name'];
+                break;
+            case 'Mobile Phone Number':
+                staff.errors['Mobile Phone Number'] = !validatePhoneNumber(value) ||
+                    allStaff.some((s, i) => i !== index && s['Mobile Phone Number'] === value);
+                isValid = !staff.errors['Mobile Phone Number'];
+                break;
+            case 'Email':
+                staff.errors.Email = !validateEmail(value) ||
+                    allStaff.some((s, i) => i !== index && s.Email === value);
+                isValid = !staff.errors.Email;
+                break;
+            case 'Staff ID':
+                staff.errors['Staff ID'] = !validateStaffID(value) ||
+                    allStaff.some((s, i) => i !== index && s['Staff ID'] === value);
+                isValid = !staff.errors['Staff ID'];
+                break;
+            default:
+                break;
         }
-    };
 
+        return isValid;
+    };
 
 
 const validateAllFields = async (updatedData) => {
-    if (!Array.isArray(updatedData)) {
-        console.error("updatedData is not an array:", updatedData);
-        return;
-    }
+    const syncResults = updatedData.map((staff, index) => validateStaffMember(staff, index, updatedData));
+    const asyncResults = await Promise.all(
+        updatedData.map((staff, index) =>
+            checkUniqueness(staff['Mobile Phone Number'], staff.Email, staff['Staff ID'])
+        )
+    );
 
-    let hasErrors = false;
-
-    for (let i = 0; i < updatedData.length; i++) {
-        const staff = updatedData[i];
-
-        // Ensure staff is defined and is an object
-        if (!staff || typeof staff !== 'object') {
-            console.error(`Staff data at index ${i} is invalid:`, staff);
-            hasErrors = true;
-            continue;
-        }
-
-        // Pass updatedData as allStaff to validateStaffMember
-        const isValid = await validateStaffMember(staff, i, updatedData);
-        if (!isValid) {
-            hasErrors = true;
-        }
-    }
-
-    setIsButtonDisabled(hasErrors); // Update button state based on errors
-    setFileData(updatedData); // Update state to reflect changes in errors
-    // Set error message if errors are present
+    const hasErrors = syncResults.some(r => !r) || asyncResults.some(r => !r.isUnique);
+    setIsButtonDisabled(hasErrors);
     setErrorMessage(hasErrors ? "Please fix the errors in the table highlighted with red borders." : '');
 };
 
-const validateStaffMember = async (staff, index, allStaff) => {
-    const { 'First name': Fname, 'Last name': Lname, 'Mobile Phone Number': PhoneNumber, Email, 'Staff ID': ID } = staff;
 
-    // Reset errors for the specific staff member
-    staff.errors = {
-        Fname: !Fname,
-        Lname: !Lname,
-        PhoneNumber: false,
-        Email: false,
-        ID: false,
-    };
+const validateAsyncField = async (field, value, index) => {
+    const staff = fileData[index];
+    let uniquenessResult = { isUnique: true };
 
-    let isValid = true;
-
-    // Validate required fields
-    if (!Fname) {
-        staff.errors.Fname = true;
-        isValid = false;
-    }
-    if (!Lname) {
-        staff.errors.Lname = true;
-        isValid = false;
-    }
-    if (!PhoneNumber) {
-        staff.errors.PhoneNumber = true;
-        isValid = false;
-    }
-    if (!Email) {
-        staff.errors.Email = true;
-        isValid = false;
-    }
-    if (!ID) {
-        staff.errors.ID = true;
-        isValid = false;
+    if (field === 'Mobile Phone Number' || field === 'Email' || field === 'Staff ID') {
+        uniquenessResult = await checkUniqueness(
+            field === 'Mobile Phone Number' ? value : null,
+            field === 'Email' ? value : null,
+            field === 'Staff ID' ? value : null
+        );
     }
 
-    // Validate formats
-    if (PhoneNumber && validatePhoneNumber(PhoneNumber)) {
-        staff.errors.PhoneNumber = true;
-        isValid = false;
-    }
-    if (Email && validateEmail(Email)) {
-        staff.errors.Email = true;
-        isValid = false;
-    }
-    if (ID && validateStaffID(ID)) {
-        staff.errors.ID = true;
-        isValid = false;
-    }
-
-    // Validate uniqueness against the DB
-    const uniqueValidationResult = await checkUniqueness(PhoneNumber, Email, ID);
-    if (!uniqueValidationResult.isUnique) {
-        if (uniqueValidationResult.message.includes("Phone number")) {
-            staff.errors.PhoneNumber = true;
-            isValid = false;
-        }
-        if (uniqueValidationResult.message.includes("Email")) {
-            staff.errors.Email = true;
-            isValid = false;
-        }
-        if (uniqueValidationResult.message.includes("Staff ID")) {
-            staff.errors.ID = true;
-            isValid = false;
-        }
-    }
-
-    // Validate uniqueness within the file
-    const duplicates = allStaff.filter((s, i) => 
-        i !== index && 
-    (s['Phone Number'] === PhoneNumber || s.Email === Email || s['Staff ID'] === ID));
-    if (duplicates.length > 0) {
-        duplicates.forEach(dup => {
-            if (dup['Mobile Phone Number'] === PhoneNumber) staff.errors.PhoneNumber = true;
-            if (dup.Email === Email) staff.errors.Email = true;
-            if (dup['Staff ID'] === ID) staff.errors.ID = true;
-        });
-        isValid = false;
-    }
-
-    setFileData(prevData => {
-        const updatedData = [...prevData];
-        updatedData[index] = { ...staff }; // Update staff with errors
-        return updatedData;
-    });
-
-    return isValid; // Return the validity of the staff member
+    staff.errors[field] = !uniquenessResult.isUnique;
+    setFileData([...fileData]);
 };
+
+
+    const validateStaffMember = async (staff, index, allStaff) => {
+        const { 'First name': Fname, 'Last name': Lname, 'Mobile Phone Number': PhoneNumber, Email, 'Staff ID': ID } = staff;
+
+        staff.errors = {
+            Fname: !Fname,
+            Lname: !Lname,
+            PhoneNumber: false,
+            Email: false,
+            ID: false,
+        };
+
+        let isValid = true;
+
+        if (!Fname) { staff.errors.Fname = true; isValid = false; }
+        if (!Lname) { staff.errors.Lname = true; isValid = false; }
+        if (!PhoneNumber) { staff.errors.PhoneNumber = true; isValid = false; }
+        if (!Email) { staff.errors.Email = true; isValid = false; }
+        if (!ID) { staff.errors.ID = true; isValid = false; }
+
+        if (PhoneNumber && validatePhoneNumber(PhoneNumber)) { staff.errors.PhoneNumber = true; isValid = false; }
+        if (Email && validateEmail(Email)) { staff.errors.Email = true; isValid = false; }
+        if (ID && validateStaffID(ID)) { staff.errors.ID = true; isValid = false; }
+
+        const uniquenessResult = await checkUniqueness(PhoneNumber, Email, ID);
+        if (!uniquenessResult.isUnique) {
+            if (uniquenessResult.message.includes("Phone number")) staff.errors.PhoneNumber = true;
+            if (uniquenessResult.message.includes("Email")) staff.errors.Email = true;
+            if (uniquenessResult.message.includes("Staff ID")) staff.errors.ID = true;
+            isValid = false;
+        }
+
+        // Check for duplicates within the uploaded file
+        const duplicates = allStaff.filter((s, i) => i !== index && (s['Mobile Phone Number'] === PhoneNumber || s.Email === Email || s['Staff ID'] === ID));
+        if (duplicates.length > 0) {
+            duplicates.forEach(dup => {
+                if (dup['Mobile Phone Number'] === PhoneNumber) staff.errors.PhoneNumber = true;
+                if (dup.Email === Email) staff.errors.Email = true;
+                if (dup['Staff ID'] === ID) staff.errors.ID = true;
+                isValid = false;
+            });
+        }
+
+        setFileData(prevData => {
+            const updatedData = [...prevData];
+            updatedData[index] = { ...staff };
+            return updatedData;
+        });
+        console.log("Validating staff:", staff);
+        console.log("Validation errors:", staff.errors);
+        console.log("isvalid=",isValid)
+        return !Object.values(staff.errors).some(error => error); // Return true if no errors
+            };
 
 
 const checkForDuplicatesAndUpdateErrors = (updatedData) => {
@@ -177,11 +177,11 @@ const checkForDuplicatesAndUpdateErrors = (updatedData) => {
     const ids = {};
 
     updatedData.forEach((staff, index) => {
-        if (staff.PhoneNumber) {
-            if (phoneNumbers[staff.PhoneNumber]) {
-                phoneNumbers[staff.PhoneNumber].push(index);
+        if (staff['Mobile Phone Number']) {
+            if (phoneNumbers[staff['Mobile Phone Number']]) {
+                phoneNumbers[staff['Mobile Phone Number']].push(index);
             } else {
-                phoneNumbers[staff.PhoneNumber] = [index];
+                phoneNumbers[staff['Mobile Phone Number']] = [index];
             }
         }
         if (staff.Email) {
@@ -191,11 +191,11 @@ const checkForDuplicatesAndUpdateErrors = (updatedData) => {
                 emails[staff.Email] = [index];
             }
         }
-        if (staff.ID) {
-            if (ids[staff.ID]) {
-                ids[staff.ID].push(index);
+        if (staff['Staff ID']) {
+            if (ids[staff['Staff ID']]) {
+                ids[staff['Staff ID']].push(index);
             } else {
-                ids[staff.ID] = [index];
+                ids[staff['Staff ID']] = [index];
             }
         }
     });
@@ -235,11 +235,16 @@ const checkForDuplicatesAndUpdateErrors = (updatedData) => {
     setFileData([...updatedData]); // Update the state with marked errors
 };
 
-
 const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     return phoneRegex.test(PhoneNumber) ? null : 'Phone number must start with +9665 and be followed by 8 digits.';
 };
+
+const validateName = (name) => {
+    // Regular expression to match only letters and spaces
+    const nameRegex = /^[a-zA-Z\s]+$/; 
+    return name && nameRegex.test(name.trim());
+  };
 
 const validateEmail = (Email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -252,45 +257,57 @@ const validateStaffID = (StaffID) => {
 };
 
 const checkUniqueness = async (phone, email, staffID) => {
-    const phoneQuery = query(collection(db, 'GDT'), where("PhoneNumber", "==", phone));
-    const emailQuery = query(collection(db, 'GDT'), where("GDTEmail", "==", email));
-    const staffIDQuery = query(collection(db, 'GDT'), where("ID", "==", staffID));
+    console.log("Checking uniqueness for:", { phone, email, staffID });
 
-    const phoneSnapshot = await getDocs(phoneQuery);
-    const emailSnapshot = await getDocs(emailQuery);
-    const staffIDSnapshot = await getDocs(staffIDQuery);
+    try {
+        // Create queries to check for existing phone, email, and staff ID
+        const phoneQuery = query(collection(db, 'GDT'), where("PhoneNumber", "==", phone));
+        const emailQuery = query(collection(db, 'GDT'), where("GDTEmail", "==", email));
+        const idQuery = query(collection(db, 'GDT'), where("ID", "==", staffID));
 
-    console.log(`Checking uniqueness: Phone: ${phone}, Email: ${email}, Staff ID: ${staffID}`);
-    console.log(`Phone exists: ${!phoneSnapshot.empty}, Email exists: ${!emailSnapshot.empty}, Staff ID exists: ${!staffIDSnapshot.empty}`);
+        // Execute the queries
+        const [phoneSnapshot, emailSnapshot, idSnapshot] = await Promise.all([
+            getDocs(phoneQuery),
+            getDocs(emailQuery),
+            getDocs(idQuery),
+        ]);
 
-    if (!phoneSnapshot.empty) {
-        return { isUnique: false, message: "Phone number already exists." };
+        // Check if any of the snapshots have documents
+        if (!phoneSnapshot.empty) {
+            console.log("Phone number already exists.");
+            return { isUnique: false, message: "Phone number already exists." };
+        }
+        if (!emailSnapshot.empty) {
+            console.log("Email already exists.");
+            return { isUnique: false, message: "Email already exists." };
+        }
+        if (!idSnapshot.empty) {
+            console.log("Staff ID already exists.");
+            return { isUnique: false, message: "Staff ID already exists." };
+        }
+
+        // If no duplicates are found
+        return { isUnique: true, message: "" };
+    } catch (error) {
+        console.error("Error checking uniqueness:", error);
+        return { isUnique: false, message: "Error checking uniqueness in the database." };
     }
-
-    if (!emailSnapshot.empty) {
-        return { isUnique: false, message: "Email already exists." };
-    }
-
-    if (!staffIDSnapshot.empty) {
-        return { isUnique: false, message: "Staff ID already exists." };
-    }
-
-    return { isUnique: true, message: "" };
 };
+
+
+
 
 const handleBatchUploadResults = (errorList) => {
     if (errorList.length > 0) {
         const errorMessages = errorList.map(err => err.message).join('\n');
-        setPopupMessage(`${errorMessages}`);
+        setPopupMessage(errorMessages);
         setPopupImage(errorImage);
         setPopupVisible(true);
     } else {
         setPopupMessage("All staff added successfully!");
         setPopupImage(successImage);
         setPopupVisible(true);
-        setTimeout(() => {
-            navigate('/gdtstafflist'); 
-        }, 2000);
+        setTimeout(() => navigate('/gdtstafflist'), 2000);
     }
 };
 
@@ -312,7 +329,6 @@ const sendEmail = (email, staffName, password) => {
 const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -322,30 +338,22 @@ const handleFileUpload = (event) => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Initialize errors for each staff member
-        const validatedData = jsonData.map((staff) => ({
-            ...staff,
-            errors: {
-                Fname: false,
-                Lname: false,
-                PhoneNumber: false,
-                Email: false,
-                ID: false,
-            },
-        }));
-
+        const validatedData = jsonData.map(staff => ({ ...staff, errors: { Fname: false, Lname: false, PhoneNumber: false, Email: false, ID: false } }));
         setFileData(validatedData);
-        validateAllFields(validatedData); // Validate after setting data
-        checkForDuplicatesAndUpdateErrors(validatedData); // Check for duplicates
-
     };
     reader.readAsBinaryString(file);
 };
+
+
+
 const handleRemoveFile = () => {
     setFileName('');
     document.getElementById('fileInput').value = '';
     setFileData([]);
+    setIsButtonDisabled(true); // Disable button when file is removed
+    setErrorMessage(''); // Clear error message
 };
+
 
 const handleClosePopup = () => {
     setPopupVisible(false);
@@ -353,52 +361,42 @@ const handleClosePopup = () => {
 
 
 const handleAddStaff = async () => {
-    // Check if there are any errors before proceeding
     const hasErrors = fileData.some(staff => Object.values(staff.errors).some(error => error));
     if (hasErrors) {
         setPopupMessage("Please fix the errors before adding staff.");
         setPopupImage(errorImage);
         setPopupVisible(true);
-        return; // Prevent adding staff if there are errors
+        return;
     }
 
-    for (let staff of fileData) {
-        await addStaffToDatabase(staff);
+    const errorList = [];
+    for (const staff of fileData) {
+        try {
+            await addStaffToDatabase(staff);
+        } catch (error) {
+            errorList.push({ message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}` });
+        }
     }
-    setPopupMessage("Staff added successfully!");
-    setPopupImage(successImage);
-    setPopupVisible(true);
-    setTimeout(() => {
-        navigate('/gdtstafflist');
-    }, 2000);
+    handleBatchUploadResults(errorList);
 };
 
 const addStaffToDatabase = async (staff) => {
-    const { Fname, Lname, PhoneNumber, Email, ID } = staff;
-    const password = generateRandomPassword(); // Generate a random password
+    const { 'First name': Fname, 'Last name': Lname, 'Mobile Phone Number': PhoneNumber, Email, 'Staff ID': ID } = staff;
+    const password = generateRandomPassword();
     try {
-        // Create user in Firebase
         await createUserWithEmailAndPassword(auth, Email, password);
-        // Add staff to Firestore
-        await addDoc(collection(db, 'GDT'), {
-            Fname,
-            Lname,
-            PhoneNumber,
-            GDTEmail: Email,
-            ID,
-            isAdmin: false,
-            isDefaultPassword: true,
-        });
-        // Send email with the password
+        await addDoc(collection(db, 'GDT'), { Fname, Lname, PhoneNumber, GDTEmail: Email, ID, isAdmin: false, isDefaultPassword: true });
         sendEmail(Email, `${Fname} ${Lname}`, password);
     } catch (error) {
-        console.error("Error adding staff: ", error);
+        throw error; // Re-throw the error to be caught in handleAddStaff
     }
 };
 
 
+
+
 return (
-    <div >
+    <div>
         <Header active="gdtstafflist" />
         <div className="breadcrumb" style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/gdthome')}>Home</a>
@@ -532,13 +530,19 @@ return (
 </table>
 
 
-<button onClick={handleAddStaff} disabled={isButtonDisabled} className={s.editBtn} style={{ marginBottom: "10px", backgroundColor: isButtonDisabled ? 'gray' : '#059855', color: 'white',
-
-cursor: isButtonDisabled ? 'not-allowed' : 'pointer',opacity: isButtonDisabled ? 0.6 : 1, }}>
-
-Add Staff List
-
+<button
+    onClick={handleAddStaff}
+    disabled={isButtonDisabled}
+    className={s.editBtn}
+    style={{
+        backgroundColor: isButtonDisabled ? 'gray' : '#059855',
+        cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+        opacity: isButtonDisabled ? 0.6 : 1,
+    }}
+>
+    Add Staff List
 </button>
+
 
 </div>
 
