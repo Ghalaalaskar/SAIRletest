@@ -46,7 +46,7 @@ import GDTRicklessDrivers from './Maincomponent/GDT/GDTRicklessDrivers';
 import GDTDriverDetails from './Maincomponent/GDT/GDTDriverDetails';
 import GDTViolationDriver from"./Maincomponent/GDT/GDTViolationDriver";
 import GDTAddStaffBatch from"./Maincomponent/GDT/GDTAddStaffBatch";
-
+import RicklessDrivers from './Maincomponent/ricklessdrives'; 
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
@@ -102,7 +102,7 @@ function App() {
         <Route path="/edit-motorcycle/:motorcycleId" element={<EditMotorcycle />} />
         <Route path="/add-motorcycle" element={<AddMotorcycle />} />
         <Route path="/driver-details/:driverId" element={<DriverDetails />} />
-        <Route path="/drivers/:driverId/violations" element={<VDriver />} />
+        <Route path="/drivers/:driverId/violations/:type?" element={<VDriver />} />
         <Route path="/crash/general/:crashId" element={<CrashGeneral />} />
         <Route path="/complaint/general/:complaintId" element={<ComplaintGeneral />} />
         <Route path="/motorcycle-details/:motorcycleId" element={<MotorcycleDetails />} />
@@ -124,6 +124,7 @@ function App() {
         <Route path="/gdtdriverdetails/:driverId" element={<GDTDriverDetails />} />
         <Route path="/gdtviolationdriver/:driverId" element={<GDTViolationDriver />} />
         <Route path="/gdtaddstaffbatch" element={<GDTAddStaffBatch />} />
+        <Route path="/ricklessdrives" element={<RicklessDrivers />} />
         
 
       </Routes>

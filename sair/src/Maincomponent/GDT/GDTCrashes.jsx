@@ -9,7 +9,7 @@ import {
   getDocs,
   query,
   where,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import EyeIcon from "../../images/eye.png";
 import { Button, Modal } from "antd";
@@ -27,7 +27,7 @@ const CrashList = () => {
   const [currentCrash, setCurrentCrash] = useState({});
   const [drivers, setDrivers] = useState({});
   const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
-  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [searchDriverID, setSearchDriverID] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const navigate = useNavigate();
@@ -173,10 +173,12 @@ const CrashList = () => {
 
     fetchDriversAndCrashes();
   }, [gdtUID]);
-  
+
   const filterByStatus = (record) => {
-    const formattedStatus = record.Status.charAt(0).toUpperCase() + record.Status.slice(1).toLowerCase();
-  
+    const formattedStatus =
+      record.Status.charAt(0).toUpperCase() +
+      record.Status.slice(1).toLowerCase();
+
     if (selectedStatus === "Responsed") {
       return formattedStatus === "Emergency sos" && record.RespondedBy != null; // Responded
     } else if (selectedStatus === "Unresponsed") {
@@ -186,24 +188,26 @@ const CrashList = () => {
   };
 
   const filteredCrashes = crashes
-  .filter((crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied") // Filter by status
-  .filter((crash) => {
-    const crashDate = crash.time
-      ? new Date(crash.time * 1000).toISOString().split("T")[0]
-      : "";
-    const matchesSearchDate = searchDate ? crashDate === searchDate : true;
+    .filter(
+      (crash) => crash.Status === "Emergency SOS" || crash.Status === "Denied"
+    ) // Filter by status
+    .filter((crash) => {
+      const crashDate = crash.time
+        ? new Date(crash.time * 1000).toISOString().split("T")[0]
+        : "";
+      const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
-    const driverName = drivers[crash.driverID]?.name || " ";
-    const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
+      const driverName = drivers[crash.driverID]?.name || " ";
+      const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
 
-    const matchesSearchQuery =
-      driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      companyName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearchQuery =
+        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        companyName.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesSearchQuery && matchesSearchDate;
-  })
-  .filter(filterByStatus) // Apply the filterByStatus function here
-  .sort((a, b) => (b.time || 0) - (a.time || 0)); // Sort by time in descending order
+      return matchesSearchQuery && matchesSearchDate;
+    })
+    .filter(filterByStatus) // Apply the filterByStatus function here
+    .sort((a, b) => (b.time || 0) - (a.time || 0)); // Sort by time in descending order
 
   const formatDate = (time) => {
     const date = new Date(time * 1000);
@@ -229,30 +233,30 @@ const CrashList = () => {
     setCurrentCrash(record);
     setModalVisible(true); // Show the confirmation modal
   };
-  
+
   const handleResponse = async () => {
     setModalVisible(false); // Close the modal
-  
+
     try {
       // Ensure the GDT data is valid
       if (!GDT.Fname || !GDT.Lname) {
         console.error("Responder details are incomplete");
         return;
       }
-  
+
       const updatedCrash = {
         ...currentCrash,
         RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
       };
-  
+
       const crashDocRef = doc(db, "Crash", currentCrash.id);
-  
+
       // Update Firestore with the new RespondedBy field
       await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
-  
+
       // Update the local state with the new crash details
       setCurrentCrash(updatedCrash);
-  
+
       console.log("Crash response updated successfully");
     } catch (error) {
       console.error("Error updating crash response:", error);
@@ -272,7 +276,8 @@ const CrashList = () => {
       align: "center",
       render: (text, record) => {
         const driverName = drivers[record.driverID]?.name || "   ";
-        const capitalizeddriverName = driverName.charAt(0).toUpperCase() + driverName.slice(1);
+        const capitalizeddriverName =
+          driverName.charAt(0).toUpperCase() + driverName.slice(1);
         return capitalizeddriverName;
       },
     },
@@ -282,7 +287,8 @@ const CrashList = () => {
       align: "center",
       render: (text, record) => {
         const companyName = drivers[record.driverID]?.shortCompanyName || "   ";
-        const capitalizedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
+        const capitalizedCompanyName =
+          companyName.charAt(0).toUpperCase() + companyName.slice(1);
         return capitalizedCompanyName;
       },
     },
@@ -395,6 +401,7 @@ const CrashList = () => {
                     d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
                   />
                 </svg>
+
                 <input
                   type="text"
                   placeholder="Search by Driver Name or Company Name"
@@ -409,8 +416,8 @@ const CrashList = () => {
                 <FaFilter className={c.filterIcon} />
                 <select
                   className={c.customSelect}
-                  onChange={event => setSelectedStatus(event.target.value)}
-                  defaultValue="" 
+                  onChange={(event) => setSelectedStatus(event.target.value)}
+                  defaultValue=""
                   style={{
                     width: "200px", // Widen the select bar
                     padding: "8px", // Add padding
@@ -426,22 +433,80 @@ const CrashList = () => {
                 </select>
               </div>
             </div>
-              <div className={s.searchContainerdate}>
+            <div
+              className={s.searchContainerdate}
+              style={{ position: "relative" }}
+            >
+              <div>
+                {/* Your SVG Icon */}
+                <svg
+                  onClick={() => document.getElementById("date-input").focus()}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "1px",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    width: "40px", // Adjusted width
+                    height: "40px", // Adjusted height
+                  }}
+                >
+                  <path
+                    d="M18 2V4M6 2V4"
+                    stroke="#059855"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11.9955 13H12.0045M11.9955 17H12.0045M15.991 13H16M8 13H8.00897M8 17H8.00897"
+                    stroke="#059855"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.5 8H20.5"
+                    stroke="#059855"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2.5 12.2432C2.5 7.88594 2.5 5.70728 3.75212 4.35364C5.00424 3 7.01949 3 11.05 3H12.95C16.9805 3 18.9958 3 20.2479 4.35364C21.5 5.70728 21.5 7.88594 21.5 12.2432V12.7568C21.5 17.1141 21.5 19.2927 20.2479 20.6464C18.9958 22 16.9805 22 12.95 22H11.05C7.01949 22 5.00424 22 3.75212 20.6464C2.5 19.2927 2.5 17.1141 2.5 12.7568V12.2432Z"
+                    stroke="#059855"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3 8H21"
+                    stroke="#059855"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
                 <input
+                  id="date-input"
                   type="date"
                   value={searchDate}
                   onChange={(e) => setSearchDate(e.target.value)}
                   style={{
-                    width: "40px",
-                    height: "40px", 
-                    fontSize: "16px", 
+                    width: "100%",
+                    height: "40px", // Adjusted height
+                    fontSize: "16px",
+                    paddingLeft: "40px", // Add padding to avoid overlap with the icon
                     backgroundColor: "transparent",
-                    color: "",
-                    border: "none",
-                    marginLeft: "10px",
+                    border: "0px solid #ccc",
+                    borderRadius: "4px",
                   }}
                 />
               </div>
+            </div>
           </div>
 
           <Modal
@@ -467,9 +532,10 @@ const CrashList = () => {
             ]}
           >
             <p>
-              {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)} {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by clicking on confirm button, you
-              formally acknowledge your responsibility for overseeing the
-              management of this crash.
+              {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
+              {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
+              clicking on confirm button, you formally acknowledge your
+              responsibility for overseeing the management of this crash.
               <br />
               <br />
               Additionally, you affirm your obligation to ensure that the driver
