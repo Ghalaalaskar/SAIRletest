@@ -10,7 +10,7 @@ import '../css/CustomModal.css';
 
 
 const ViolationsTable = () => {
-  const { driverId } = useParams(); // Get driverId from URL parameters
+  const { driverId,type  } = useParams(); // Get driverId from URL parameters
   const [violations, setViolations] = useState([]); // State for storing violations
   const [error, setError] = useState(null); // State for error messages
   const navigate = useNavigate(); // Hook to programmatically navigate
@@ -40,6 +40,7 @@ const ViolationsTable = () => {
 
     fetchViolations();
   }, [driverId]);
+  const activeHeader = type === "reckless-drivers" ? "violations" : "driverslist";
 
   const formatDate = (time) => {
     const date = new Date(time * 1000); // Assuming timestamp is in seconds
@@ -99,18 +100,29 @@ const ViolationsTable = () => {
   }
 
   return (
-    <><Header active={"driverslist"} />
+    <>
+     <Header active={activeHeader} /> 
+        <div className="breadcrumb">
 
-<div className="breadcrumb">
-        <a onClick={() => navigate('/employer-home')}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate('/driverslist')}>Driver List</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/driver-details/${driverId}`)}>Drivers Details</a>
-        <span> / </span>
-        <a onClick={() => navigate(`/drivers/:driverId/violations`)}>Violations List</a>
-      </div>
-
+      <a onClick={() => navigate('/employer-home')}>Home</a>
+      <span> / </span>
+      {type === 'reckless-drivers' ? (
+        <>
+          <a onClick={() => navigate('/violations')}>Violation List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/ricklessdrives`)}>Reckless Drivers List</a>
+          <span> / </span>
+        </>
+      ) : (
+        <>
+          <a onClick={() => navigate('/driverslist')}>Driver List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/driver-details/${driverId}`)}>Drivers Details</a>
+          <span> / </span>
+        </>
+      )}
+      <a onClick={() => navigate(`/drivers/${driverId}/violations`)}>Driver Violations List</a>
+    </div>
     <div className={s.container}>
       <h2 className={s.title} >Violations for Driver ID: {driverId}</h2>
       <Table dataSource={violations} columns={columns} rowKey="id" />

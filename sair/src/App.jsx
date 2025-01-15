@@ -102,7 +102,7 @@ function App() {
         <Route path="/edit-motorcycle/:motorcycleId" element={<EditMotorcycle />} />
         <Route path="/add-motorcycle" element={<AddMotorcycle />} />
         <Route path="/driver-details/:driverId" element={<DriverDetails />} />
-        <Route path="/drivers/:driverId/violations" element={<VDriver />} />
+        <Route path="/drivers/:driverId/violations/:type?" element={<VDriver />} />
         <Route path="/crash/general/:crashId" element={<CrashGeneral />} />
         <Route path="/complaint/general/:complaintId" element={<ComplaintGeneral />} />
         <Route path="/motorcycle-details/:motorcycleId" element={<MotorcycleDetails />} />

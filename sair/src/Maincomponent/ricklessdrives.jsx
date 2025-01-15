@@ -212,7 +212,7 @@ const DriverList = () => {
 
   const viewDriverDetails = (driverID) => {
     console.log("Navigating to details for driver ID:", driverID);
-    navigate(`/violationdriver/${driverID}`);
+    navigate(`/drivers/${driverID}/violations/reckless-drivers`);
   };
 
   const handleLogout = () => {
