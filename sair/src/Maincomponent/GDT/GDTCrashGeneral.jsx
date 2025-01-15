@@ -128,7 +128,7 @@ const CrashGeneral = () => {
   };
 
   const goBack = () => {
-    navigate(-2); // Navigate back to the previous page
+    navigate("/GDTcrashes"); // Navigate back to the previous page 
   };
 
   const formatDate = (time) => {
