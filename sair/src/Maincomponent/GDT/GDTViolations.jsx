@@ -113,7 +113,14 @@ const ViolationList = () => {
 
     return () => unsubscribe();
   };
-
+ // Function to format the date
+ const formatDate = (time) => {
+  const date = new Date(time * 1000); // Assuming timestamp is in seconds
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const day = date.getDate().toString().padStart(2, '0'); // Days are 1-based
+  return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
+};
   const handleViewViolations = () => {
     if (violations.length > 0) {
       navigate(`/gdtricklessdrives`); // Navigate to the first violation
@@ -233,6 +240,12 @@ const ViolationList = () => {
       align: "center",
       render: (text, record) =>
         record.isReckless ? "Reckless Violation" : "Regular Violation",
+    },
+    {
+      title: 'Date',
+      key: 'date',
+      align: 'center',
+      render: (text, record) => formatDate(record.time),
     },
     {
       title: "Violation Details",

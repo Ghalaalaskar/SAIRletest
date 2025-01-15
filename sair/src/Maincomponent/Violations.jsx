@@ -87,15 +87,19 @@ const ViolationList = () => {
       collection(db, 'Violation'),
       where('driverID', 'in', driverIDs)
     );
-
     const unsubscribe = onSnapshot(violationCollection, (snapshot) => {
-      const violationList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const violationList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const isReckless = data.count30 > 0 || data.count50 > 0;
+        return {
+          id: doc.id,
+          ...data,
+          isReckless, // Add reckless classification
+        };
+      });
       setViolations(violationList);
       if (violationList.length > 0) {
-        const violationIDs = violationList.map(v => v.violationID); // Collecting violation IDs
+        const violationIDs = violationList.map((v) => v.violationID); // Collecting violation IDs
         fetchMotorcycles(violationIDs); // Fetch motorcycles using violation IDs
       } else {
         setMotorcycles({});
@@ -147,7 +151,14 @@ const ViolationList = () => {
       navigate(`/violation/general/${record.id}`);
     };
     console.log("Session Storage:", sessionStorage.getItem('viewedViolations'));
-
+    const capitalizeFirstLetter = (string) => {
+      if (!string) return "";
+      return string
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+    };
+    
   const columns = [
     {
       title: 'Violation ID',
@@ -159,8 +170,10 @@ const ViolationList = () => {
       title: 'Driver Name',
       key: 'driverName',
       align: 'center',
-      render: (text, record) => drivers[record.driverID] || '   ',
-    },
+      render: (text, record) => {
+        const driverName = drivers[record.driverID]|| "";
+        return capitalizeFirstLetter(driverName);
+      },    },
     {
       title: 'Motorcycle License Plate',
       key: 'motorcyclePlate',
@@ -172,6 +185,14 @@ const ViolationList = () => {
       dataIndex: 'driverSpeed',
       key: 'driverSpeed',
       align: 'center',
+    },
+    {
+      title: "Type",
+      dataIndex: "violationType",
+      key: "violationType",
+      align: "center",
+      render: (text, record) =>
+        record.isReckless ? "Reckless Violation" : "Regular Violation",
     },
     {
       title: 'Date',
