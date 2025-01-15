@@ -173,3 +173,70 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .searchDate input[type='date']::-webkit-datetime-edit {
   color: transparent;
 }
+
+.searchContainerdate {
+  position: relative;
+  outline: none;
+  width: 40px;
+  font-size: 14px;
+}
+
+.searchContainerdate input[type='date']::-webkit-calendar-picker-indicator {
+  background: none;
+  color: transparent;
+  font-size: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.searchContainerdate input[type='date']::-webkit-inner-spin-button {
+  display: none;
+}
+
+.searchContainerdate input[type='date']::-webkit-clear-button {
+  display: none;
+}
+
+.searchContainerdate input[type='date']::-webkit-datetime-edit {
+  display: none; 
+  outline: none; 
+  border: none; 
+}
+
+.searchContainerdate input[type='date'] {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  font-size: 16px;
+  /* -webkit-appearance: none; */
+}
+
+.searchContainerdate input[type='date']::-moz-placeholder {
+  /* Hide the placeholder (dd/mm/yyyy) */
+  color: transparent;
+  outline: none; 
+}
+
+.searchContainerdate input[type='date']::-moz-focus-inner {
+  /* Remove focus outline */
+  border: 0;
+  outline: none; 
+}
+
+.searchContainerdate input[type='date']::-moz-datetime-edit {
+  display: none;
+  outline: none; 
+}
+
+.searchContainerdate input[type='date']::-moz-calendar-picker-indicator {
+  display: none;
+  outline: none; 
+} 
