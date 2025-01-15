@@ -17,6 +17,7 @@ import { Pagination } from "antd";
 import s from "../css/Violations.module.css";
 import "../css/CustomModal.css";
 import X from "../images/redx.webp";
+import { FaFilter } from "react-icons/fa";
 const ViolationList = () => {
   const [motorcycles, setMotorcycles] = useState({});
   const [violations, setViolations] = useState([]);
@@ -30,7 +31,7 @@ const ViolationList = () => {
     return storedViewedViolations ? JSON.parse(storedViewedViolations) : {};
   });
   const employerUID = sessionStorage.getItem("employerUID");
-
+  const [violationTypeFilter, setViolationTypeFilter] = useState("");
   useEffect(() => {
     const fetchEmployerDrivers = async () => {
       if (employerUID) {
@@ -128,16 +129,7 @@ const ViolationList = () => {
   // Filtering violations
   const filteredViolations = violations
     .filter((violation) => {
-      const driverName = drivers[violation.driverID] || "  ";
-      const licensePlate = motorcycles[violation.violationID] || "  "; // Match with violationID
-
-      console.log("Checking Violation:", violation);
-      console.log(
-        "License Plate Found for Violation ID:",
-        violation.violationID,
-        "->",
-        licensePlate
-      );
+      const driverName = drivers[violation.driverID]?.name || "";
 
       let violationDate = "";
       if (violation.time) {
@@ -146,18 +138,23 @@ const ViolationList = () => {
           .split("T")[0];
       }
 
-      const matchesSearchQuery =
-        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-
+      const matchesSearchQuery = driverName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       const matchesSearchDate = searchDate
         ? violationDate === searchDate
         : true;
 
-      return matchesSearchQuery && matchesSearchDate;
+      let matchesTypeFilter = true;
+      if (violationTypeFilter === "Reckless Violations") {
+        matchesTypeFilter = violation.isReckless;
+      } else if (violationTypeFilter === "Normal Violations") {
+        matchesTypeFilter = !violation.isReckless;
+      }
+
+      return matchesSearchQuery && matchesSearchDate && matchesTypeFilter;
     })
     .sort((a, b) => {
-      // Sort by time in descending order (newest first)
       return (b.time || 0) - (a.time || 0);
     });
 
@@ -285,6 +282,28 @@ const ViolationList = () => {
                 />
               </div>
               <div className={s.searchContainer}>
+                 <div className={s.selectWrapper}>
+                  <FaFilter className={s.filterIcon} />
+                  <select
+                    className={s.customSelect}
+                    onChange={(e) => setViolationTypeFilter(e.target.value)}
+                    value={violationTypeFilter}
+                  >
+                    <option value="" disabled>
+                      Filter Violations
+                    </option>
+                    <option value="">All</option>
+                    <option value="Reckless Violations">
+                      Reckless Violations
+                    </option>
+                    <option value="Normal Violations">
+                      Regular Violations
+                    </option>
+                  </select>
+                </div>
+                </div>
+              <div className={s.searchContainer}>
+             
                 <input
                   type="date"
                   value={searchDate}
@@ -294,7 +313,6 @@ const ViolationList = () => {
               </div>
             </div>
           </div>
-
 
           <Table
             columns={columns}
@@ -327,8 +345,8 @@ const ViolationList = () => {
             </Button>
 
             <Pagination
-              defaultCurrent={1} 
-              total={filteredViolations.length} 
+              defaultCurrent={1}
+              total={filteredViolations.length}
               pageSize={5} // Number of items per page
               style={{ marginLeft: "auto" }} // Align pagination to the right
             />
