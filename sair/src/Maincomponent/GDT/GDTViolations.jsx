@@ -308,9 +308,9 @@ const ViolationList = () => {
                 </div>
                 
                 </div>
-                <div className={s.searchInputs}>
+              <div className={s.searchDate}>
                 {/* Search inputs */}
-                <div className={s.searchContainer}>
+                <div className={s.searchDate}>
                   <input
                     type="date"
                     value={searchDate}

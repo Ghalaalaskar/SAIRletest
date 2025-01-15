@@ -436,7 +436,7 @@ const CrashList = () => {
                     height: "40px", 
                     fontSize: "16px", 
                     backgroundColor: "transparent",
-                    color: "",
+                    color: "transparent",
                     border: "none",
                     marginLeft: "10px",
                   }}

@@ -108,13 +108,68 @@ input[type='date']::-webkit-calendar-picker-indicator {
   outline: none;
 }
 
-/* Custom arrow icon for dropdown */
-.selectWrapper::after {
-  content: '▼'; /* Unicode arrow or use a custom icon */
-  position: absolute;
-  right: 10px;
-  font-size: 12px;
-  color: #1c7a50;
-  pointer-events: none; /* Prevents arrow from blocking clicks */
+
+/*=================== Date bar */
+.searchDate {
+  display: flex;
+  justify-content: flex-end;
 }
 
+.searchDate {
+  /* padding: 3px 3px;
+  font-family: 'Open Sans';
+  display: flex;
+  align-items: center;
+  justify-content: center; */
+
+  position: relative;
+  outline: none;
+  width: 40px;
+  font-size: 14px;
+}
+
+/* .searchDate svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  margin-right: 10px;
+} */
+
+.searchDate input {
+  /* transition: border-color 0.3s ease-in-out; */
+  /* font-family: 'Open Sans'; */
+  outline: none;
+  border: none;
+}
+
+.searchDate input:focus {
+  outline: none;
+}
+
+.searchDate input[type='date'] {
+  outline: none;
+  border: none;
+}
+
+/* changing the color of the calendar icon */
+.searchDate input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) sepia(1) saturate(5) hue-rotate(120deg) brightness(0.7);
+
+  font-size: 0;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  position: absolute;
+  top: 2;
+  right: 0;
+}
+
+/* Update the color of the calendar icon to green */
+.searchDate input[type='date']::-webkit-calendar-picker-indicator {
+  /* filter: invert(0.5) sepia(1) saturate(5) hue-rotate(120deg) brightness(0.7); */
+  filter: invert(0.5) sepia(1) saturate(5) hue-rotate(120deg) brightness(0.6);
+}
+
+/* Hide the complete "dd/mm/yyyy" placeholder text */
+.searchDate input[type='date']::-webkit-datetime-edit {
+  color: transparent;
+}
