@@ -397,7 +397,7 @@ const ViolationList = () => {
             >
               <img
                 src={X}
-                alt="No Complaints"
+                alt="No Reckless Drivers"
                 style={{ width: "20%", marginBottom: "16px" }}
               />
             </div>
