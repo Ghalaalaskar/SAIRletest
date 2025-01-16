@@ -31,6 +31,7 @@ const DriverList = () => {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(true);
   const navigate = useNavigate();
+  const [companyMap, setCompanyMap] = useState({});
   const goBack = () => navigate(-1); // Go back to the previous page
   const GDTUID = sessionStorage.getItem("gdtUID");
   const capitalizeFirstLetter = (string) => {
@@ -41,12 +42,178 @@ const DriverList = () => {
       .join(" ");
   };
 
+  const fetchCompanyMap = async () => {
+    const companiesSnapshot = await getDocs(collection(db, "Employer"));
+    const map = {};
+    companiesSnapshot.forEach((doc) => {
+      const data = doc.data();
+      map[data.CompanyName] = data.ShortCompanyName || data.CompanyName;
+    });
+    setCompanyMap(map);
+  };
+
+  const fetchRecklessDrivers = async () => {
+    try {
+      // Step 1: Fetch drivers with count30
+      const count30Query = query(
+        collection(db, "Violation"),
+        where("count30", ">=", 1)
+      );
+
+      const count30Snapshot = await getDocs(count30Query);
+      console.log("Count30 Snapshot:", count30Snapshot.docs);
+
+      const recklessDrivers = {};
+      console.log("Processing Count30 Drivers:");
+
+      count30Snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        console.log(`Count30 DriverID: ${data.driverID}`);
+        if (data.driverID) {
+          if (!recklessDrivers[data.driverID]) {
+            recklessDrivers[data.driverID] = {
+              id: doc.id,
+              ...data,
+            };
+            console.log(`Added to Reckless Drivers: ${data.driverID}`);
+          }
+        }
+      });
+
+      // Step 2: Fetch drivers with count50
+      const count50Query = query(
+        collection(db, "Violation"),
+        where("count50", ">=", 1)
+      );
+
+      const count50Snapshot = await getDocs(count50Query);
+      console.log("Processing Count50 Drivers:");
+
+      count50Snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        console.log(`Count50 DriverID: ${data.driverID}`);
+        if (data.driverID) {
+          if (!recklessDrivers[data.driverID]) {
+            recklessDrivers[data.driverID] = {
+              id: doc.id,
+              ...data,
+            };
+            console.log(`Added to Reckless Drivers: ${data.driverID}`);
+          } else {
+            console.log(`Driver already exists: ${data.driverID}`);
+            recklessDrivers[data.driverID].count50 = data.count50; // Combine counts
+          }
+        }
+      });
+
+      console.log("Reckless Drivers:", recklessDrivers);
+
+      // Step 3: Fetch driver details from the Driver table
+      const driverIDs = Object.keys(recklessDrivers);
+
+      // Use Promise.all to fetch all driver details in parallel
+      const driverDetailsPromises = driverIDs.map(async (id) => {
+        const driverQuery = query(
+          collection(db, "Driver"),
+          where("DriverID", "==", id)
+        );
+        const driverSnapshot = await getDocs(driverQuery);
+        if (!driverSnapshot.empty) {
+          const driverData = driverSnapshot.docs[0].data();
+          return {
+            ...recklessDrivers[id],
+            ...driverData, // Merge driver data
+          };
+        }
+        return recklessDrivers[id]; // Return reckless driver if no match found
+      });
+
+      const detailedRecklessDrivers = await Promise.all(
+        driverDetailsPromises
+      );
+
+      console.log("Detailed Reckless Drivers:", detailedRecklessDrivers);
+      setDriverData(detailedRecklessDrivers);
+    } catch (error) {
+      console.error("Error fetching reckless drivers:", error);
+    }
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetching reckless drivers data
+        const count30Query = query(collection(db, "Violation"), where("count30", ">=", 1));
+        const count30Snapshot = await getDocs(count30Query);
+  
+        const recklessDrivers = {};
+        count30Snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          if (data.driverID) {
+            recklessDrivers[data.driverID] = { id: doc.id, ...data };
+          }
+        });
+  
+        const count50Query = query(collection(db, "Violation"), where("count50", ">=", 1));
+        const count50Snapshot = await getDocs(count50Query);
+        
+        count50Snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          if (data.driverID) {
+            if (!recklessDrivers[data.driverID]) {
+              recklessDrivers[data.driverID] = { id: doc.id, ...data };
+            } else {
+              recklessDrivers[data.driverID].count50 = data.count50;
+            }
+          }
+        });
+  
+        const driverIDs = Object.keys(recklessDrivers);
+        const driverDetailsPromises = driverIDs.map(async (id) => {
+          const driverQuery = query(collection(db, "Driver"), where("DriverID", "==", id));
+          const driverSnapshot = await getDocs(driverQuery);
+          if (!driverSnapshot.empty) {
+            const driverData = driverSnapshot.docs[0].data();
+            return { ...recklessDrivers[id], ...driverData };
+          }
+          return recklessDrivers[id];
+        });
+  
+        const detailedRecklessDrivers = await Promise.all(driverDetailsPromises);
+        setDriverData(detailedRecklessDrivers);
+        
+        // Fetching motorcycles data
+        const motorcycleQuery = query(collection(db, "Motorcycle"));
+        const unsubscribeMotorcycles = onSnapshot(motorcycleQuery, (snapshot) => {
+          const bikes = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            GPSnumber: doc.data().GPSnumber,
+          }));
+          setAvailableMotorcycles(bikes);
+        });
+  
+        return () => unsubscribeMotorcycles();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+    fetchCompanyMap();
+  }, [GDTUID]);
+  
+
   const columns = [
     {
       title: "Driver ID",
       dataIndex: "DriverID",
       key: "DriverID",
       align: "center",
+    },
+    {
+      title: "Company Name",
+      key: "CompanyName",
+      align: "center",
+      render: (_, record) => capitalizeFirstLetter(companyMap[record.CompanyName] || ""),
     },
     {
       title: "Driver Name",
