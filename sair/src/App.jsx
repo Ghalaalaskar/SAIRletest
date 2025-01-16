@@ -37,6 +37,7 @@ import GDTCrashes from './Maincomponent/GDT/GDTCrashes';
 import GDTCrashGeneral from './Maincomponent/GDT/GDTCrashGeneral';
 import GDTComplaints from './Maincomponent/GDT/GDTComplaints';
 import GDTHeatmap from './Maincomponent/GDT/GDTHeatmap';
+import GDTDashBoard from './Maincomponent/GDT/GDTDashBoard';
 import GDTStafflist from './Maincomponent/GDT/GDTStafflist';
 import GDTDriverlist from './Maincomponent/GDT/GDTDriverlist';
 import GDTProfilepage from './Maincomponent/GDT/GDTProfilepage';
@@ -115,6 +116,7 @@ function App() {
         <Route path="/gdtcrash/general/:crashId" element={<GDTCrashGeneral />} />
         <Route path="/gdtcomplaints" element={<GDTComplaints />} /> 
         <Route path="/gdtheatmap" element={<GDTHeatmap />} /> 
+        <Route path="/GDTDashBoard" element={<GDTDashBoard />} /> 
         <Route path="/gdtstafflist" element={<GDTStafflist />} /> 
         <Route path="/gdtdriverlist" element={<GDTDriverlist />} /> 
         <Route path="/gdtprofile" element={<GDTProfilepage />} /> 
