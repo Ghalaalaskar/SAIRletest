@@ -152,7 +152,7 @@ const ComplaintList = () => {
         record.DateTime ? new Date(record.DateTime.seconds * 1000).toLocaleDateString() : '',
     },
     {
-      title: 'Details',
+      title: 'Complaint Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (

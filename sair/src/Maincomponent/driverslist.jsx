@@ -76,7 +76,7 @@ const DriverList = () => {
       ),
     },
     {
-      title: 'Details',
+      title: 'Driver Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (
