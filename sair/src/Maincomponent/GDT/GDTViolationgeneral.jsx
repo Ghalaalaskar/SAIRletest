@@ -1430,7 +1430,7 @@ const ViolationGeneral = () => {
                 )}
               </div>
               <hr />
-              <div style={{ marginBottom: "10px" }}>
+              <div style={{ marginBottom: "100px" }}>
                 {/* View Complaints Button */}
                 <Button
                   // onClick={handleViewComplaints}
