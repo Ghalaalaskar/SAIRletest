@@ -198,10 +198,11 @@ const CrashList = () => {
       const matchesSearchDate = searchDate ? crashDate === searchDate : true;
 
       const driverName = drivers[crash.driverID]?.name || " ";
+      const driverId = crash.driverID;
       const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
 
       const matchesSearchQuery =
-        driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        driverId.includes(searchQuery) ||
         companyName.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesSearchQuery && matchesSearchDate;
@@ -404,7 +405,7 @@ const CrashList = () => {
 
                 <input
                   type="text"
-                  placeholder="Search by Driver Name or Company Name"
+                  placeholder="Search by Driver ID or Company Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: "280px" }}
