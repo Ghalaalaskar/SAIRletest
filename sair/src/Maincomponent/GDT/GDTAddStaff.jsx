@@ -377,6 +377,18 @@ const handleBatchUpload = async (staffArray) => {
   </span>.
 </p>
                             <button type="submit" className={s.editBtn}>Add Staff</button>
+                            <button
+                                onClick={() => { navigate('/gdtstafflist');}}
+                                className={s.editBtn}
+                                style={{
+                                    backgroundColor:'#059855',
+                                    cursor:'pointer',
+                                    opacity:  1,
+                                    marginBottom: '20px'
+                                }}
+                            >
+                                Cancel
+                            </button>
                                                  </div>
                     </form>
                 ) : (
