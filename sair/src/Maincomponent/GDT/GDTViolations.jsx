@@ -206,6 +206,12 @@ const ViolationList = () => {
       align: "center",
     },
     {
+      title: "Driver ID",
+      dataIndex: "driverID",
+      key: "driverID",
+      align: "center",
+    },
+    {
       title: "Driver Name",
       key: "driverName",
       align: "center",
