@@ -44,10 +44,11 @@ const GDTAddStaffBatch = () => {
   };
 
   const validateAllFields = async (updatedData) => {
-    const syncResults = updatedData.map((staff, index) =>
+    updatedData.map((staff, index) =>
       validateStaffMember(staff, index, updatedData)
     );
-    const asyncResults = await Promise.all(
+
+    await Promise.all(
       updatedData.map((staff, index) =>
         checkUniqueness(
           staff['Mobile Phone Number'],
@@ -56,19 +57,9 @@ const GDTAddStaffBatch = () => {
         )
       )
     );
-
-    const hasErrors =
-      syncResults.some((r) => !r) || asyncResults.some((r) => !r.isUnique);
-    setIsButtonDisabled(hasErrors);
-    setErrorMessage(
-      hasErrors
-        ? 'Please fix the errors in the table highlighted with red borders.'
-        : ''
-    );
   };
 
   const validateStaffMember = async (staff, index, allStaff) => {
-    console.log('Validating staff:', staff);
     const staffErrors = {
       Fname: !staff['First name'],
       Lname: !staff['Last name'],
@@ -77,27 +68,20 @@ const GDTAddStaffBatch = () => {
       ID: false,
     };
 
-    let isValid = true;
-
     if (!staff['First name'] || !validateName(staff['First name'])) {
       staffErrors.Fname = true;
-      isValid = false;
     }
     if (!staff['Last name']) {
       staffErrors.Lname = true;
-      isValid = false;
     }
     if (!staff['Mobile Phone Number']) {
       staffErrors.PhoneNumber = true;
-      isValid = false;
     }
     if (!staff.Email) {
       staffErrors.Email = true;
-      isValid = false;
     }
     if (!staff['Staff ID']) {
       staffErrors.ID = true;
-      isValid = false;
     }
 
     if (
@@ -105,15 +89,12 @@ const GDTAddStaffBatch = () => {
       validatePhoneNumber(staff['Mobile Phone Number'])
     ) {
       staffErrors.PhoneNumber = true;
-      isValid = false;
     }
     if (staff.Email && validateEmail(staff.Email)) {
       staffErrors.Email = true;
-      isValid = false;
     }
     if (staff['Staff ID'] && validateStaffID(staff['Staff ID'])) {
       staffErrors.ID = true;
-      isValid = false;
     }
 
     const uniquenessResult = await checkUniqueness(
@@ -126,7 +107,6 @@ const GDTAddStaffBatch = () => {
         staffErrors.PhoneNumber = true;
       if (uniquenessResult.message.includes('Email')) staffErrors.Email = true;
       if (uniquenessResult.message.includes('Staff ID')) staffErrors.ID = true;
-      isValid = false;
     }
 
     // Check for duplicates within the uploaded file
@@ -143,7 +123,6 @@ const GDTAddStaffBatch = () => {
           staffErrors.PhoneNumber = true;
         if (dup.Email === staff.Email) staffErrors.Email = true;
         if (dup['Staff ID'] === staff['Staff ID']) staffErrors.ID = true;
-        isValid = false;
       });
     }
 
@@ -152,8 +131,6 @@ const GDTAddStaffBatch = () => {
       updatedErrorData[index] = staffErrors;
       return updatedErrorData;
     });
-
-    return !Object.values(staffErrors).some((error) => error); // Return true if no errors
   };
 
   const checkForDuplicatesAndUpdateErrors = (updatedData) => {
@@ -426,10 +403,19 @@ const GDTAddStaffBatch = () => {
     }
   };
 
-  // useEffect(() => {
-  //   // Validate only when fileData changes
-  //   validateAllFields(fileData);
-  // }, [fileData]);
+  useEffect(() => {
+    // Validate only when fileData changes
+
+    const hasErrors = errorData.some((staffErrors) =>
+      Object.values(staffErrors).some((error) => error)
+    );
+    setIsButtonDisabled(hasErrors);
+    setErrorMessage(
+      hasErrors
+        ? 'Please fix the errors in the table highlighted with red borders.'
+        : ''
+    );
+  }, [errorData, fileData]);
 
   return (
     <div>
@@ -462,23 +448,36 @@ const GDTAddStaffBatch = () => {
           .
         </p>
 
-            <br/>
-            <div className={s.formRow}>
-                <input
-                    id="fileInput"
-                    type="file"
-                    onChange={handleFileUpload}
-                    accept=".xls,.xlsx"
-                    className={s.fileInput}
-                />
-                {fileName && (
-                    <div style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
-                        <FaTrash onClick={handleRemoveFile} style={{ marginLeft: '10px', color: '#059855', cursor: 'pointer', fontSize: '20px' }} title="Remove file" />
-                    </div>
-                )}
+        <br />
+        <div className={s.formRow}>
+          <input
+            id='fileInput'
+            type='file'
+            onChange={handleFileUpload}
+            accept='.xls,.xlsx'
+            className={s.fileInput}
+          />
+          {fileName && (
+            <div
+              style={{
+                marginLeft: '10px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <FaTrash
+                onClick={handleRemoveFile}
+                style={{
+                  marginLeft: '10px',
+                  color: '#059855',
+                  cursor: 'pointer',
+                  fontSize: '20px',
+                }}
+                title='Remove file'
+              />
             </div>
-
-                
+          )}
+        </div>
 
         {fileData.length > 0 && (
           <div>
@@ -629,23 +628,21 @@ const GDTAddStaffBatch = () => {
               </tbody>
             </table>
 
-<button
-    onClick={handleAddStaff}
-    disabled={isButtonDisabled}
-    className={s.editBtn}
-    style={{
-        backgroundColor: isButtonDisabled ? 'gray' : '#059855',
-        cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
-        opacity: isButtonDisabled ? 0.6 : 1,
-    }}
->
-    Add Staff List
-</button>
-
-
-</div>
-
-)}
+            <button
+              onClick={handleAddStaff}
+              disabled={isButtonDisabled}
+              className={s.editBtn}
+              style={{
+                backgroundColor: isButtonDisabled ? 'gray' : '#059855',
+                cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+                opacity: isButtonDisabled ? 0.6 : 1,
+                marginBottom:'10px'
+              }}
+            >
+              Add Staff List
+            </button>
+          </div>
+        )}
 
         {popupVisible && (
           <Modal
