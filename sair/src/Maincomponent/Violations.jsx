@@ -130,6 +130,7 @@ const ViolationList = () => {
   const filteredViolations = violations
     .filter((violation) => {
       const driverName = drivers[violation.driverID]?.name || "";
+      const licensePlate = motorcycles[violation.violationID] || ' ';
 
       let violationDate = "";
       if (violation.time) {
@@ -138,9 +139,8 @@ const ViolationList = () => {
           .split("T")[0];
       }
 
-      const matchesSearchQuery = driverName
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase())||
+        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSearchDate = searchDate
         ? violationDate === searchDate
         : true;

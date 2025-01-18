@@ -161,6 +161,7 @@ const ViolationList = () => {
     .filter((violation) => {
       const driverName = drivers[violation.driverID]?.name || "";
       const driverId = violation.driverID;
+      const licensePlate = motorcycles[violation.violationID] || ' ';
       const companyName = drivers[violation.driverID]?.shortCompanyName || "";
 
       let violationDate = "";
@@ -172,7 +173,7 @@ const ViolationList = () => {
 
       const matchesSearchQuery =
         driverId.includes(searchQuery) ||
-        companyName.toLowerCase().includes(searchQuery.toLowerCase());
+        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSearchDate = searchDate
         ? violationDate === searchDate
         : true;
@@ -295,7 +296,7 @@ const ViolationList = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search by Driver ID or Company Name"
+                  placeholder="Search by Driver ID  or License Plate"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: "280px" }}

@@ -200,10 +200,11 @@ const CrashList = () => {
       const driverName = drivers[crash.driverID]?.name || " ";
       const driverId = crash.driverID;
       const companyName = drivers[crash.driverID]?.shortCompanyName || "  ";
+      const licensePlate = motorcycles[crash.crashID] || ' ';
 
       const matchesSearchQuery =
         driverId.includes(searchQuery) ||
-        companyName.toLowerCase().includes(searchQuery.toLowerCase());
+        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesSearchQuery && matchesSearchDate;
     })
@@ -405,7 +406,7 @@ const CrashList = () => {
 
                 <input
                   type="text"
-                  placeholder="Search by Driver ID or Company Name"
+                  placeholder="Search by Driver ID or License Plate"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{ width: "280px" }}
