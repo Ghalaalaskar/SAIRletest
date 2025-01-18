@@ -552,6 +552,13 @@ const EditDriver = () => {
                   <button type="submit" className={s.editBtn}>
                     Update Driver
                   </button>
+                  <button
+                                onClick={() => { navigate('/driverslist');}}
+                                className={s.profileCancel}
+                               
+                            >
+                                Cancel
+                            </button>
                 </div>
               </form>
             )}

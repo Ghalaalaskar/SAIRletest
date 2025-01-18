@@ -239,6 +239,15 @@ const EditMotorcycle = () => {
   return (
     <div>
       <Header active='motorcycleslist' />
+
+      <div className="breadcrumb" Style={{ marginRight: '100px' }}>
+        <a onClick={() => navigate('/employer-home')}>Home</a>
+        <span> / </span>
+        <a onClick={() => navigate('/motorcycleslist')}>Motorcycles List</a>
+        <span> / </span>
+        <a onClick={() => navigate(`/edit-motorcycle/${motorcycleId}`)}>Edit Motorcycle</a>
+      </div>
+
       <main>
         <div className={s.container}>
           <h2 className='title'>Edit Motorcycle</h2>
@@ -356,6 +365,13 @@ const EditMotorcycle = () => {
                 <button type='submit' className={s.editBtn}>
                   Update Motorcycle
                 </button>
+                <button
+                                onClick={() => { navigate('/motorcycleslist');}}
+                                className={s.profileCancel}
+                               
+                            >
+                                Cancel
+                            </button>
               </div>
             </form>
           )}
