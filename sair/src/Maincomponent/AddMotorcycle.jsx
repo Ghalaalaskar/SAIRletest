@@ -333,6 +333,18 @@ const generateMotorcycleID = async (gpsNumber) => {
             <button type="submit" className={s.editBtn}>
               Add Motorcycle
             </button>
+            <button
+                onClick={() => { navigate('/motorcycleslist');}}
+                className={s.editBtn}
+                style={{
+                    backgroundColor:'#059855',
+                    cursor:'pointer',
+                    opacity:  1,
+                    marginBottom: '20px'
+                }}
+            >
+                Cancel
+            </button>
           </div>
         </form>
       </main>

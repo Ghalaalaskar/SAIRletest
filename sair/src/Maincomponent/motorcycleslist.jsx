@@ -219,7 +219,7 @@ const handleAddMotorcycleSubmit = async (e) => {
       align: 'center',
     },
     {
-      title: 'Details',
+      title: 'Motorcycle Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (

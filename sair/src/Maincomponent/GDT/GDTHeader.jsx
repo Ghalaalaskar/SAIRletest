@@ -133,6 +133,7 @@ const GDTHeader = ({ active }) => {
     { path: 'gdtcrashes', label: 'Crashes List' },
     { path: 'gdtcomplaints', label: 'Complaints List' },
     { path: 'gdtdriverlist', label: 'Drivers List' },
+    { path: 'gdtdashboard', label: 'Dashboard' },
     { path: 'gdtheatmap', label: 'Heat-Map' },
     { path: 'gdtstafflist', label: 'Staff List', adminOnly: true },
   ];

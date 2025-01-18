@@ -462,36 +462,23 @@ const GDTAddStaffBatch = () => {
           .
         </p>
 
-        <br />
-        <div className={s.formRow}>
-          <input
-            id='fileInput'
-            type='file'
-            onChange={handleFileUpload}
-            accept='.xls,.xlsx'
-            className={s.fileInput}
-          />
-          {fileName && (
-            <div
-              style={{
-                marginLeft: '10px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <FaTrash
-                onClick={handleRemoveFile}
-                style={{
-                  marginLeft: '10px',
-                  color: '#059855',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                }}
-                title='Remove file'
-              />
+            <br/>
+            <div className={s.formRow}>
+                <input
+                    id="fileInput"
+                    type="file"
+                    onChange={handleFileUpload}
+                    accept=".xls,.xlsx"
+                    className={s.fileInput}
+                />
+                {fileName && (
+                    <div style={{ marginLeft: '10px', display: 'flex', alignItems: 'center' }}>
+                        <FaTrash onClick={handleRemoveFile} style={{ marginLeft: '10px', color: '#059855', cursor: 'pointer', fontSize: '20px' }} title="Remove file" />
+                    </div>
+                )}
             </div>
-          )}
-        </div>
+
+                
 
         {fileData.length > 0 && (
           <div>
@@ -642,20 +629,23 @@ const GDTAddStaffBatch = () => {
               </tbody>
             </table>
 
-            <button
-              onClick={handleAddStaff}
-              disabled={isButtonDisabled}
-              className={s.editBtn}
-              style={{
-                backgroundColor: isButtonDisabled ? 'gray' : '#059855',
-                cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
-                opacity: isButtonDisabled ? 0.6 : 1,
-              }}
-            >
-              Add Staff List
-            </button>
-          </div>
-        )}
+<button
+    onClick={handleAddStaff}
+    disabled={isButtonDisabled}
+    className={s.editBtn}
+    style={{
+        backgroundColor: isButtonDisabled ? 'gray' : '#059855',
+        cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+        opacity: isButtonDisabled ? 0.6 : 1,
+    }}
+>
+    Add Staff List
+</button>
+
+
+</div>
+
+)}
 
         {popupVisible && (
           <Modal

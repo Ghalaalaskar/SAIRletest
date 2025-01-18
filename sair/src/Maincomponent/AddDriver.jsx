@@ -1457,6 +1457,19 @@ const handleRemoveFile = () => {
             <button type="submit" className={s.editBtn}>
               Add Driver
             </button> 
+            <button
+                onClick={() => { navigate('/driverslist');}}
+                className={s.editBtn}
+                style={{
+                    backgroundColor:'#059855',
+                    cursor:'pointer',
+                    opacity:  1,
+                    marginBottom: '20px'
+                }}
+            >
+                Cancel
+            </button>
+                                          
           </div>
  
           </form>

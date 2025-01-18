@@ -935,19 +935,17 @@ const ViolationGeneral = () => {
                 )}
               </div>
               <hr />
-              <div style={{ marginBottom: "10px" }}>
+              <div style={{ marginBottom: "100px" }}>
                 {/* View Complaints Button */}
                 <Button
                   onClick={handleViewComplaints}
                   style={{
-                    backgroundColor: "#059855",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: "20px 10px",
+                    float: "left",
+                    width: "auto",
                     height: "60px",
+                    fontSize: "15px",
+                    color: "#059855",
+                    borderColor: "#059855",
                     fontFamily: "Open Sans",
                   }}
                 >

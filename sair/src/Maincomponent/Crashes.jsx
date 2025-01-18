@@ -198,7 +198,7 @@ const CrashList = () => {
       render: (text, record) => formatDate(record.time),
     },
     {
-      title: 'Details',
+      title: 'Crash Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (
