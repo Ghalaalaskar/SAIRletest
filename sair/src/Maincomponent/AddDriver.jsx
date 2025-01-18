@@ -1459,13 +1459,8 @@ const handleRemoveFile = () => {
             </button> 
             <button
                 onClick={() => { navigate('/driverslist');}}
-                className={s.editBtn}
-                style={{
-                    backgroundColor:'#059855',
-                    cursor:'pointer',
-                    opacity:  1,
-                    marginBottom: '20px'
-                }}
+                className={s.profileCancel}
+                
             >
                 Cancel
             </button>

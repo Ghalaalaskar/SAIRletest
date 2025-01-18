@@ -335,13 +335,8 @@ const generateMotorcycleID = async (gpsNumber) => {
             </button>
             <button
                 onClick={() => { navigate('/motorcycleslist');}}
-                className={s.editBtn}
-                style={{
-                    backgroundColor:'#059855',
-                    cursor:'pointer',
-                    opacity:  1,
-                    marginBottom: '20px'
-                }}
+                className={s.profileCancel}
+               
             >
                 Cancel
             </button>
