@@ -129,13 +129,13 @@ const GDTHeader = ({ active }) => {
 
   const navItems = [
     { path: 'gdthome', label: 'Home' },
-    { path: 'gdtviolations', label: 'Violations List' },
-    { path: 'gdtcrashes', label: 'Crashes List' },
-    { path: 'gdtcomplaints', label: 'Complaints List' },
+    { path: 'gdtstafflist', label: 'Staff List', adminOnly: true },
     { path: 'gdtdriverlist', label: 'Drivers List' },
+    { path: 'gdtviolations', label: 'Violations List' },
+    { path: 'gdtcomplaints', label: 'Complaints List' },
+    { path: 'gdtcrashes', label: 'Crashes List' },
     { path: 'gdtdashboard', label: 'Dashboard' },
     { path: 'gdtheatmap', label: 'Heat-Map' },
-    { path: 'gdtstafflist', label: 'Staff List', adminOnly: true },
   ];
 
   return (
