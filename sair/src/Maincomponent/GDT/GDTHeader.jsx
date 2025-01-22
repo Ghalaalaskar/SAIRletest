@@ -150,9 +150,8 @@ const GDTHeader = ({ active }) => {
   return (
     <header>
       <nav>
-        <Link to={'/gdthome'}>
-          <img className={s.logo} src={SAIRLogo} alt='SAIR Logo' />
-        </Link>
+      <img className={s.logo} src={SAIRLogo} alt='SAIR Logo' onClick={() => handleNavigation('/gdthome')}/>
+
 
         <div className={s.navLinks} id='navLinks'>
           <ul>
@@ -160,9 +159,9 @@ const GDTHeader = ({ active }) => {
               // Only render if not adminOnly or user is admin
               (!item.adminOnly || isAdmin) && (
                 <li key={item.path}>
-                  <Link className={active === item.path ? s.active : ''} to={`/${item.path}`}>
+                  <a className={active === item.path ? s.active : ''} onClick={() => handleNavigation(`/${item.path}`)}>
                     {item.label}
-                  </Link>
+                  </a>
                 </li>
               )
             ))}
