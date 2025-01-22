@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -326,16 +325,16 @@ const DriverDetails = () => {
               </a>
             </p>
             <br />
-             <div id="company name">
-            <h3
-              style={{
-                color: "#059855",
-                fontSize: "32px",
-                margin: "20px 0",
-              }}
-            >
-              Company Details
-            </h3>
+            <div id="company name">
+              <h3
+                style={{
+                  color: "#059855",
+                  fontSize: "32px",
+                  margin: "20px 0",
+                }}
+              >
+                Company Details
+              </h3>
               <h3
                 style={{
                   color: "#059855",
@@ -343,8 +342,8 @@ const DriverDetails = () => {
                   fontSize: "20px",
                 }}
               >
-            <hr />
-            <svg
+                <hr />
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   color="#059855"
@@ -586,7 +585,7 @@ const DriverDetails = () => {
               </p>
             </div>
 
-             <h3
+            <h3
               style={{
                 color: "#059855",
                 fontSize: "32px",
@@ -882,25 +881,22 @@ const DriverDetails = () => {
             ) : (
               <p>No motorcycles associated with this driver.</p>
             )}
-            <button
+            <div style={{ marginBottom: "20px" }}></div>
+            <Button
               onClick={handleViewViolations}
               style={{
-                backgroundColor: "#059855",
-                color: "white",
-                border: "none",
-                borderRadius: "50px",
-                alignItems: "center",
-                cursor: "pointer",
-                padding: "20px 10px",
+                float: "left",
+                marginBottom: "100px",
                 width: "auto",
                 height: "60px",
-                fontFamily: "Open Sans",
+                fontSize: "15px",
+                color: "#059855",
+                borderColor: "#059855",
               }}
             >
-              {" "}
               <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
-              View Violations
-            </button>
+              View Violations{" "}
+            </Button>
 
             <Button
               onClick={goBack}
