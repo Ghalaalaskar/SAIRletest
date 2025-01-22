@@ -349,6 +349,7 @@ const Profile = () => {
 
     if (currentData.exists()) {
       const existingPhoneNumber = currentData.data().PhoneNumber;
+      const existingID = currentData.data().ID;
 
       if (GDT.PhoneNumber && GDT.PhoneNumber !== existingPhoneNumber) {
         const existingUserQuery1 = await getDocs(
@@ -361,6 +362,24 @@ const Profile = () => {
         if (!existingUserQuery1.empty) {
           setPopupMessage(
             "The phone number is already used. Please use a new number."
+          );
+          setPopupImage(errorImage);
+          setPopupVisible(true);
+          setLoading(false);
+          return;
+        }
+      }
+      if (GDT.ID && GDT.ID !== existingID) {
+        const existingUserQuery2 = await getDocs(
+          query(
+            collection(db, "GDT"),
+            where("ID", "==", GDT.ID)
+          )
+        );
+
+        if (!existingUserQuery2.empty) {
+          setPopupMessage(
+            "The ID is already used. Please use a new ID."
           );
           setPopupImage(errorImage);
           setPopupVisible(true);

@@ -71,7 +71,7 @@ const DriverList = () => {
       : "";
 
   const viewDriverDetails = (driverID) => {
-    navigate(`/driver-details/${driverID}`);
+    navigate(`/gdtdriverdetails/${driverID}`);
   };
 
   const columns = [
@@ -136,7 +136,7 @@ const DriverList = () => {
       <div className="breadcrumb" style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate('/gdtdriverslist')}>Driver List</a>
+        <a onClick={() => navigate('/gdtdriverlist')}>Driver List</a>
       </div>
 
       <main>

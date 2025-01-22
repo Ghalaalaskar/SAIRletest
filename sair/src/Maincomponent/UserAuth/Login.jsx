@@ -455,7 +455,7 @@ const hasExistingErrors = Object.values(validationMessages).some(
 );
 if (hasExistingErrors) {
   isvalid=false;
-  console.log('Errors in validation messages. Stopping sign-up.');
+  console.log('Errors in validation messages. Stopping sign-up.',validationMessages);
   return;
 }
 
@@ -636,27 +636,23 @@ else{
 
 
 const handleNext3 = async (e) => {
-  const GDTCollection = collection(db, 'GDT');
-
-    // Query for the document with the matching email
-    const q = query(GDTCollection, where('GDTEmail', '==', email));
-    console.log('in 3',email);
-    const querySnapshot = await getDocs(q);
-    const gdtUID = querySnapshot.docs[0].id;
-    console.log('in 3',gdtUID);
-
-     sessionStorage.setItem('gdtUID', gdtUID);
-          const GDTData = querySnapshot.docs[0].data();
-                const Fname = GDTData.Fname || '';
-                sessionStorage.setItem('FirstName', Fname);
-                setFirstName(Fname); // Update the context
-                sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
+  
           setCurrent(current + 1);
-          setTimeout(() => {
-          navigate('/gdthome');
-         }, 1500);
-};
+          window.location.reload();
+        };
 
+        
+const handleback = async (e) => {
+  setCurrent(current - 1); 
+  setValidationMessages((prev) => ({
+    phoneError: '',
+    idError:'',
+    passwordError:'',
+    confirmPasswordError: '',
+  }));
+  setshowPasswordDetails(false);
+          
+};
 
   const handleClosePopup = () => {
     setPopupVisible(false);
@@ -860,10 +856,10 @@ const handleNext3 = async (e) => {
           ) : (
             <div  >
               {showDetailsFormAdmin && !showDetailsFormStaff  ? ( 
-                <div style={{ width: '120%', margin: '0 auto' }}>
+                <div style={{ width: '120%' }}>
               <Steps current={current} size="small" className={s.customSteps}>
-      <Step title="User Info" description=""  />
-      <Step title="Reset Password" description=""  />
+      <Step title="Complete user Info" description=""  />
+      <Step title="Reset user Password" description=""  />
       <Step title="Registration Completed" description=""  />
     </Steps>
 
@@ -962,7 +958,7 @@ const handleNext3 = async (e) => {
         <div>
        <p style={{marginBottom: '20px'}} //i add marginTop for the journey numbers
             >
-              For security reasons, please reset your password.
+             Please reset your password, for security reasons.
             </p>
 </div>
       ):null}
@@ -971,7 +967,7 @@ const handleNext3 = async (e) => {
         <div>
        <p style={{marginBottom: '20px', marginTop:'60px'}} //i add marginTop for the journey numbers
             >
-              For security reasons, please reset your password.
+               Please reset your password, for security reasons.
             </p>
 </div>
       ):null}
@@ -1040,17 +1036,33 @@ const handleNext3 = async (e) => {
             </span>
             {missingFields['confirmPassword'] && <p style={{ color: 'red' , marginTop: '3px',fontSize:'14px' }}>{missingFields['confirmPassword']}</p>}
             <br /></div>
-            <button className={s.submitButton} onClick={handleNext2} type='button'>
+
+            {showDetailsFormAdmin && showPasswordDetails  && !showDetailsFormStaff ? (
+           
+           <button className={s.submitButton} onClick={handleNext2} type='button' style={{marginLeft:'2px'}}>
             Next
           </button>
-          {/* {showDetailsFormAdmin && showPasswordDetails  && !showDetailsFormStaff ? (
+          
+
+          ):null}
+
+{!showDetailsFormAdmin && showPasswordDetails  && showDetailsFormStaff ? (
            
-           <button className={s.submitButton} onClick={handleback} type='button'>
+           <button className={s.submitButton} onClick={handleNext2} type='button'>
+            Next
+          </button>
+          
+
+          ):null}
+           
+          {showDetailsFormAdmin && showPasswordDetails  && !showDetailsFormStaff ? (
+           
+           <button className={s.submitButton} onClick={handleback} type='button' style={{marginLeft:'9px'}}>
             Back
           </button> 
           
-          
-          ):null} */}
+
+          ):null}
 
 
 
