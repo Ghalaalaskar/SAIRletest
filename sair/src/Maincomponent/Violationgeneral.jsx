@@ -683,6 +683,7 @@ const ViolationGeneral = () => {
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {currentViolation.price} SAR
                 </p>
+                {(currentViolation.count30 > 0 || currentViolation.count50 > 0) && (
                 <p style={{ marginLeft: "45px", color: "grey" }}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -736,6 +737,7 @@ const ViolationGeneral = () => {
                     </p>
                   )}
                 </p>
+                )}
                 <p style={{ marginLeft: "45px", color: "grey" }}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
