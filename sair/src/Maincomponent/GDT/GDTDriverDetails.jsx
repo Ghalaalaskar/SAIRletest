@@ -136,8 +136,8 @@ const DriverDetails = () => {
 
   const handleViewViolations = () => {
     if (violations.length > 0) {
-      navigate(`/drivers/${driverId}/violations`);
-    } else {
+      navigate(`/gdtviolationdriver/${driverId}`);
+        } else {
       setIsPopupVisible(true); // Show popup if no violations exist
     }
   };
@@ -148,7 +148,7 @@ const DriverDetails = () => {
 
   return (
     <div>
-      <Header active={"driverslist"} />
+      <Header active={"gdtdriverlist"} />
 
       <div className="breadcrumb">
         <a onClick={() => navigate("/gdthome")}>Home</a>
