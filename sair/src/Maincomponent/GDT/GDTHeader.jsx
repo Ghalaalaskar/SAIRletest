@@ -47,7 +47,16 @@ const GDTHeader = ({ active }) => {
     fetchFirstName();
   }, [firstName, setFirstName]); // Only rerun when `firstName` or `setFirstName` changes
 
- 
+   // Function to remove all staff-related session storage keys and navigate
+   const handleNavigation = (path) => {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("staff_")) {
+        sessionStorage.removeItem(key);
+      }
+    });
+
+    navigate(path);
+  };
   
   // useEffect(() => {
   //   const fetchName = async () => {
@@ -118,7 +127,7 @@ const GDTHeader = ({ active }) => {
 
   const menu = (
     <Menu>
-      <Menu.Item key='profile' onClick={() => navigate('/gdtprofile')}>
+      <Menu.Item key='profile' onClick={() => handleNavigation('/gdtprofile')}>
         Profile
       </Menu.Item>
       <Menu.Item key='logout' onClick={() => setModalVisible(true)} style={{ color: 'red' }}>

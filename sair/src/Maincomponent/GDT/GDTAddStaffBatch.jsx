@@ -367,7 +367,9 @@ const GDTAddStaffBatch = () => {
     const errorList = [];
     for (const staff of fileData) {
       try {
-        await addStaffToDatabase(staff);
+        const addedStaff = await addStaffToDatabase(staff);
+        // Store the staff ID in sessionStorage
+        sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
       } catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
