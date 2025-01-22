@@ -136,8 +136,8 @@ const DriverDetails = () => {
 
   const handleViewViolations = () => {
     if (violations.length > 0) {
-      navigate(`/gdtviolationdriver/${driverId}`);
-        } else {
+      navigate(`/gdtviolationdriver/${driverId}`, { state: "driverlist" });
+    } else {
       setIsPopupVisible(true); // Show popup if no violations exist
     }
   };
