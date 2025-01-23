@@ -324,7 +324,7 @@ const DriverDetails = () => {
                 {driverDetails.Email}
               </a>
             </p>
-            <br />
+    
             <div id="company name">
               <h3
                 style={{
