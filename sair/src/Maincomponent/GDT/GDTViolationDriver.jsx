@@ -149,7 +149,11 @@ const ViolationsTable = () => {
 
   return (
     <>
-      <Header active={"gdtviolations"} />
+    <Header
+        active={
+          state === "driverlist"? "gdtdriverlist" : "gdtviolations"
+        }
+      />
 
       <div className="breadcrumb">
         <a onClick={() => navigate("/gdthome")}>Home</a>

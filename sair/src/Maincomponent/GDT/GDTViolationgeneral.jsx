@@ -105,7 +105,7 @@ const ViolationGeneral = () => {
           </a>
         </>
       );
-    }    else if (breadcrumbParam === "Driver List") {
+    } else if (breadcrumbParam === "Driver List") {
       return (
         <>
           <a onClick={() => navigate("/gdthome")}>Home</a>
@@ -113,7 +113,12 @@ const ViolationGeneral = () => {
           <a onClick={() => navigate("/gdtdriverlist")}>Driver List</a>
           <span> / </span>
           <a onClick={() => navigate(`/gdtdriverdetails/${driverID}`)}>
-          Driver Details          </a>
+            Driver Details{" "}
+          </a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolationdriver/${driverID}`)}>
+            Driver Violations List
+          </a>{" "}
           <span> / </span>
           <a>Violation Details</a>
         </>
@@ -195,7 +200,9 @@ const ViolationGeneral = () => {
       if (!snapshot.empty) {
         snapshot.forEach((doc) => {
           const data = doc.data();
-          const CapitalizCompanyName = capitalizeFirstLetter(data.ShortCompanyName);
+          const CapitalizCompanyName = capitalizeFirstLetter(
+            data.ShortCompanyName
+          );
 
           setEmployerDetails({
             CompanyEmail: data.CompanyEmail,
@@ -317,7 +324,11 @@ const ViolationGeneral = () => {
 
   return (
     <div>
-      <Header active="gdtviolations" />
+      <Header
+        active={
+          breadcrumbParam === "Driver List" ? "gdtdriverlist" : "gdtviolations"
+        }
+      />
       <div className="breadcrumb">{generateBreadcrumb()}</div>
 
       <main className={s.violation}>
@@ -1192,60 +1203,61 @@ const ViolationGeneral = () => {
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {currentViolation.price} SAR
                 </p>
-                {(currentViolation.count30 > 0 || currentViolation.count50 > 0) && (
-                <p style={{ marginLeft: "45px", color: "grey" }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    color="#000000"
-                    fill="none"
-                    style={{ marginBottom: "-5px" }}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="red"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M11.992 15H12.001"
-                      stroke="red"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 12L12 8"
-                      stroke="red"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  According to the General Department of Traffic regulations,
-                  this speed violation is considered reckless and marks the
-                  driver's{" "}
-                  <strong>
-                    {getOrdinal(
-                      currentViolation.count30 > 0
-                        ? currentViolation.count30
-                        : currentViolation.count50
+                {(currentViolation.count30 > 0 ||
+                  currentViolation.count50 > 0) && (
+                  <p style={{ marginLeft: "45px", color: "grey" }}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      color="#000000"
+                      fill="none"
+                      style={{ marginBottom: "-5px" }}
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="red"
+                        strokeWidth="1.5"
+                      />
+                      <path
+                        d="M11.992 15H12.001"
+                        stroke="red"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M12 12L12 8"
+                        stroke="red"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    According to the General Department of Traffic regulations,
+                    this speed violation is considered reckless and marks the
+                    driver's{" "}
+                    <strong>
+                      {getOrdinal(
+                        currentViolation.count30 > 0
+                          ? currentViolation.count30
+                          : currentViolation.count50
+                      )}
+                    </strong>{" "}
+                    offense.
+                    {(currentViolation.count30 > 1 ||
+                      currentViolation.count50 > 1) && (
+                      <p style={{ marginLeft: "45px", color: "grey" }}>
+                        <span style={{ marginLeft: "-12px" }}>
+                          {" "}
+                          As a result, the penalty amount has been increased.
+                        </span>
+                      </p>
                     )}
-                  </strong>{" "}
-                  offense.
-                  {(currentViolation.count30 > 1 ||
-                    currentViolation.count50 > 1) && (
-                    <p style={{ marginLeft: "45px", color: "grey" }}>
-                      <span style={{ marginLeft: "-12px" }}>
-                        {" "}
-                        As a result, the penalty amount has been increased.
-                      </span>
-                    </p>
-                  )}
-                </p>
+                  </p>
                 )}
                 <p style={{ marginLeft: "45px", color: "grey" }}>
                   <svg
