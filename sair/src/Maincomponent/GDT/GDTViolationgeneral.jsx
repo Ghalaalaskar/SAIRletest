@@ -264,7 +264,7 @@ const ViolationGeneral = () => {
 
   const handleViewComplaints = () => {
     if (complaints.length > 0) {
-      navigate(`/complaint/general/${complaints[0].id}`, {
+      navigate(`/gdtcomplaints/general/${complaints[0].id}`, {
         state: { from: "GDTViolationGeneral" },
       }); // Navigate to the first complaint
     } else {
@@ -1449,8 +1449,8 @@ const ViolationGeneral = () => {
               <div style={{ marginBottom: "100px" }}>
                 {/* View Complaints Button */}
                 <Button
-                  // onClick={handleViewComplaints}
-                  onClick={disableViewComplaints}
+                  onClick={handleViewComplaints}
+                  // onClick={disableViewComplaints}
                   style={{
                     float: "left",
                     width: "auto",
@@ -1488,13 +1488,13 @@ const ViolationGeneral = () => {
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
         footer={
-          // <p style={{ textAlign: "center" }}>
-          //   There is no complaint associated with this violation.
-          // </p>
           <p style={{ textAlign: "center" }}>
-            View associated complaint feature currently unavailable. Stay tuned
-            for updates!
+            There is no complaint associated with this violation.
           </p>
+          // <p style={{ textAlign: "center" }}>
+          //   View associated complaint feature currently unavailable. Stay tuned
+          //   for updates!
+          // </p>
         }
         style={{ top: "38%" }}
         className="custom-modal"
