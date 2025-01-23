@@ -882,7 +882,7 @@ const DriverDetails = () => {
               <p>No motorcycles associated with this driver.</p>
             )}
             <div style={{ marginBottom: "20px" }}></div>
-            <Button
+            <div style={{ marginBottom: "50px", paddingBottom: "20px" }}>            <Button
               onClick={handleViewViolations}
               style={{
                 float: "left",
@@ -911,9 +911,10 @@ const DriverDetails = () => {
               }}
             >
               <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-            </Button>
+            </Button>  </div>
           </>
         ) : null}
+      
       </main>
       {isPopupVisible && (
         <Modal
