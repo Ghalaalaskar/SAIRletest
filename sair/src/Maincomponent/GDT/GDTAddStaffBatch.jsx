@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../firebase';
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  runTransaction,
-  getFirestore,
-} from 'firebase/firestore';
-import { Modal } from 'antd';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { Modal, Steps } from 'antd';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FaTrash } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
@@ -21,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 import { generateRandomPassword } from '../../utils/common';
 import templateFile from './template.xlsx';
-import debounce from 'lodash.debounce';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const GDTAddStaffBatch = () => {
@@ -34,7 +25,7 @@ const GDTAddStaffBatch = () => {
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const firestore = getFirestore(); // Get Firestore instance once
+  const [currentStep, setCurrentStep] = useState(0);
 
   const handleInputChange = (index, field, value) => {
     const updatedFileData = [...fileData];
@@ -43,9 +34,9 @@ const GDTAddStaffBatch = () => {
     validateAllFields(updatedFileData);
   };
 
-  const validateAllFields = async (updatedData) => {
+  const validateAllFields = async (updatedData, curIdx = currentStep) => {
     updatedData.map((staff, index) =>
-      validateStaffMember(staff, index, updatedData)
+      validateStaffMember(staff, index, updatedData, curIdx)
     );
 
     await Promise.all(
@@ -59,7 +50,7 @@ const GDTAddStaffBatch = () => {
     );
   };
 
-  const validateStaffMember = async (staff, index, allStaff) => {
+  const validateStaffMember = async (staff, index, allStaff, curIdx) => {
     const staffErrors = {
       Fname: !staff['First name'],
       Lname: !staff['Last name'],
@@ -71,7 +62,7 @@ const GDTAddStaffBatch = () => {
     if (!staff['First name'] || !validateName(staff['First name'])) {
       staffErrors.Fname = true;
     }
-    if (!staff['Last name']) {
+    if (!staff['Last name'] || !validateName(staff['Last name'])) {
       staffErrors.Lname = true;
     }
     if (!staff['Mobile Phone Number']) {
@@ -97,33 +88,38 @@ const GDTAddStaffBatch = () => {
       staffErrors.ID = true;
     }
 
-    const uniquenessResult = await checkUniqueness(
-      staff['Mobile Phone Number'],
-      staff.Email,
-      staff['Staff ID']
-    );
-    if (!uniquenessResult.isUnique) {
-      if (uniquenessResult.message.includes('Phone number'))
-        staffErrors.PhoneNumber = true;
-      if (uniquenessResult.message.includes('Email')) staffErrors.Email = true;
-      if (uniquenessResult.message.includes('Staff ID')) staffErrors.ID = true;
-    }
-
-    // Check for duplicates within the uploaded file
-    const duplicates = allStaff.filter(
-      (s, i) =>
-        i !== index &&
-        (s['Mobile Phone Number'] === staff['Mobile Phone Number'] ||
-          s.Email === staff.Email ||
-          s['Staff ID'] === staff['Staff ID'])
-    );
-    if (duplicates.length > 0) {
-      duplicates.forEach((dup) => {
-        if (dup['Mobile Phone Number'] === staff['Mobile Phone Number'])
+    // unique validation
+    if (curIdx === 1) {
+      const uniquenessResult = await checkUniqueness(
+        staff['Mobile Phone Number'],
+        staff.Email,
+        staff['Staff ID']
+      );
+      if (!uniquenessResult.isUnique) {
+        if (uniquenessResult.message.includes('Phone number'))
           staffErrors.PhoneNumber = true;
-        if (dup.Email === staff.Email) staffErrors.Email = true;
-        if (dup['Staff ID'] === staff['Staff ID']) staffErrors.ID = true;
-      });
+        if (uniquenessResult.message.includes('Email'))
+          staffErrors.Email = true;
+        if (uniquenessResult.message.includes('Staff ID'))
+          staffErrors.ID = true;
+      }
+
+      // Check for duplicates within the uploaded file
+      const duplicates = allStaff.filter(
+        (s, i) =>
+          i !== index &&
+          (s['Mobile Phone Number'] === staff['Mobile Phone Number'] ||
+            s.Email === staff.Email ||
+            s['Staff ID'] === staff['Staff ID'])
+      );
+      if (duplicates.length > 0) {
+        duplicates.forEach((dup) => {
+          if (dup['Mobile Phone Number'] === staff['Mobile Phone Number'])
+            staffErrors.PhoneNumber = true;
+          if (dup.Email === staff.Email) staffErrors.Email = true;
+          if (dup['Staff ID'] === staff['Staff ID']) staffErrors.ID = true;
+        });
+      }
     }
 
     setErrorData((prev) => {
@@ -131,74 +127,6 @@ const GDTAddStaffBatch = () => {
       updatedErrorData[index] = staffErrors;
       return updatedErrorData;
     });
-  };
-
-  const checkForDuplicatesAndUpdateErrors = (updatedData) => {
-    const phoneNumbers = {};
-    const emails = {};
-    const ids = {};
-
-    updatedData.forEach((staff, index) => {
-      if (staff['Mobile Phone Number']) {
-        if (phoneNumbers[staff['Mobile Phone Number']]) {
-          phoneNumbers[staff['Mobile Phone Number']].push(index);
-        } else {
-          phoneNumbers[staff['Mobile Phone Number']] = [index];
-        }
-      }
-      if (staff.Email) {
-        if (emails[staff.Email]) {
-          emails[staff.Email].push(index);
-        } else {
-          emails[staff.Email] = [index];
-        }
-      }
-      if (staff['Staff ID']) {
-        if (ids[staff['Staff ID']]) {
-          ids[staff['Staff ID']].push(index);
-        } else {
-          ids[staff['Staff ID']] = [index];
-        }
-      }
-    });
-
-    const updatedErrorData = [...errorData];
-
-    // Reset all error states before applying new validation
-    updatedData.forEach((staff, index) => {
-      const staffErrors = updatedErrorData[index] || {};
-      staffErrors.PhoneNumber = false;
-      staffErrors.Email = false;
-      staffErrors.ID = false;
-      updatedErrorData[index] = staffErrors;
-    });
-
-    // Update error states based on duplicates
-    for (const phone in phoneNumbers) {
-      if (phoneNumbers[phone].length > 1) {
-        phoneNumbers[phone].forEach((i) => {
-          updatedErrorData[i].PhoneNumber = true;
-        });
-      }
-    }
-
-    for (const email in emails) {
-      if (emails[email].length > 1) {
-        emails[email].forEach((i) => {
-          updatedErrorData[i].Email = true;
-        });
-      }
-    }
-
-    for (const id in ids) {
-      if (ids[id].length > 1) {
-        ids[id].forEach((i) => {
-          updatedErrorData[i].ID = true;
-        });
-      }
-    }
-
-    setErrorData(updatedErrorData); // Update the state with marked errors
   };
 
   const validatePhoneNumber = (PhoneNumber) => {
@@ -347,6 +275,7 @@ const GDTAddStaffBatch = () => {
     setFileData([]);
     setIsButtonDisabled(true); // Disable button when file is removed
     setErrorMessage(''); // Clear error message
+    setCurrentStep(0); // Reset to first step
   };
 
   const handleClosePopup = () => {
@@ -367,9 +296,9 @@ const GDTAddStaffBatch = () => {
     const errorList = [];
     for (const staff of fileData) {
       try {
-        const addedStaff = await addStaffToDatabase(staff);
-        // Store the staff ID in sessionStorage
-        sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
+      const addedStaff = await addStaffToDatabase(staff);
+      // Store the staff ID in sessionStorage
+      sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
       } catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
@@ -407,10 +336,10 @@ const GDTAddStaffBatch = () => {
 
   useEffect(() => {
     // Validate only when fileData changes
-
     const hasErrors = errorData.some((staffErrors) =>
       Object.values(staffErrors).some((error) => error)
     );
+
     setIsButtonDisabled(hasErrors);
     setErrorMessage(
       hasErrors
@@ -450,8 +379,14 @@ const GDTAddStaffBatch = () => {
           .
         </p>
 
-        <br />
-        <div className={s.formRow}>
+        <div
+          className={s.formRow}
+          style={{
+            margin: 0,
+            padding: '20px 0',
+            borderBottom: '1px solid #ddd',
+          }}
+        >
           <input
             id='fileInput'
             type='file'
@@ -483,12 +418,19 @@ const GDTAddStaffBatch = () => {
 
         {fileData.length > 0 && (
           <div>
-            {/* Add error message display here */}
-            {errorMessage && (
-              <p style={{ color: 'red', marginBottom: '10px' }}>
-                {errorMessage} <br />
-              </p>
-            )}
+            <Steps
+              current={currentStep}
+              style={{ margin: '25px auto', width: '90%' }}
+              items={[
+                {
+                  title: 'Format Validation',
+                },
+                {
+                  title: 'Uniqueness Validation',
+                },
+              ]}
+            />
+
             <table>
               <thead>
                 <tr>
@@ -498,6 +440,7 @@ const GDTAddStaffBatch = () => {
                   <th style={{ color: '#059855' }}>Email</th>
                   <th style={{ color: '#059855' }}>ID</th>
                   <th style={{ color: '#059855' }}>Status</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -625,23 +568,83 @@ const GDTAddStaffBatch = () => {
                         />
                       )}
                     </td>
+                    <td>
+                      {/* delet icon */}
+                      <button
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'red',
+                        }}
+                        onClick={() => {
+                          const newFileData = [...fileData];
+                          newFileData.splice(index, 1);
+                          setFileData(newFileData);
+                          setErrorData((prev) => {
+                            const updatedErrorData = [...prev];
+                            updatedErrorData.splice(index, 1);
+                            return updatedErrorData;
+                          });
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
+            {/* Add error message display here */}
+            {errorMessage && (
+              <p style={{ color: 'red', margin: '10px 0' }}>
+                {errorMessage} <br />
+              </p>
+            )}
+            {currentStep === 1 && (
+              <button
+              style={{
+                borderRadius: '5px',
+                backgroundColor: '#059855',
+                border: 'none',
+                padding: '10px 20px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                marginTop: '20px',
+                color: 'white',
+                marginRight: '10px',
+                fontFamily: 'Open Sans'
+              }}
+                onClick={() => {
+                  setCurrentStep(0);
+                  validateAllFields(fileData, 0);
+                }}
+              >
+                Back
+              </button>
+            )}
             <button
-              onClick={handleAddStaff}
+              onClick={() => {
+                switch (currentStep) {
+                  case 0:
+                    setCurrentStep(1);
+                    validateAllFields(fileData, 1);
+                    break;
+                  case 1:
+                    handleAddStaff();
+                    break;
+                  default:
+                    break;
+                }
+              }}
               disabled={isButtonDisabled}
               className={s.editBtn}
               style={{
-                backgroundColor: isButtonDisabled ? 'gray' : '#059855',
-                cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
-                opacity: isButtonDisabled ? 0.6 : 1,
-                marginBottom:'10px'
+                marginBottom:'10px',
               }}
             >
-              Add Staff List
+              {currentStep === 1 ? 'Add Staff List' : 'Next'}
             </button>
           </div>
         )}
