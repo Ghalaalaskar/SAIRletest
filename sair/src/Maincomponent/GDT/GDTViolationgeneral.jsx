@@ -105,6 +105,24 @@ const ViolationGeneral = () => {
           </a>
         </>
       );
+    } else if (breadcrumbParam === "Driver List") {
+      return (
+        <>
+          <a onClick={() => navigate("/gdthome")}>Home</a>
+          <span> / </span>
+          <a onClick={() => navigate("/gdtdriverlist")}>Driver List</a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtdriverdetails/${driverID}`)}>
+            Driver Details{" "}
+          </a>
+          <span> / </span>
+          <a onClick={() => navigate(`/gdtviolationdriver/${driverID}`)}>
+            Driver Violations List
+          </a>{" "}
+          <span> / </span>
+          <a>Violation Details</a>
+        </>
+      );
     } else if (breadcrumbParam === "Driver Violations List") {
       return (
         <>
@@ -124,6 +142,7 @@ const ViolationGeneral = () => {
         </>
       );
     }
+
     return null;
   };
 
@@ -181,7 +200,9 @@ const ViolationGeneral = () => {
       if (!snapshot.empty) {
         snapshot.forEach((doc) => {
           const data = doc.data();
-          const CapitalizCompanyName = capitalizeFirstLetter(data.ShortCompanyName);
+          const CapitalizCompanyName = capitalizeFirstLetter(
+            data.ShortCompanyName
+          );
 
           setEmployerDetails({
             CompanyEmail: data.CompanyEmail,
@@ -250,7 +271,7 @@ const ViolationGeneral = () => {
 
   const handleViewComplaints = () => {
     if (complaints.length > 0) {
-      navigate(`/complaint/general/${complaints[0].id}`, {
+      navigate(`/gdtcomplaints/general/${complaints[0].id}`, {
         state: { from: "GDTViolationGeneral" },
       }); // Navigate to the first complaint
     } else {
@@ -303,7 +324,11 @@ const ViolationGeneral = () => {
 
   return (
     <div>
-      <Header active="gdtviolations" />
+      <Header
+        active={
+          breadcrumbParam === "Driver List" ? "gdtdriverlist" : "gdtviolations"
+        }
+      />
       <div className="breadcrumb">{generateBreadcrumb()}</div>
 
       <main className={s.violation}>
@@ -1178,60 +1203,61 @@ const ViolationGeneral = () => {
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {currentViolation.price} SAR
                 </p>
-                {(currentViolation.count30 > 0 || currentViolation.count50 > 0) && (
-                <p style={{ marginLeft: "45px", color: "grey" }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    color="#000000"
-                    fill="none"
-                    style={{ marginBottom: "-5px" }}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="red"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M11.992 15H12.001"
-                      stroke="red"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 12L12 8"
-                      stroke="red"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  According to the General Department of Traffic regulations,
-                  this speed violation is considered reckless and marks the
-                  driver's{" "}
-                  <strong>
-                    {getOrdinal(
-                      currentViolation.count30 > 0
-                        ? currentViolation.count30
-                        : currentViolation.count50
+                {(currentViolation.count30 > 0 ||
+                  currentViolation.count50 > 0) && (
+                  <p style={{ marginLeft: "45px", color: "grey" }}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      color="#000000"
+                      fill="none"
+                      style={{ marginBottom: "-5px" }}
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="red"
+                        strokeWidth="1.5"
+                      />
+                      <path
+                        d="M11.992 15H12.001"
+                        stroke="red"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M12 12L12 8"
+                        stroke="red"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    According to the General Department of Traffic regulations,
+                    this speed violation is considered reckless and marks the
+                    driver's{" "}
+                    <strong>
+                      {getOrdinal(
+                        currentViolation.count30 > 0
+                          ? currentViolation.count30
+                          : currentViolation.count50
+                      )}
+                    </strong>{" "}
+                    offense.
+                    {(currentViolation.count30 > 1 ||
+                      currentViolation.count50 > 1) && (
+                      <p style={{ marginLeft: "45px", color: "grey" }}>
+                        <span style={{ marginLeft: "-12px" }}>
+                          {" "}
+                          As a result, the penalty amount has been increased.
+                        </span>
+                      </p>
                     )}
-                  </strong>{" "}
-                  offense.
-                  {(currentViolation.count30 > 1 ||
-                    currentViolation.count50 > 1) && (
-                    <p style={{ marginLeft: "45px", color: "grey" }}>
-                      <span style={{ marginLeft: "-12px" }}>
-                        {" "}
-                        As a result, the penalty amount has been increased.
-                      </span>
-                    </p>
-                  )}
-                </p>
+                  </p>
                 )}
                 <p style={{ marginLeft: "45px", color: "grey" }}>
                   <svg
@@ -1435,8 +1461,8 @@ const ViolationGeneral = () => {
               <div style={{ marginBottom: "100px" }}>
                 {/* View Complaints Button */}
                 <Button
-                  // onClick={handleViewComplaints}
-                  onClick={disableViewComplaints}
+                  onClick={handleViewComplaints}
+                  // onClick={disableViewComplaints}
                   style={{
                     float: "left",
                     width: "auto",
@@ -1474,13 +1500,13 @@ const ViolationGeneral = () => {
         visible={isPopupVisible}
         onCancel={() => setIsPopupVisible(false)}
         footer={
-          // <p style={{ textAlign: "center" }}>
-          //   There is no complaint associated with this violation.
-          // </p>
           <p style={{ textAlign: "center" }}>
-            View associated complaint feature currently unavailable. Stay tuned
-            for updates!
+            There is no complaint associated with this violation.
           </p>
+          // <p style={{ textAlign: "center" }}>
+          //   View associated complaint feature currently unavailable. Stay tuned
+          //   for updates!
+          // </p>
         }
         style={{ top: "38%" }}
         className="custom-modal"

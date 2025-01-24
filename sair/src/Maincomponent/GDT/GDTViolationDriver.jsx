@@ -7,12 +7,16 @@ import s from "../../css/VDriver.module.css";
 import EyeIcon from "../../images/eye.png";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
 const ViolationsTable = () => {
   const { driverId } = useParams(); // Get driverId from URL parameters
   const [violations, setViolations] = useState([]); // State for storing violations
   const [error, setError] = useState(null); // State for error messages
   const navigate = useNavigate(); // Hook to programmatically navigate
   const [driverName, setDriverName] = useState("");
+  const location = useLocation();
+  const state = location.state;
+
   useEffect(() => {
     if (!driverId) {
       setError("Driver ID is missing.");
@@ -121,14 +125,21 @@ const ViolationsTable = () => {
       key: "actions",
       align: "center",
       className: "svg",
-      render: (_, record) => (
-        <Link
-          to={`/gdtviolation/general/${record.id}`}
-          state={{ breadcrumbParam: "Driver Violations List" }}
-        >
-          <img style={{ cursor: "pointer" }} src={EyeIcon} alt="Details" />
-        </Link>
-      ),
+      render: (_, record) => {
+        const linkState = state === "driverlist" 
+          ? { breadcrumbParam: "Driver List" } 
+          : { breadcrumbParam: "Driver Violations List" };
+      
+        return (
+          <Link
+            to={`/gdtviolation/general/${record.id}`}
+            state={linkState}
+          >
+            <img style={{ cursor: "pointer" }} src={EyeIcon} alt="Details" />
+          </Link>
+        );
+      },
+      
     },
   ];
 
@@ -138,20 +149,40 @@ const ViolationsTable = () => {
 
   return (
     <>
-      <Header active={"gdtviolations"} />
+    <Header
+        active={
+          state === "driverlist"? "gdtdriverlist" : "gdtviolations"
+        }
+      />
 
       <div className="breadcrumb">
         <a onClick={() => navigate("/gdthome")}>Home</a>
         <span> / </span>
-        <a onClick={() => navigate("/gdtviolations")}>Violation List</a>
-        <span> / </span>
-        <a onClick={() => navigate("/gdtricklessdrives")}>
-          Reckless Drivers List
-        </a>
-        <span> / </span>
-        <a onClick={() => navigate(`/gdtviolationdriver/${driverId}`)}>
-          Driver Violations List
-        </a>
+        {state === "driverlist" ? (
+          <>
+            <a onClick={() => navigate("/gdtdriverlist")}>Driver List</a>
+            <span> / </span>
+            <a onClick={() => navigate(`/gdtdriverdetails/${driverId}`)}>
+              Driver Details
+            </a>
+            <span> / </span>
+            <a onClick={() => navigate(`/gdtviolationdriver/${driverId}`)}>
+              Driver Violations List
+            </a>
+          </>
+        ) : (
+          <>
+            <a onClick={() => navigate("/gdtviolations")}>Violation List</a>
+            <span> / </span>
+            <a onClick={() => navigate("/gdtricklessdrives")}>
+              Reckless Drivers List
+            </a>
+            <span> / </span>
+            <a onClick={() => navigate(`/gdtviolationdriver/${driverId}`)}>
+              Driver Violations List
+            </a>
+          </>
+        )}
       </div>
 
       <div className={s.container}>

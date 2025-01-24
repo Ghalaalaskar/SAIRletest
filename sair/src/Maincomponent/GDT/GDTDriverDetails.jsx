@@ -136,7 +136,7 @@ const DriverDetails = () => {
 
   const handleViewViolations = () => {
     if (violations.length > 0) {
-      navigate(`/drivers/${driverId}/violations`);
+      navigate(`/gdtviolationdriver/${driverId}`, { state: "driverlist" });
     } else {
       setIsPopupVisible(true); // Show popup if no violations exist
     }
@@ -148,7 +148,7 @@ const DriverDetails = () => {
 
   return (
     <div>
-      <Header active={"driverslist"} />
+      <Header active={"gdtdriverlist"} />
 
       <div className="breadcrumb">
         <a onClick={() => navigate("/gdthome")}>Home</a>
@@ -324,7 +324,7 @@ const DriverDetails = () => {
                 {driverDetails.Email}
               </a>
             </p>
-            <br />
+    
             <div id="company name">
               <h3
                 style={{
@@ -882,7 +882,7 @@ const DriverDetails = () => {
               <p>No motorcycles associated with this driver.</p>
             )}
             <div style={{ marginBottom: "20px" }}></div>
-            <Button
+            <div style={{ marginBottom: "50px", paddingBottom: "20px" }}>            <Button
               onClick={handleViewViolations}
               style={{
                 float: "left",
@@ -911,9 +911,10 @@ const DriverDetails = () => {
               }}
             >
               <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-            </Button>
+            </Button>  </div>
           </>
         ) : null}
+      
       </main>
       {isPopupVisible && (
         <Modal
