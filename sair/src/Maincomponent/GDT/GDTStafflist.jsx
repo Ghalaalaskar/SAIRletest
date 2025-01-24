@@ -97,9 +97,9 @@ const GDTStafflist = () => {
 
   const filteredData = staffData.filter(staff => {
     const fullName = `${staff.Fname} ${staff.Lname}`.toLowerCase();
-    const staffID = staff.ID.toLowerCase();
+    const staffID = String(staff.ID || '').toLowerCase(); // Convert to string and handle undefined or null
     const query = searchQuery.toLowerCase();
-
+  
     return staffID.includes(query) || fullName.includes(query);
   });
 
