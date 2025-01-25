@@ -530,7 +530,6 @@ const storeCrash = async (CrashID, driverid, GPSnumber, location, position, spee
             time: time,
             timestamp: admin.firestore.Timestamp.now(),
             Status: "Pending",
-            Flag: false,
             isRead: false,
         });
         console.log('Crash stored successfully.');

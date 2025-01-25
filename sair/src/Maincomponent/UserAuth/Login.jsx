@@ -67,6 +67,8 @@ const Login = () => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState('');
+  const gdtUID = sessionStorage.getItem('gdtUID');
+
 
   // useEffect(() => {
   //   validatePhoneNumber(phoneNumber);
@@ -263,6 +265,8 @@ const Login = () => {
   // };
 
   const handleSubmit = async (event) => {
+    console.log('in log out',gdtUID);
+
     // event.preventDefault();
     const newMissingFields = {};
 if (!email) {
@@ -303,7 +307,6 @@ if (Object.keys(newMissingFields).length > 0) {
 
             //proceed with login
             userFound = true;
-            const gdtUID = querySnapshot.docs[0].id;
             const isAdmin = querySnapshot.docs[0].data().isAdmin;
             const isDefaultPassword = querySnapshot.docs[0].data().isDefaultPassword;
 
@@ -314,13 +317,16 @@ if (Object.keys(newMissingFields).length > 0) {
               
               }
               else{
+                const gdtUID = querySnapshot.docs[0].id;
                 sessionStorage.setItem('gdtUID', gdtUID); 
                 const GDTData = querySnapshot.docs[0].data();
                 const Fname = GDTData.Fname || 'su';
                 sessionStorage.setItem('FirstName', Fname);
                 setFirstName(Fname); // Update the context
                 sessionStorage.setItem('isAdmin', GDTData.isAdmin || false);
-                console.log('looooooog in',firstName);
+                console.log('looooooog in',Fname);
+                console.log('looooooog in',gdtUID);
+
 
                 setTimeout(() => {
                   navigate('/gdthome');
@@ -334,6 +340,7 @@ if (Object.keys(newMissingFields).length > 0) {
 
             }
               else{
+                const gdtUID = querySnapshot.docs[0].id;
                 sessionStorage.setItem('gdtUID', gdtUID);
                 const GDTData = querySnapshot.docs[0].data();
                 const Fname = GDTData.Fname || '';
@@ -539,7 +546,6 @@ if(showDetailsFormAdmin===true){
     // Query for the document with the matching email
     const q = query(GDTCollection, where('GDTEmail', '==', email));
     const querySnapshot = await getDocs(q);
-    const gdtUID = querySnapshot.docs[0].id;
     if (!querySnapshot.empty) {
       // Assuming email is unique, update the first matched document
       const docRef = querySnapshot.docs[0].ref;
@@ -584,7 +590,6 @@ console.log('in stafffffffffff');
     // Query for the document with the matching email
     const q = query(GDTCollection, where('GDTEmail', '==', email));
     const querySnapshot = await getDocs(q);
-    const gdtUID = querySnapshot.docs[0].id;
     if (!querySnapshot.empty) {
       // Assuming email is unique, update the first matched document
       const docRef = querySnapshot.docs[0].ref;
@@ -606,6 +611,7 @@ console.log('in stafffffffffff');
           
 
           console.log(`Document with email ${email} updated successfully!`);
+          const gdtUID = querySnapshot.docs[0].id;
           sessionStorage.setItem('gdtUID', gdtUID);
           const GDTData = querySnapshot.docs[0].data();
                 const Fname = GDTData.Fname || '';

@@ -86,11 +86,11 @@ const GDTHeader = ({ active }) => {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      sessionStorage.removeItem('gdtUID');
+      await auth.signOut(); // Sign out the user
+      sessionStorage.removeItem('gdtUID');  
       sessionStorage.removeItem('FirstName');
       sessionStorage.removeItem('isAdmin');
-      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('storage')); // Notify other components
       navigate('/');
     } catch (error) {
       console.error('Error during logout:', error);
