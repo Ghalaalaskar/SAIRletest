@@ -213,6 +213,9 @@ const GDTHeader = ({ active }) => {
                 color: "black",
                 fontSize: "17px",
               }}
+              onClick={(e) => {
+                e.preventDefault();  // Prevent navigation
+              }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#059855")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
             >
