@@ -213,7 +213,7 @@ export const GDTNotification = () => {
               className: "custom-notification",
               style: {
                 width: 450,
-                backgroundColor: "rgba(255, 77, 79, 0.6)",
+                backgroundColor: "rgba(75, 75, 75,0.25)",
                 color: "#ffffff",
                 borderRadius: "10px",
               },
