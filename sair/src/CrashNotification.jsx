@@ -20,6 +20,14 @@ export const CrashNotification = () => {
   const [employerUID, setEmployerUID] = useState(sessionStorage.getItem('employerUID')); // Track employerUID dynamically
   const crashListeners = useRef({}); // Store listeners for each company
 
+ 
+// Cleanup all listeners
+const cleanupAllListeners = () => {
+  Object.values(crashListeners.current).forEach((unsubscribe) => unsubscribe());
+  crashListeners.current = {};
+};
+
+
   // Track changes to `sessionStorage` for employerUID
   useEffect(() => {
     const handleStorageChange = () => {
@@ -152,8 +160,7 @@ export const CrashNotification = () => {
       const crashQuery = query(
         collection(db, 'Crash'),
         where('driverID', 'in', chunk),
-        where('Status', '==', 'Confirmed'),
-        where('Flag', '==', false)
+        where('Status', '==', 'Emergency SOS'),
       );
       console.log('hfhfhfhfh');
 
@@ -164,6 +171,25 @@ export const CrashNotification = () => {
           const date=formatDate(crash.time);
           const time= new Date(crash.time * 1000).toLocaleTimeString();
           console.log('crash:',crash);
+
+
+// Check if the crash has already been notified
+const notifiedCrashesEmployer = JSON.parse(localStorage.getItem("notifiedCrashesEmployer")) || {};
+if (notifiedCrashesEmployer[crash.id]) return; // Skip if already notified
+
+console.log('local storage:',notifiedCrashesEmployer);
+console.log('helo');
+// Save the crash ID to localStorage
+notifiedCrashesEmployer[crash.id] = true;
+localStorage.setItem("notifiedCrashesEmployer", JSON.stringify(notifiedCrashesEmployer));
+
+
+
+
+
+
+
+
           // Show notification only if employer is logged in
           if (showNotifications && employerUID) {
             notification.open({
@@ -183,8 +209,8 @@ export const CrashNotification = () => {
           
 
           // Mark crash as handled globally
-          const crashDocRef = doc(db, 'Crash', crash.id);
-          await updateDoc(crashDocRef, { Flag: true });
+          // const crashDocRef = doc(db, 'Crash', crash.id);
+          // await updateDoc(crashDocRef, { Flag: true });
         });
       });
 
@@ -192,11 +218,7 @@ export const CrashNotification = () => {
     }
   };
 
-  // Cleanup all listeners
-  const cleanupAllListeners = () => {
-    Object.values(crashListeners.current).forEach((unsubscribe) => unsubscribe());
-    crashListeners.current = {};
-  };
+  
 
   const formatDate = (time) => {
     const date = new Date(time * 1000);

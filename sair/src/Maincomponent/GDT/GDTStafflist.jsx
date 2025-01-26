@@ -14,7 +14,7 @@ import { Button, Table, Modal } from 'antd';
 import Header from './GDTHeader';
 import '../../css/CustomModal.css';
 import s from "../../css/DriverList.module.css";
-
+import { v4 as uuidv4 } from 'uuid';
 const GDTStafflist = () => {
   const [staffData, setStaffData] = useState([]);
   const [staffToRemove, setStaffToRemove] = useState(null);
@@ -28,11 +28,12 @@ const GDTStafflist = () => {
 
   const handleEditStaff = (staff) => {
     if (staff && staff.id) {
-        navigate(`/gdteditstaff/${staff.id}`);
+      const randomQuery = uuidv4(); // Generate a random UUID
+      navigate(`/gdteditstaff/${staff.id}?${randomQuery}`);
     } else {
-        console.error("Staff ID is not available");
+      console.error("Staff ID is not available");
     }
-};
+  };
 
   const columns = [
     {
@@ -176,7 +177,11 @@ const GDTStafflist = () => {
               />
             </div>
             <Button type="primary" className={s.addButton}
-              onClick={() => navigate('/gdtaddstaff')}>
+            
+            onClick={() => {
+              const randomQuery = uuidv4(); 
+              navigate(`/gdtaddstaff?${randomQuery}`);
+            }}>
               <UsergroupAddOutlined />
               <span>Add Staff</span>
             </Button>

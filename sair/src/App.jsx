@@ -29,6 +29,7 @@ import { FirstNameProvider } from './FirstNameContext';
 import "./css/common.css"
 import ScrollToTop from './ScrollToTop'; 
 import { CrashNotification } from './CrashNotification';
+import { GDTNotification } from './GDTNotification';
 import GDTHome from './Maincomponent/GDT/GDTHome';
 import GDTViolations from './Maincomponent/GDT/GDTViolations';
 import GDTViolationGeneral from './Maincomponent/GDT/GDTViolationgeneral';
@@ -86,6 +87,7 @@ function App() {
     <Router>
     <ScrollToTop /> 
     <CrashNotification />
+    <GDTNotification/>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
