@@ -128,7 +128,13 @@ const GDTHeader = ({ active }) => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="profile" onClick={() => handleNavigation("/gdtprofile")}>
+      <Menu.Item
+        key="profile"
+        onClick={() => {
+          const randomQuery = isAdmin ? `?${uuidv4()}` : '';
+          handleNavigation(`/gdtprofile${randomQuery}`);
+        }}
+      >
         Profile
       </Menu.Item>
       <Menu.Item
@@ -140,6 +146,7 @@ const GDTHeader = ({ active }) => {
       </Menu.Item>
     </Menu>
   );
+  
 
   const navItems = [
     { path: "gdthome", label: "Home" },
