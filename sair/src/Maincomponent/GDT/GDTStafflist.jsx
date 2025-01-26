@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import {
-  collection, doc, onSnapshot, deleteDoc, query, where, getDoc
+  collection,
+  doc,
+  onSnapshot,
+  deleteDoc,
+  query,
+  where,
+  getDoc,
 } from 'firebase/firestore';
 import TrashIcon from '../../images/Trash.png';
 import PencilIcon from '../../images/pencil.png';
@@ -13,8 +19,8 @@ import { SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import { Button, Table, Modal } from 'antd';
 import Header from './GDTHeader';
 import '../../css/CustomModal.css';
-import s from "../../css/DriverList.module.css";
-import { v4 as uuidv4 } from 'uuid';
+import s from '../../css/DriverList.module.css';
+
 const GDTStafflist = () => {
   const [staffData, setStaffData] = useState([]);
   const [staffToRemove, setStaffToRemove] = useState(null);
@@ -28,10 +34,9 @@ const GDTStafflist = () => {
 
   const handleEditStaff = (staff) => {
     if (staff && staff.id) {
-      const randomQuery = uuidv4(); // Generate a random UUID
-      navigate(`/gdteditstaff/${staff.id}?${randomQuery}`);
+      navigate(`/gdteditstaff/${staff.id}`);
     } else {
-      console.error("Staff ID is not available");
+      console.error('Staff ID is not available');
     }
   };
 
@@ -55,18 +60,20 @@ const GDTStafflist = () => {
       key: 'GDTEmail',
       align: 'center',
       render: (email) => (
-        <a href={`mailto:${email}`} style={{
-          color: 'black', // Default color
-          textDecoration: 'underline', // Underline the text
-          transition: 'color 0.3s', // Smooth transition for color change
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
-        onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
-      >
+        <a
+          href={`mailto:${email}`}
+          style={{
+            color: 'black', // Default color
+            textDecoration: 'underline', // Underline the text
+            transition: 'color 0.3s', // Smooth transition for color change
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
+        >
           {email}
         </a>
       ),
-    },    
+    },
     {
       title: 'Phone Number',
       dataIndex: 'PhoneNumber',
@@ -82,13 +89,13 @@ const GDTStafflist = () => {
           <img
             style={{ cursor: 'pointer', marginRight: 8 }}
             src={TrashIcon}
-            alt="Delete"
+            alt='Delete'
             onClick={() => openDeleteConfirmation(record)}
           />
           <img
             style={{ cursor: 'pointer' }}
             src={PencilIcon}
-            alt="Edit"
+            alt='Edit'
             onClick={() => handleEditStaff(record)}
           />
         </div>
@@ -96,11 +103,11 @@ const GDTStafflist = () => {
     },
   ];
 
-  const filteredData = staffData.filter(staff => {
+  const filteredData = staffData.filter((staff) => {
     const fullName = `${staff.Fname} ${staff.Lname}`.toLowerCase();
     const staffID = String(staff.ID || '').toLowerCase(); // Convert to string and handle undefined or null
     const query = searchQuery.toLowerCase();
-  
+
     return staffID.includes(query) || fullName.includes(query);
   });
 
@@ -123,14 +130,24 @@ const GDTStafflist = () => {
     fetchStaff();
   }, []);
 
-  const handleDeleteStaff = async (staffId) => {
+  const handleDeleteStaff = async (staffId, staffEmail) => {
     try {
       await deleteDoc(doc(db, 'GDT', staffId));
+      console.log('staffId:', staffId);
+      // Make a call to the backend to delete the staff
+      await fetch(`${process.env.REACT_APP_SERVER_URI}/api/deleteAuthUser/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json', // Tell the server the body is JSON
+        },
+        body: JSON.stringify({ email: staffEmail }),
+      });
+
       setIsSuccess(true);
       setNotificationMessage('Staff deleted successfully!');
       setIsNotificationVisible(true);
       setTimeout(() => {
-        navigate('/gdtstafflist'); 
+        navigate('/gdtstafflist');
       }, 2000);
     } catch (error) {
       console.error('Error deleting staff:', error);
@@ -153,9 +170,9 @@ const GDTStafflist = () => {
 
   return (
     <div>
-      <Header active="gdtstafflist" />
+      <Header active='gdtstafflist' />
 
-      <div className="breadcrumb" style={{ marginRight: '100px' }}>
+      <div className='breadcrumb' style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/gdthome')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/gdtstafflist')}>Staff List</a>
@@ -169,19 +186,18 @@ const GDTStafflist = () => {
             <div className={s.searchContainer}>
               <SearchOutlined style={{ color: '#059855' }} />
               <input
-                type="text"
-                placeholder="Search by Staff ID or Name"
+                type='text'
+                placeholder='Search by Staff ID or Name'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: "300px" }}
+                style={{ width: '300px' }}
               />
             </div>
-            <Button type="primary" className={s.addButton}
-            
-            onClick={() => {
-              const randomQuery = uuidv4(); 
-              navigate(`/gdtaddstaff?${randomQuery}`);
-            }}>
+            <Button
+              type='primary'
+              className={s.addButton}
+              onClick={() => navigate('/gdtaddstaff')}
+            >
               <UsergroupAddOutlined />
               <span>Add Staff</span>
             </Button>
@@ -193,13 +209,20 @@ const GDTStafflist = () => {
         <Table
           columns={columns}
           dataSource={filteredData}
-          rowKey="id"
+          rowKey='id'
           pagination={{ pageSize: 5 }}
-          style={{ width: '1200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto' }}
+          style={{
+            width: '1200px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            margin: '0 auto',
+          }}
           onRow={(record) => ({
             style: {
-              backgroundColor:
-                sessionStorage.getItem(`staff_${record.id}`) ? "#f0f8f0" : "transparent",
+              backgroundColor: sessionStorage.getItem(`staff_${record.id}`)
+                ? '#f0f8f0'
+                : 'transparent',
             },
           })}
         />
@@ -208,22 +231,25 @@ const GDTStafflist = () => {
         <Modal
           visible={isDeletePopupVisible}
           onCancel={() => setIsDeletePopupVisible(false)}
-          title="Confirm Deletion"
+          title='Confirm Deletion'
           style={{ top: '38%' }}
           footer={[
-            <Button key="no" onClick={() => setIsDeletePopupVisible(false)}>
+            <Button key='no' onClick={() => setIsDeletePopupVisible(false)}>
               No
             </Button>,
-            <Button key="yes" type="primary" danger onClick={() => handleDeleteStaff(staffToRemove.id)}>
+            <Button
+              key='yes'
+              type='primary'
+              danger
+              onClick={() =>
+                handleDeleteStaff(staffToRemove.id, staffToRemove.GDTEmail)
+              }
+            >
               Yes
             </Button>,
           ]}
-          className="custom-modal" 
-          closeIcon={
-            <span className="custom-modal-close-icon">
-              ×
-            </span>
-          }
+          className='custom-modal'
+          closeIcon={<span className='custom-modal-close-icon'>×</span>}
         >
           <div>
             <p>Are you sure you want to delete {staffToRemove?.Fname}?</p>
@@ -236,12 +262,8 @@ const GDTStafflist = () => {
           onCancel={() => setIsNotificationVisible(false)}
           footer={<p style={{ textAlign: 'center' }}>{notificationMessage}</p>}
           style={{ top: '38%' }}
-          className="custom-modal" 
-          closeIcon={
-            <span className="custom-modal-close-icon">
-              ×
-            </span>
-          }
+          className='custom-modal'
+          closeIcon={<span className='custom-modal-close-icon'>×</span>}
         >
           <div style={{ textAlign: 'center' }}>
             <img

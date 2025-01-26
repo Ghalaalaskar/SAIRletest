@@ -283,7 +283,9 @@ const GDTAddStaffBatch = () => {
     const errorList = [];
     for (const staff of fileData) {
       try {
+        console.log('Adding staff:', staff);
         const addedStaff = await addStaffToDatabase(staff);
+        console.log('add', addedStaff);
         // Store the staff ID in sessionStorage
         sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
       } catch (error) {
@@ -306,7 +308,7 @@ const GDTAddStaffBatch = () => {
     const password = generateRandomPassword();
     try {
       await createUserWithEmailAndPassword(auth, Email, password);
-      await addDoc(collection(db, 'GDT'), {
+      const addedStaff = await addDoc(collection(db, 'GDT'), {
         Fname,
         Lname,
         PhoneNumber,
@@ -316,6 +318,7 @@ const GDTAddStaffBatch = () => {
         isDefaultPassword: true,
       });
       sendEmail(Email, `${Fname} ${Lname}`, password);
+      return addedStaff;
     } catch (error) {
       throw error; // Re-throw the error to be caught in handleAddStaff
     }
@@ -336,7 +339,7 @@ const GDTAddStaffBatch = () => {
   }, [errorData, fileData]);
 
   return (
-    <div>
+    <div style={{ paddingBottom: '40px' }}>
       <Header active='gdtstafflist' />
       <div className='breadcrumb' style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/gdthome')}>Home</a>
