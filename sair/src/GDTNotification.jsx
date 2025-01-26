@@ -295,6 +295,11 @@ export const GDTNotification = () => {
           <Button key="cancel" onClick={() => setModalVisible(false)}>Cancel</Button>,
           <Button key="confirm" type="primary" onClick={handleResponse}>Confirm</Button>,
         ]}
+        closeIcon={
+          <span className="custom-modal-close-icon">
+            ×
+          </span>
+        }
       >
         <p>
           {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you formally acknowledge your responsibility for overseeing the management of this crash.
