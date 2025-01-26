@@ -2,7 +2,7 @@ const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
 
-const serviceAccount = require('./sair-7310d-firebase-adminsdk-9tvud-7c0824d3ea.json');
+const serviceAccount = require('./sair-7310d-firebase-adminsdk-9tvud-88bbe3e8ea.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
