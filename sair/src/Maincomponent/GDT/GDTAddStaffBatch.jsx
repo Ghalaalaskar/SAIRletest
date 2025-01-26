@@ -38,16 +38,6 @@ const GDTAddStaffBatch = () => {
     updatedData.map((staff, index) =>
       validateStaffMember(staff, index, updatedData, curIdx)
     );
-
-    await Promise.all(
-      updatedData.map((staff, index) =>
-        checkUniqueness(
-          staff['Mobile Phone Number'],
-          staff.Email,
-          staff['Staff ID']
-        )
-      )
-    );
   };
 
   const validateStaffMember = async (staff, index, allStaff, curIdx) => {
@@ -95,14 +85,10 @@ const GDTAddStaffBatch = () => {
         staff.Email,
         staff['Staff ID']
       );
-      if (!uniquenessResult.isUnique) {
-        if (uniquenessResult.message.includes('Phone number'))
-          staffErrors.PhoneNumber = true;
-        if (uniquenessResult.message.includes('Email'))
-          staffErrors.Email = true;
-        if (uniquenessResult.message.includes('Staff ID'))
-          staffErrors.ID = true;
-      }
+
+      if (!uniquenessResult.PhoneNumber) staffErrors.PhoneNumber = true;
+      if (!uniquenessResult.Email) staffErrors.Email = true;
+      if (!uniquenessResult.ID) staffErrors.ID = true;
 
       // Check for duplicates within the uploaded file
       const duplicates = allStaff.filter(
@@ -155,6 +141,8 @@ const GDTAddStaffBatch = () => {
   const checkUniqueness = async (phone, email, staffID) => {
     // console.log('Checking uniqueness for:', { phone, email, staffID });
 
+    let result = { PhoneNumber: true, Email: true, ID: true };
+
     try {
       // Create queries to check for existing phone, email, and staff ID
       const phoneQuery = query(
@@ -177,23 +165,22 @@ const GDTAddStaffBatch = () => {
       // Check if any of the snapshots have documents
       if (!phoneSnapshot.empty) {
         console.log('Phone number already exists.');
-        return { isUnique: false, message: 'Phone number already exists.' };
+        result = { ...result, PhoneNumber: false };
       }
       if (!emailSnapshot.empty) {
         console.log('Email already exists.');
-        return { isUnique: false, message: 'Email already exists.' };
+        result = { ...result, Email: false };
       }
       if (!idSnapshot.empty) {
         console.log('Staff ID already exists.');
-        return { isUnique: false, message: 'Staff ID already exists.' };
+        result = { ...result, ID: false };
       }
 
       // If no duplicates are found
-      return { isUnique: true, message: '' };
+      return result;
     } catch (error) {
       console.error('Error checking uniqueness:', error);
       return {
-        isUnique: false,
         message: 'Error checking uniqueness in the database.',
       };
     }
@@ -296,9 +283,9 @@ const GDTAddStaffBatch = () => {
     const errorList = [];
     for (const staff of fileData) {
       try {
-      const addedStaff = await addStaffToDatabase(staff);
-      // Store the staff ID in sessionStorage
-      sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
+        const addedStaff = await addStaffToDatabase(staff);
+        // Store the staff ID in sessionStorage
+        sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
       } catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
@@ -363,8 +350,8 @@ const GDTAddStaffBatch = () => {
       <div className={s.container}>
         <h2 className='title'>Add Staff as Batch</h2>
         <p>
-          To download the staff batch template, which must follow exactly the
-          format to add the staff correctly,{' '}
+          For a successful staff addition, please download the staff batch
+          template by clicking here,{' '}
           <a
             href={templateFile}
             download
@@ -374,9 +361,9 @@ const GDTAddStaffBatch = () => {
               textDecoration: 'underline',
             }}
           >
-            click here
+            clicking here
           </a>
-          .
+          , making sure to follow the required format.
         </p>
 
         <div
@@ -384,7 +371,6 @@ const GDTAddStaffBatch = () => {
           style={{
             margin: 0,
             padding: '20px 0',
-            borderBottom: '1px solid #ddd',
           }}
         >
           <input
@@ -417,7 +403,7 @@ const GDTAddStaffBatch = () => {
         </div>
 
         {fileData.length > 0 && (
-          <div>
+          <div style={{ borderTop: '1px solid #ddd' }}>
             <Steps
               current={currentStep}
               style={{ margin: '25px auto', width: '90%' }}
@@ -430,7 +416,12 @@ const GDTAddStaffBatch = () => {
                 },
               ]}
             />
-
+            {/* Add error message display here */}
+            {errorMessage && (
+              <p style={{ color: 'red', margin: '10px 0' }}>
+                {errorMessage} <br />
+              </p>
+            )}
             <table>
               <thead>
                 <tr>
@@ -595,27 +586,20 @@ const GDTAddStaffBatch = () => {
                 ))}
               </tbody>
             </table>
-
-            {/* Add error message display here */}
-            {errorMessage && (
-              <p style={{ color: 'red', margin: '10px 0' }}>
-                {errorMessage} <br />
-              </p>
-            )}
             {currentStep === 1 && (
               <button
-              style={{
-                borderRadius: '5px',
-                backgroundColor: '#059855',
-                border: 'none',
-                padding: '10px 20px',
-                fontSize: '16px',
-                cursor: 'pointer',
-                marginTop: '20px',
-                color: 'white',
-                marginRight: '10px',
-                fontFamily: 'Open Sans'
-              }}
+                style={{
+                  borderRadius: '5px',
+                  backgroundColor: '#059855',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  marginTop: '20px',
+                  color: 'white',
+                  marginRight: '10px',
+                  fontFamily: 'Open Sans',
+                }}
                 onClick={() => {
                   setCurrentStep(0);
                   validateAllFields(fileData, 0);
@@ -624,6 +608,26 @@ const GDTAddStaffBatch = () => {
                 Back
               </button>
             )}
+            {currentStep !== 1 && (
+              <button
+                onClick={() => navigate('/gdtaddstaff')} // Navigate to Staff List page
+                style={{
+                  borderRadius: '5px',
+                  backgroundColor: '#059855',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  marginTop: '20px',
+                  color: 'white',
+                  marginRight: '10px',
+                  fontFamily: 'Open Sans',
+                }}
+              >
+                Cancel
+              </button>
+            )}
+
             <button
               onClick={() => {
                 switch (currentStep) {
@@ -641,7 +645,7 @@ const GDTAddStaffBatch = () => {
               disabled={isButtonDisabled}
               className={s.editBtn}
               style={{
-                marginBottom:'10px',
+                marginBottom: '40px',
               }}
             >
               {currentStep === 1 ? 'Add Staff List' : 'Next'}
