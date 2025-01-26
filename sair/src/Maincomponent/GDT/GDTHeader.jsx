@@ -220,7 +220,7 @@ const GDTHeader = ({ active }) => {
               onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
             >
               <UserOutlined style={{ marginRight: 10 }} />
-              Hello {firstName || ""}
+              Hello {firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1) : ""}
               <DownOutlined style={{ marginLeft: 15 }} />
             </Link>
           </Dropdown>
