@@ -671,27 +671,34 @@ const fetchMessages = async (sessionId, unitId, from, to) => {
   }
 };
 
-
-const storeCrash = async (CrashID, driverid, GPSnumber, location, position, speed, time) => {
-    try {
-        await db.collection('Crash').add({
-            crashID: CrashID,
-            driverID: driverid,
-            GPSnumber: GPSnumber,
-            location: location,
-            position: position,
-            driverSpeed: speed,
-            time: time,
-            timestamp: admin.firestore.Timestamp.now(),
-            Status: "Pending",
-            Flag: false,
-            isRead: false,
-        });
-        console.log('Crash stored successfully.');
-    } catch (e) {
-        console.error('Error storing crash:', e);
-        console.log('Failed to store crash.');
-    }
+const storeCrash = async (
+  CrashID,
+  driverid,
+  GPSnumber,
+  location,
+  position,
+  speed,
+  time
+) => {
+  try {
+    await db.collection('Crash').add({
+      crashID: CrashID,
+      driverID: driverid,
+      GPSnumber: GPSnumber,
+      location: location,
+      position: position,
+      driverSpeed: speed,
+      time: time,
+      timestamp: admin.firestore.Timestamp.now(),
+      Status: 'Pending',
+      Flag: false,
+      isRead: false,
+    });
+    console.log('Crash stored successfully.');
+  } catch (e) {
+    console.error('Error storing crash:', e);
+    console.log('Failed to store crash.');
+  }
 };
 
 const generateCrashId = () => {
