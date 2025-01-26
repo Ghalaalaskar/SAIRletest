@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+# Ignore Firebase Admin SDK key file
+sair-7310d-firebase-adminsdk-9tvud-88bbe3e8ea.json
