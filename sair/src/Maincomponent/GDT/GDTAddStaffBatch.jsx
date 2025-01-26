@@ -354,7 +354,7 @@ const GDTAddStaffBatch = () => {
         <h2 className='title'>Add Staff as Batch</h2>
         <p>
           For a successful staff addition, please download the staff batch
-          template by clicking here,{' '}
+          template by{' '}
           <a
             href={templateFile}
             download
