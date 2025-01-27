@@ -247,4 +247,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .searchContainerdate input[type='date']::-moz-calendar-picker-indicator {
   display: none;
   outline: none; 
-} 
+}
+.highlightRow {
+  background-color: #f0f8f0
+}
