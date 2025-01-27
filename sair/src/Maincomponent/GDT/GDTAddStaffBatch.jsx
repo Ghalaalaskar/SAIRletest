@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef  } from 'react';
 import { db, auth } from '../../firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { Modal, Steps } from 'antd';
@@ -22,10 +22,13 @@ const GDTAddStaffBatch = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState('');
   const [fileName, setFileName] = useState('');
+  const [isUploadBoxVisible, setIsUploadBoxVisible] = useState(true);
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
+
+  const fileInputRef = useRef(null);
 
   const handleInputChange = (index, field, value) => {
     const updatedFileData = [...fileData];
@@ -232,6 +235,7 @@ const GDTAddStaffBatch = () => {
     const file = event.target.files[0];
     if (!file) return;
     setFileName(file.name);
+    setIsUploadBoxVisible(false);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
@@ -258,11 +262,15 @@ const GDTAddStaffBatch = () => {
 
   const handleRemoveFile = () => {
     setFileName('');
-    document.getElementById('fileInput').value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+  }
+    //document.getElementById('fileInput').value = '';
     setFileData([]);
     setIsButtonDisabled(true); // Disable button when file is removed
     setErrorMessage(''); // Clear error message
     setCurrentStep(0); // Reset to first step
+    setIsUploadBoxVisible(true); // Show the upload box again
   };
 
   const handleClosePopup = () => {
@@ -369,41 +377,77 @@ const GDTAddStaffBatch = () => {
           , making sure to follow the required format.
         </p>
 
-        <div
-          className={s.formRow}
-          style={{
-            margin: 0,
-            padding: '20px 0',
-          }}
-        >
-          <input
-            id='fileInput'
-            type='file'
-            onChange={handleFileUpload}
-            accept='.xls,.xlsx'
-            className={s.fileInput}
-          />
-          {fileName && (
-            <div
-              style={{
-                marginLeft: '10px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <FaTrash
-                onClick={handleRemoveFile}
-                style={{
-                  marginLeft: '10px',
-                  color: '#059855',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                }}
-                title='Remove file'
-              />
+        {isUploadBoxVisible && (
+          <div
+    className={s.fileUploadContainer}
+    onDragOver={(e) => e.preventDefault()} // Prevent the browser's default behavior
+    onDrop={(e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0]; // Get the dropped file
+        if (file) {
+            handleFileUpload({ target: { files: [file] } }); // Pass it to the handler
+        }
+    }}
+>
+    <label htmlFor="fileInput" className={s.fileUploadBox}>
+        <div className={s.fileUploadContent}>
+            <div className={s.uploadIcon}>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    color="#000000"
+                    fill="none"
+                >
+                    <path
+                        d="M6.5 2.5C5.3579 2.68817 4.53406 3.03797 3.89124 3.6882C2.5 5.09548 2.5 7.36048 2.5 11.8905C2.5 16.4204 2.5 18.6854 3.89124 20.0927C5.28249 21.5 7.52166 21.5 12 21.5C16.4783 21.5 18.7175 21.5 20.1088 20.0927C21.5 18.6854 21.5 16.4204 21.5 11.8905C21.5 7.36048 21.5 5.09548 20.1088 3.6882C19.4659 3.03797 18.6421 2.68817 17.5 2.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                    <path
+                        d="M9.5 5C9.99153 4.4943 11.2998 2.5 12 2.5M14.5 5C14.0085 4.4943 12.7002 2.5 12 2.5M12 2.5V10.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                    <path
+                        d="M21.5 13.5H16.5743C15.7322 13.5 15.0706 14.2036 14.6995 14.9472C14.2963 15.7551 13.4889 16.5 12 16.5C10.5111 16.5 9.70373 15.7551 9.30054 14.9472C8.92942 14.2036 8.26777 13.5 7.42566 13.5H2.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinejoin="round"
+                    />
+                </svg>
             </div>
-          )}
+            <p>Drag & drop a file here</p>
+            <p>
+                or <span className={s.browseText}>browse file</span> from device
+            </p>
         </div>
+    </label>
+    <input
+        ref={fileInputRef}
+        id="fileInput"
+        type="file"
+        onChange={handleFileUpload}
+        accept=".xls,.xlsx"
+        className={s.hiddenInput}
+    />
+    </div>
+    )}
+    {fileName && (
+        <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '8px', border: '1px solid #059855', padding: '8px' }}>
+        <span style={{ marginRight: '10px', fontSize: '14px', alignItems: 'center', justifyContent: 'center' }}>{fileName}</span>
+        <FaTrash
+            onClick={handleRemoveFile}
+            style={{ color: '#059855', cursor: 'pointer', fontSize: '20px' }}
+            title="Remove file"
+        />
+    </div>
+    )}
 
         {fileData.length > 0 && (
           <div style={{ borderTop: '1px solid #ddd' }}>
