@@ -379,14 +379,14 @@ const handleBatchUpload = async (staffArray) => {
     click here
   </span>.
 </p>
-                            <button type="submit" className={s.editBtn}>Add Staff</button>
-                            <button
+<button
                                 onClick={() => { navigate('/gdtstafflist');}}
                                 className={s.profileCancel}
                                
                             >
                                 Cancel
                             </button>
+                            <button type="submit" className={s.editBtn}>Add Staff</button>
                                                  </div>
                     </form>
                 ) : (
