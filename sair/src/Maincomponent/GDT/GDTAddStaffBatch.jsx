@@ -461,6 +461,9 @@ const GDTAddStaffBatch = () => {
                 {
                   title: 'Uniqueness Validation',
                 },
+                {
+                  title: 'Adding Completed',
+                },
               ]}
             />
             {/* Add error message display here */}
