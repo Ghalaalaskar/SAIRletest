@@ -29,6 +29,11 @@ const ViolationList = () => {
   const [violationTypeFilter, setViolationTypeFilter] = useState("");
   const gdtUID = sessionStorage.getItem("gdtUID");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [clickedViolations, setClickedViolations] = useState(() => {
+    // Load clicked violations from local storage using a user-specific key
+    const savedClickedViolations = localStorage.getItem(`clickedViolations_${gdtUID}`);
+    return savedClickedViolations ? JSON.parse(savedClickedViolations) : [];
+  });
   useEffect(() => {
     const fetchEmployerDrivers = async () => {
       if (gdtUID) {
@@ -40,6 +45,14 @@ const ViolationList = () => {
     fetchEmployerDrivers();
   }, [gdtUID]);
 
+  const handleClickDetails = (id) => {
+    if (!clickedViolations.includes(id)) {
+      const updatedClickedViolations = [...clickedViolations, id];
+      setClickedViolations(updatedClickedViolations);
+      // Save to local storage with a user-specific key
+      localStorage.setItem(`clickedViolations_${gdtUID}`, JSON.stringify(updatedClickedViolations));
+    }
+  };
   const fetchDrivers = () => {
     const driverCollection = query(collection(db, "Driver"));
 
@@ -144,6 +157,11 @@ const ViolationList = () => {
           isReckless, // Add reckless classification
         };
       });
+      // Ensure violations not clicked yet are highlighted
+      const newViolationIDs = violationList.map((v) => v.id);
+      setClickedViolations((prev) =>
+        prev.filter((id) => newViolationIDs.includes(id))
+      );
       setViolations(violationList);
       if (violationList.length > 0) {
         const violationIDs = violationList.map((v) => v.violationID); // Collecting violation IDs
@@ -161,7 +179,7 @@ const ViolationList = () => {
     .filter((violation) => {
       const driverName = drivers[violation.driverID]?.name || "";
       const driverId = violation.driverID;
-      const licensePlate = motorcycles[violation.violationID] || ' ';
+      const licensePlate = motorcycles[violation.violationID] || " ";
       const companyName = drivers[violation.driverID]?.shortCompanyName || "";
 
       let violationDate = "";
@@ -262,9 +280,16 @@ const ViolationList = () => {
       render: (text, record) => (
         <Link
           to={`/gdtviolation/general/${record.id}`}
-          state={{ breadcrumbParam: "Violation List" }}
+          onClick={(e) => {
+            e.preventDefault(); // Prevent immediate navigation
+            handleClickDetails(record.id); // Update state
+            setTimeout(
+              () => navigate(`/gdtviolation/general/${record.id}`),
+              100
+            ); // Navigate after state update
+          }}
         >
-          <img style={{ cursor: "pointer" }} src={EyeIcon} alt="Details" />
+          <img src={EyeIcon} alt="Details" style={{ cursor: "pointer" }} />
         </Link>
       ),
     },
@@ -414,14 +439,15 @@ const ViolationList = () => {
               </div>
             </div>
           </div>
-
           <Table
-            columns={columns}
-            dataSource={filteredViolations}
-            rowKey="id"
-            pagination={false}
-          />
-
+  columns={columns}
+  dataSource={filteredViolations}
+  rowKey="id"
+  rowClassName={(record) =>
+    clickedViolations.includes(record.id) ? "" : s.highlightRow
+  }
+  pagination={false}
+/>
           {/* Flex container for button and pagination */}
           <div
             style={{

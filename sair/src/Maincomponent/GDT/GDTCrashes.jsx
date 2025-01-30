@@ -333,20 +333,20 @@ const CrashList = () => {
           return <span>{record.RespondedBy}</span>;
         } else if (formattedStatus === "Emergency sos" && !record.RespondedBy) {
           return (
-            <button
+            // i did not remove the function but only change button to p also remove on click
+            <p
               style={{
                 backgroundColor: "transparent",
                 color: "red",
                 border: "none",
                 borderRadius: "4px",
                 padding: "4px 8px",
-                cursor: "pointer",
-                textDecoration: "underline",
+                cursor: "default",
               }}
-              onClick={() => handleConfirmResponse(record)}
+
             >
               Need for Response
-            </button>
+            </p>
           );
         } else {
           return null;
