@@ -296,9 +296,11 @@ const GDTAddStaffBatch = () => {
     for (const staff of fileData) {
       try {
         const addedStaff = await addStaffToDatabase(staff);
-            addedStaffIDs.push(addedStaff.id); // Store the added staff ID
-            successCount++;
-      } catch (error) {
+        addedStaffIDs.push(addedStaff.id); // Store the added staff ID
+        successCount++;
+        // Store the staff ID in sessionStorage
+        sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
+      }  catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
         });
@@ -331,8 +333,8 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
         isAdmin: false,
         isDefaultPassword: true,
       });
-                  // Store the added staff ID in session storage for batch adds
-                  sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
+      // Store the added staff ID in session storage for batch adds
+      sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
                   
       sendEmail(Email, `${Fname} ${Lname}`, password);
       return addedStaff;
