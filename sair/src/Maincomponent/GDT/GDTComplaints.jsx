@@ -10,6 +10,7 @@ import {
   onSnapshot,
   doc,
   getDoc,
+  getDocs,
   query,
   where,
 } from "firebase/firestore";
@@ -51,11 +52,24 @@ const GDTComplaintList = () => {
       const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
         const driverIds = [];
         const driverMap = {};
+        const companyPromises = [];
 
         snapshot.forEach((doc) => {
           const data = doc.data();
+          if (data.DriverID) {
+            driverMap[data.DriverID] = {
+              name: `${data.Fname} ${data.Lname}`,
+              companyName: data.CompanyName,
+              shortCompanyName: "", // Placeholder for ShortCompanyName
+            };
+          }
+
           driverIds.push(data.DriverID);
-          driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`; // Store driver names
+          companyPromises.push(
+            fetchCompany(data.CompanyName).then((shortName) => {
+              driverMap[data.DriverID].shortCompanyName = shortName;
+            })
+          );
         });
 
         setDrivers(driverMap); // Update state with driver names
@@ -64,6 +78,21 @@ const GDTComplaintList = () => {
 
       return () => unsubscribeDrivers();
     };
+
+
+        const fetchCompany = async (companyName) => {
+          const companyQuery = query(
+            collection(db, "Employer"),
+            where("CompanyName", "==", companyName)
+          );
+    
+          const snapshot = await getDocs(companyQuery);
+          if (!snapshot.empty) {
+            const companyData = snapshot.docs[0].data();
+            return companyData.ShortCompanyName || companyName; // Fallback to full name if short name not available
+          }
+          return companyName; // Return the original name if no match found
+        };
 
     const fetchComplaints = (driverIds) => {
       if (driverIds.length === 0) return;
@@ -151,7 +180,24 @@ const GDTComplaintList = () => {
       title: "Driver Name",
       key: "driverName",
       align: "center",
-      render: (text, record) => drivers[record.driverID] || "   ",
+      render: (text, record) => {
+        const driverName = drivers[record.driverID]?.name || "   ";
+        const capitalizeddriverName =
+          driverName.charAt(0).toUpperCase() + driverName.slice(1);
+        return capitalizeddriverName;
+      },
+    },
+    {
+      title: "Company Name",
+      key: "CompanyName",
+      align: "center",
+      
+      render: (text, record) => {
+        const companyName = drivers[record.driverID]?.shortCompanyName || "   ";
+        const capitalizedCompanyName =
+          companyName.charAt(0).toUpperCase() + companyName.slice(1);
+        return capitalizedCompanyName;
+      },
     },
     {
       title: "Motorcycle License Plate",
