@@ -6,24 +6,50 @@ import {
   where,
   collection,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { db } from "../../firebase";
 import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 
 const GDTComplaintGeneral = () => {
   const [currentComplaint, setCurrentComplaint] = useState({});
   const [driverDetails, setDriverDetails] = useState({});
+  const [GDT, setGDT] = useState({
+    Lname: "",
+    Fname: "",
+    ID: "",
+  });
   const { complaintId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isPopupVisibleStaff, setIsPopupVisibleStaff] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const from = location.state?.from; // Get the source of navigation
   const violationId = location.state?.violationId; // Get violationId from state
 
   useEffect(() => {
+    const GDTUID = sessionStorage.getItem("gdtUID");
+    
+    const fetchGDT = async () => {
+      try {
+        const docRef = doc(db, "GDT", GDTUID);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          console.log("Document data:", docSnap.data());
+          setGDT(docSnap.data()); // Set the retrieved data to the GDT state
+        } else {
+          console.error("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error);
+      }
+    };
+
     const fetchComplaintDetails = async () => {
       try {
         const complaintDocRef = doc(db, "Complaint", complaintId);
@@ -52,6 +78,7 @@ const GDTComplaintGeneral = () => {
       }
     };
 
+    fetchGDT();
     fetchComplaintDetails();
   }, [complaintId]);
 
@@ -71,6 +98,64 @@ const GDTComplaintGeneral = () => {
     }
     return ""; // Return an empty string if timestamp is not available
   };
+
+    const handleShowPopupStaff = () => {
+      setIsPopupVisibleStaff(true);
+    };
+  
+    const handleClosePopupStaff = () => {
+      setIsPopupVisibleStaff(false);
+    };
+  
+    const handleConfirmResponse = () => {
+      setModalVisible(true); // Show the confirmation modal
+    };
+  
+    const handleResponse = async () => {
+      // setModalVisible(false); // Close the modal
+  
+      // try {
+      //   // Check if crashID exists and is valid
+      //   if (!currentComplaint.complaintId) {
+      //     console.error("Crash ID is missing");
+      //     return;
+      //   }
+  
+      //   // Ensure the GDT data is valid
+      //   if (!GDT.Fname || !GDT.Lname) {
+      //     console.error("Responder details are incomplete");
+      //     return;
+      //   }
+  
+      //   console.log("Before updatedCrash");
+      //   const updatedCrash = {
+      //     ...currentComplaint,
+      //     RespondedBy: (GDT.ID), // Combine first and last name
+      //   };
+      //   console.log("After updatedCrash");
+  
+      //   const crashDocRef = doc(db, "Complaint", complaintId );
+      //   console.log("Firestore document reference:", crashDocRef.path);
+  
+      //   // Check if document exists
+      //   const docSnapshot = await getDoc(crashDocRef);
+      //   if (!docSnapshot.exists()) {
+      //     console.error("No document found with ID:", complaintId );
+      //     return;
+      //   }
+  
+      //   // Update Firestore with the new RespondedBy field
+      //   await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
+  
+      //   // Update the local state with the new crash details
+      //   setCurrentComplaint(updatedCrash);
+  
+      //   console.log("complaint response updated successfully");
+      // } catch (error) {
+      //   console.error("Error updating complaint response:", error);
+      // }
+    };
+
   // Determine the active state for the Header rawan
   let activeHeader;
   if (from === "GDTViolationDetail") {
@@ -150,6 +235,59 @@ const GDTComplaintGeneral = () => {
       </div>
 
       <main className={s.violation}>
+      {!currentComplaint.RespondedBy && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                style={{
+                  color: "red",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                }}
+              >
+                Would you like to handle this complaint report?
+              </span>
+
+              <Button type="primary" onClick={handleConfirmResponse}>
+                Confirm Response
+              </Button>
+            </div>
+          )}
+
+        <Modal
+          title="Confirm Response"
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)} // Close the modal when canceled
+          centered
+          footer={[
+            <Button key="reject" type="primary" style={{ backgroundColor: "red", color: "white" }} onClick={() => setModalVisible(false)}>
+              Reject
+            </Button>,
+            <Button key="accept" type="primary" onClick={handleResponse}>
+              Accept
+            </Button>,
+          ]}
+        >
+          <p>
+            {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
+            clicking on reject or accepte button, you formally acknowledge your
+            responsibility for overseeing the management of this complaint and assositeed violation.
+
+            by accept this complaint the assosited violation will be deleted for the driver
+            <br />
+            <br />
+            {/* condition if rejected counter =! 0 */}
+            NOTE: the driver {driverDetails.Fname} {driverDetails.Lname}, have 'counter' rejected complaint within this year
+          </p>
+        </Modal>
+
         <h2 className={s.title}>Complaint Details</h2>
         {currentComplaint && driverDetails && (
           <>

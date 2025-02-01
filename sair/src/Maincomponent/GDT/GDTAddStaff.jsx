@@ -155,7 +155,7 @@ const GDTAddStaff = () => {
                     isDefaultPassword: true,
                 });
                 // Store the added staff ID in session storage
-                sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id)
+                sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
 
                 setPopupMessage("Staff added successfully!");
                 setPopupImage(successImage);
@@ -379,14 +379,14 @@ const handleBatchUpload = async (staffArray) => {
     click here
   </span>.
 </p>
-                            <button type="submit" className={s.editBtn}>Add Staff</button>
-                            <button
+<button
                                 onClick={() => { navigate('/gdtstafflist');}}
                                 className={s.profileCancel}
                                
                             >
                                 Cancel
                             </button>
+                            <button type="submit" className={s.editBtn}>Add Staff</button>
                                                  </div>
                     </form>
                 ) : (

@@ -24,7 +24,6 @@ export const GDTNotification = () => {
   const [gdtUID, setgdtUID] = useState(sessionStorage.getItem("gdtUID"));
   const cleanupListeners = useRef([]);
   const [currentCrash, setCurrentCrash] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const [GDT, setGDT] = useState({ Fname: '', Lname: '' });
   const [originalGDTData, setOriginalGDTData] = useState({});
   const crashId = currentCrash?.id;
@@ -142,22 +141,16 @@ export const GDTNotification = () => {
               description: (
                 <>
                   Crash detected for driver {driver.name} on {date} at {time}. Phone: {driver.PhoneNumber}.
-                  Please respond to the crash  
+                  Please view the crash details
                   {" "}
                   <a 
-                    href="#" 
+                     href={`/gdtcrash/general/${crash.id}`}
                     style={{ color: "black", textDecoration: "underline" }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentCrash(crash);
-                      setModalVisible(true);
-                    }}
                   >
                     by clicking here
                   </a>.
                 </>
               ),
-              
               placement: "topRight",
               closeIcon: null,
               duration: 20,
@@ -225,39 +218,7 @@ export const GDTNotification = () => {
     }
   };
 
-  const handleResponse = async () => {
-    setModalVisible(false);
 
-    try {
-      if (!currentCrash?.id) {
-        console.error("Crash ID is missing");
-        return;
-      }
-
-      if (!GDT.Fname || !GDT.Lname) {
-        console.error("Responder details are incomplete");
-        return;
-      }
-
-      const updatedCrash = {
-        ...currentCrash,
-        RespondedBy: `${GDT.Fname} ${GDT.Lname}`,
-      };
-
-      const crashDocRef = doc(db, "Crash", crashId);
-      const docSnapshot = await getDoc(crashDocRef);
-      if (!docSnapshot.exists()) {
-        console.error("No document found with ID:", crashId);
-        return;
-      }
-
-      await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
-      setCurrentCrash(updatedCrash);
-      console.log("Crash response updated successfully");
-    } catch (error) {
-      console.error("Error updating crash response:", error);
-    }
-  };
 
   const formatDate = (time) => {
     const date = new Date(time * 1000);
@@ -282,29 +243,4 @@ export const GDTNotification = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
-
-  // Return the modal and null for main component return
-  return (
-    <>
-      <Modal
-        title="Confirm Response"
-        visible={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        centered
-        footer={[
-          <Button key="cancel" onClick={() => setModalVisible(false)}>Cancel</Button>,
-          <Button key="confirm" type="primary" onClick={handleResponse}>Confirm</Button>,
-        ]}
-        closeIcon={
-          <span className="custom-modal-close-icon">
-            ×
-          </span>
-        }
-      >
-        <p>
-          {GDT.Fname} {GDT.Lname}, by clicking on confirm button, you formally acknowledge your responsibility for overseeing the management of this crash.
-        </p>
-      </Modal>
-    </>
-  );
 };

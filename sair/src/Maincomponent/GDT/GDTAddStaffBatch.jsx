@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { db, auth } from '../../firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { Modal, Steps } from 'antd';
+import { Modal } from 'antd';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import Header from './GDTHeader';
 import s from '../../css/Profile.module.css';
@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 import { generateRandomPassword } from '../../utils/common';
 import templateFile from './template.xlsx';
-import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const GDTAddStaffBatch = () => {
   const [fileData, setFileData] = useState([]);
@@ -22,10 +21,12 @@ const GDTAddStaffBatch = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState('');
   const [fileName, setFileName] = useState('');
+  const [isUploadBoxVisible, setIsUploadBoxVisible] = useState(true);
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const [currentStep, setCurrentStep] = useState(0);
+
+  const fileInputRef = useRef(null);
 
   const handleInputChange = (index, field, value) => {
     const updatedFileData = [...fileData];
@@ -34,80 +35,97 @@ const GDTAddStaffBatch = () => {
     validateAllFields(updatedFileData);
   };
 
-  const validateAllFields = async (updatedData, curIdx = currentStep) => {
-    updatedData.map((staff, index) =>
-      validateStaffMember(staff, index, updatedData, curIdx)
+  const validateAllFields = async (updatedData) => {
+    updatedData.forEach((staff, index) =>
+      validateStaffMember(staff, index, updatedData)
     );
   };
 
-  const validateStaffMember = async (staff, index, allStaff, curIdx) => {
+  const validateStaffMember = async (staff, index, allStaff) => {
     const staffErrors = {
-      Fname: !staff['First name'],
-      Lname: !staff['Last name'],
+      Fname: false,
+      Lname: false,
       PhoneNumber: false,
       Email: false,
       ID: false,
+      EmailMessage: '',
+      PhoneNumberMessage: '',
+      IDMessage: '',
+      FnameMessage: '',
+      LnameMessage: '',
     };
-
-    if (!staff['First name'] || !validateName(staff['First name'])) {
+  
+    // Validate First Name
+    if (!staff['First name'] || validateName(staff['First name'])) {
       staffErrors.Fname = true;
+      staffErrors.FnameMessage = 'Name must contain letters only.';
     }
-    if (!staff['Last name'] || !validateName(staff['Last name'])) {
+  
+    // Validate Last Name
+    if (!staff['Last name'] || validateName(staff['Last name'])) {
       staffErrors.Lname = true;
+      staffErrors.LnameMessage = 'Name must contain letters only.';
     }
+  
+    // Validate Phone Number
     if (!staff['Mobile Phone Number']) {
       staffErrors.PhoneNumber = true;
-    }
-    if (!staff.Email) {
-      staffErrors.Email = true;
-    }
-    if (!staff['Staff ID']) {
-      staffErrors.ID = true;
-    }
-
-    if (
-      staff['Mobile Phone Number'] &&
-      validatePhoneNumber(staff['Mobile Phone Number'])
-    ) {
-      staffErrors.PhoneNumber = true;
-    }
-    if (staff.Email && validateEmail(staff.Email)) {
-      staffErrors.Email = true;
-    }
-    if (staff['Staff ID'] && validateStaffID(staff['Staff ID'])) {
-      staffErrors.ID = true;
-    }
-
-    // unique validation
-    if (curIdx === 1) {
-      const uniquenessResult = await checkUniqueness(
-        staff['Mobile Phone Number'],
-        staff.Email,
-        staff['Staff ID']
-      );
-
-      if (!uniquenessResult.PhoneNumber) staffErrors.PhoneNumber = true;
-      if (!uniquenessResult.Email) staffErrors.Email = true;
-      if (!uniquenessResult.ID) staffErrors.ID = true;
-
-      // Check for duplicates within the uploaded file
-      const duplicates = allStaff.filter(
-        (s, i) =>
-          i !== index &&
-          (s['Mobile Phone Number'] === staff['Mobile Phone Number'] ||
-            s.Email === staff.Email ||
-            s['Staff ID'] === staff['Staff ID'])
-      );
-      if (duplicates.length > 0) {
-        duplicates.forEach((dup) => {
-          if (dup['Mobile Phone Number'] === staff['Mobile Phone Number'])
-            staffErrors.PhoneNumber = true;
-          if (dup.Email === staff.Email) staffErrors.Email = true;
-          if (dup['Staff ID'] === staff['Staff ID']) staffErrors.ID = true;
-        });
+      staffErrors.PhoneNumberMessage = 'Phone number is required.';
+    } else {
+      const phoneValidation = validatePhoneNumber(staff['Mobile Phone Number']);
+      if (phoneValidation) {
+        staffErrors.PhoneNumber = true;
+        staffErrors.PhoneNumberMessage = phoneValidation;
       }
     }
-
+  
+    // Validate Email
+    if (!staff.Email) {
+      staffErrors.Email = true;
+      staffErrors.EmailMessage = 'Email is required.';
+    } else {
+      const emailValidation = validateEmail(staff.Email);
+      if (emailValidation) {
+        staffErrors.Email = true;
+        staffErrors.EmailMessage = emailValidation;
+      }
+    }
+  
+    // Validate Staff ID
+    if (!staff['Staff ID']) {
+      staffErrors.ID = true;
+      staffErrors.IDMessage = 'Staff ID is required.';
+    } else {
+      const idValidation = validateStaffID(staff['Staff ID']);
+      if (idValidation) {
+        staffErrors.ID = true;
+        staffErrors.IDMessage = idValidation;
+      }
+    }
+  
+    // Unique validation
+    const uniquenessResult = await checkUniqueness(
+      staff['Mobile Phone Number'],
+      staff.Email,
+      staff['Staff ID']
+    );
+  
+    // Set error messages based on uniqueness check
+    if (!uniquenessResult.PhoneNumber) {
+      staffErrors.PhoneNumber = true;
+      staffErrors.PhoneNumberMessage = 'Phone number already exists.';
+    }
+    if (!uniquenessResult.Email) {
+      staffErrors.Email = true;
+      staffErrors.EmailMessage = 'Email already exists.';
+    }
+    if (!uniquenessResult.ID) {
+      staffErrors.ID = true;
+      staffErrors.IDMessage = 'Staff ID already exists.';
+    }
+  
+    // Check for duplicates within the uploaded file...
+  
     setErrorData((prev) => {
       const updatedErrorData = [...prev];
       updatedErrorData[index] = staffErrors;
@@ -115,36 +133,38 @@ const GDTAddStaffBatch = () => {
     });
   };
 
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    return name && nameRegex.test(name.trim())
+      ? null
+      : 'Name must contain letters only.';
+  };
+  
   const validatePhoneNumber = (PhoneNumber) => {
     const phoneRegex = /^\+9665\d{8}$/;
     return phoneRegex.test(PhoneNumber)
       ? null
       : 'Phone number must start with +9665 and be followed by 8 digits.';
   };
-
-  const validateName = (name) => {
-    // Regular expression to match only letters and spaces
-    const nameRegex = /^[a-zA-Z\s]+$/;
-    return name && nameRegex.test(name.trim());
-  };
-
+  
   const validateEmail = (Email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(Email) ? null : 'Please enter a valid Email.';
+    return emailRegex.test(Email)
+      ? null
+      : 'Please enter a valid email.';
   };
-
+  
   const validateStaffID = (StaffID) => {
     const staffIDRegex = /^\d{10}$/;
-    return staffIDRegex.test(StaffID) ? null : 'Staff ID must be 10 digits.';
+    return staffIDRegex.test(StaffID)
+      ? null
+      : 'Staff ID must be 10 digits.';
   };
 
   const checkUniqueness = async (phone, email, staffID) => {
-    // console.log('Checking uniqueness for:', { phone, email, staffID });
-
     let result = { PhoneNumber: true, Email: true, ID: true };
 
     try {
-      // Create queries to check for existing phone, email, and staff ID
       const phoneQuery = query(
         collection(db, 'GDT'),
         where('PhoneNumber', '==', phone)
@@ -155,28 +175,22 @@ const GDTAddStaffBatch = () => {
       );
       const idQuery = query(collection(db, 'GDT'), where('ID', '==', staffID));
 
-      // Execute the queries
       const [phoneSnapshot, emailSnapshot, idSnapshot] = await Promise.all([
         getDocs(phoneQuery),
         getDocs(emailQuery),
         getDocs(idQuery),
       ]);
 
-      // Check if any of the snapshots have documents
       if (!phoneSnapshot.empty) {
-        console.log('Phone number already exists.');
         result = { ...result, PhoneNumber: false };
       }
       if (!emailSnapshot.empty) {
-        console.log('Email already exists.');
         result = { ...result, Email: false };
       }
       if (!idSnapshot.empty) {
-        console.log('Staff ID already exists.');
         result = { ...result, ID: false };
       }
 
-      // If no duplicates are found
       return result;
     } catch (error) {
       console.error('Error checking uniqueness:', error);
@@ -186,17 +200,16 @@ const GDTAddStaffBatch = () => {
     }
   };
 
-  const handleBatchUploadResults = (errorList) => {
+  const handleBatchUploadResults = (errorList, successCount) => {
     if (errorList.length > 0) {
       const errorMessages = errorList.map((err) => err.message).join('\n');
       setPopupMessage(errorMessages);
       setPopupImage(errorImage);
       setPopupVisible(true);
     } else {
-      setPopupMessage('All staff added successfully!');
+      setPopupMessage(`${successCount} Staff Added Successfully!`);
       setPopupImage(successImage);
       setPopupVisible(true);
-      setTimeout(() => navigate('/gdtstafflist'), 2000);
     }
   };
 
@@ -216,11 +229,7 @@ const GDTAddStaffBatch = () => {
       )
       .then(
         (response) => {
-          console.log(
-            'Email sent successfully!',
-            response.status,
-            response.text
-          );
+          console.log('Email sent successfully!', response.status, response.text);
         },
         (error) => {
           console.error('Failed to send email:', error);
@@ -232,6 +241,7 @@ const GDTAddStaffBatch = () => {
     const file = event.target.files[0];
     if (!file) return;
     setFileName(file.name);
+    setIsUploadBoxVisible(false);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
@@ -248,9 +258,7 @@ const GDTAddStaffBatch = () => {
         Email: false,
         ID: false,
       }));
-      console.log('Initial error data:', initialErrorData);
       setErrorData(initialErrorData);
-
       validateAllFields(jsonData);
     };
     reader.readAsBinaryString(file);
@@ -258,11 +266,13 @@ const GDTAddStaffBatch = () => {
 
   const handleRemoveFile = () => {
     setFileName('');
-    document.getElementById('fileInput').value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setFileData([]);
-    setIsButtonDisabled(true); // Disable button when file is removed
-    setErrorMessage(''); // Clear error message
-    setCurrentStep(0); // Reset to first step
+    setIsButtonDisabled(true);
+    setErrorMessage('');
+    setIsUploadBoxVisible(true);
   };
 
   const handleClosePopup = () => {
@@ -281,20 +291,26 @@ const GDTAddStaffBatch = () => {
     }
 
     const errorList = [];
+    let successCount = 0;
+    const addedStaffIDs = [];
     for (const staff of fileData) {
       try {
-        console.log('Adding staff:', staff);
         const addedStaff = await addStaffToDatabase(staff);
-        console.log('add', addedStaff);
+        addedStaffIDs.push(addedStaff.id); // Store the added staff ID
+        successCount++;
         // Store the staff ID in sessionStorage
         sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
-      } catch (error) {
+      }  catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
         });
       }
     }
-    handleBatchUploadResults(errorList);
+// Store added staff IDs in sessionStorage
+const existingIDs = JSON.parse(sessionStorage.getItem('addedStaffIDs')) || [];
+const updatedIDs = [...new Set([...existingIDs, ...addedStaffIDs])]; // Ensure unique IDs
+sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
+    handleBatchUploadResults(errorList, successCount);
   };
 
   const addStaffToDatabase = async (staff) => {
@@ -317,15 +333,17 @@ const GDTAddStaffBatch = () => {
         isAdmin: false,
         isDefaultPassword: true,
       });
+      // Store the added staff ID in session storage for batch adds
+      sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
+                  
       sendEmail(Email, `${Fname} ${Lname}`, password);
       return addedStaff;
     } catch (error) {
-      throw error; // Re-throw the error to be caught in handleAddStaff
+      throw error;
     }
   };
 
   useEffect(() => {
-    // Validate only when fileData changes
     const hasErrors = errorData.some((staffErrors) =>
       Object.values(staffErrors).some((error) => error)
     );
@@ -354,7 +372,7 @@ const GDTAddStaffBatch = () => {
         <h2 className='title'>Add Staff as Batch</h2>
         <p>
           For a successful staff addition, please download the staff batch
-          template by clicking here,{' '}
+          template by{' '}
           <a
             href={templateFile}
             download
@@ -369,63 +387,86 @@ const GDTAddStaffBatch = () => {
           , making sure to follow the required format.
         </p>
 
-        <div
-          className={s.formRow}
-          style={{
-            margin: 0,
-            padding: '20px 0',
-          }}
-        >
-          <input
-            id='fileInput'
-            type='file'
-            onChange={handleFileUpload}
-            accept='.xls,.xlsx'
-            className={s.fileInput}
-          />
-          {fileName && (
-            <div
-              style={{
-                marginLeft: '10px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <FaTrash
-                onClick={handleRemoveFile}
-                style={{
-                  marginLeft: '10px',
-                  color: '#059855',
-                  cursor: 'pointer',
-                  fontSize: '20px',
-                }}
-                title='Remove file'
-              />
-            </div>
-          )}
-        </div>
+        {isUploadBoxVisible && (
+          <div
+            className={s.fileUploadContainer}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const file = e.dataTransfer.files[0];
+              if (file) {
+                handleFileUpload({ target: { files: [file] } });
+              }
+            }}
+          >
+            <label htmlFor="fileInput" className={s.fileUploadBox}>
+              <div className={s.fileUploadContent}>
+                <div className={s.uploadIcon}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    color="#000000"
+                    fill="none"
+                  >
+                    <path
+                      d="M6.5 2.5C5.3579 2.68817 4.53406 3.03797 3.89124 3.6882C2.5 5.09548 2.5 7.36048 2.5 11.8905C2.5 16.4204 2.5 18.6854 3.89124 20.0927C5.28249 21.5 7.52166 21.5 12 21.5C16.4783 21.5 18.7175 21.5 20.1088 20.0927C21.5 18.6854 21.5 16.4204 21.5 11.8905C21.5 7.36048 21.5 5.09548 20.1088 3.6882C19.4659 3.03797 18.6421 2.68817 17.5 2.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M9.5 5C9.99153 4.4943 11.2998 2.5 12 2.5M14.5 5C14.0085 4.4943 12.7002 2.5 12 2.5M12 2.5V10.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M21.5 13.5H16.5743C15.7322 13.5 15.0706 14.2036 14.6995 14.9472C14.2963 15.7551 13.4889 16.5 12 16.5C10.5111 16.5 9.70373 15.7551 9.30054 14.9472C8.92942 14.2036 8.26777 13.5 7.42566 13.5H2.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <p>Drag & drop a file here</p>
+                <p>
+                  or <span className={s.browseText}>browse file</span> from device
+                </p>
+              </div>
+            </label>
+            <input
+              ref={fileInputRef}
+              id="fileInput"
+              type="file"
+              onChange={handleFileUpload}
+              accept=".xls,.xlsx"
+              className={s.hiddenInput}
+            />
+          </div>
+        )}
+        {fileName && (
+          <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '8px', border: '1px solid #059855', padding: '8px' }}>
+            <span style={{ marginRight: '10px', fontSize: '14px', alignItems: 'center', justifyContent: 'center' }}>{fileName}</span>
+            <FaTrash
+              onClick={handleRemoveFile}
+              style={{ color: '#059855', cursor: 'pointer', fontSize: '20px' }}
+              title="Remove file"
+            />
+          </div>
+        )}
 
         {fileData.length > 0 && (
-          <div style={{ borderTop: '1px solid #ddd' }}>
-            <Steps
-              current={currentStep}
-              style={{ margin: '25px auto', width: '90%' }}
-              items={[
-                {
-                  title: 'Format Validation',
-                },
-                {
-                  title: 'Uniqueness Validation',
-                },
-              ]}
-            />
-            {/* Add error message display here */}
+          <div style={{ marginBottom: '5px' }}>
             {errorMessage && (
               <p style={{ color: 'red', margin: '10px 0' }}>
                 {errorMessage} <br />
               </p>
             )}
-            <table>
+            <table style={{ marginTop: '15px' }}>
               <thead>
                 <tr>
                   <th style={{ color: '#059855' }}>First Name</th>
@@ -438,250 +479,238 @@ const GDTAddStaffBatch = () => {
                 </tr>
               </thead>
               <tbody>
-                {fileData.map((staff, index) => (
-                  <tr key={index}>
-                    <td>
-                      <input
-                        type='text'
-                        value={staff['First name'] || ''}
-                        onChange={(e) =>
-                          handleInputChange(index, 'First name', e.target.value)
-                        }
-                        style={{
-                          borderColor: errorData[index]?.Fname
-                            ? 'red'
-                            : '#059855',
-                          boxShadow: errorData[index]?.Fname
-                            ? '0 0 5px red'
-                            : 'none',
-                          outline: 'none',
-                          transition: 'border-color 0.3s, box-shadow 0.3s',
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='text'
-                        value={staff['Last name'] || ''}
-                        onChange={(e) =>
-                          handleInputChange(index, 'Last name', e.target.value)
-                        }
-                        style={{
-                          borderColor: errorData[index]?.Lname
-                            ? 'red'
-                            : '#059855',
-                          boxShadow: errorData[index]?.Lname
-                            ? '0 0 5px red'
-                            : 'none',
-                          outline: 'none',
-                          transition: 'border-color 0.3s, box-shadow 0.3s',
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='text'
-                        value={staff['Mobile Phone Number'] || ''}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            'Mobile Phone Number',
-                            e.target.value
-                          )
-                        }
-                        style={{
-                          borderColor: errorData[index]?.PhoneNumber
-                            ? 'red'
-                            : '#059855',
-                          boxShadow: errorData[index]?.PhoneNumber
-                            ? '0 0 5px red'
-                            : 'none',
-                          outline: 'none',
-                          transition: 'border-color 0.3s, box-shadow 0.3s',
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='email'
-                        value={staff.Email || ''}
-                        onChange={(e) =>
-                          handleInputChange(index, 'Email', e.target.value)
-                        }
-                        style={{
-                          borderColor: errorData[index]?.Email
-                            ? 'red'
-                            : '#059855',
-                          boxShadow: errorData[index]?.Email
-                            ? '0 0 5px red'
-                            : 'none',
-                          outline: 'none',
-                          transition: 'border-color 0.3s, box-shadow 0.3s',
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='text'
-                        value={staff['Staff ID'] || ''}
-                        onChange={(e) =>
-                          handleInputChange(index, 'Staff ID', e.target.value)
-                        }
-                        style={{
-                          borderColor: errorData[index]?.ID ? 'red' : '#059855',
-                          boxShadow: errorData[index]?.ID
-                            ? '0 0 5px red'
-                            : 'none',
-                          outline: 'none',
-                          transition: 'border-color 0.3s, box-shadow 0.3s',
-                        }}
-                      />
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      {errorData[index]?.Fname ||
-                      errorData[index]?.Lname ||
-                      errorData[index]?.PhoneNumber ||
-                      errorData[index]?.Email ||
-                      errorData[index]?.ID ? (
-                        <FaTimes
-                          style={{
-                            color: 'red',
-                            marginLeft: '10px',
-                            marginTop: '5px',
-                          }}
-                          title='Not Valid'
-                        />
-                      ) : (
-                        <FaCheck
-                          style={{
-                            color: 'green',
-                            marginLeft: '10px',
-                            marginTop: '5px',
-                          }}
-                          title='Valid'
-                        />
-                      )}
-                    </td>
-                    <td>
-                      {/* delet icon */}
-                      <button
-                        style={{
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: 'red',
-                        }}
-                        onClick={() => {
-                          const newFileData = [...fileData];
-                          newFileData.splice(index, 1);
-                          setFileData(newFileData);
-                          setErrorData((prev) => {
-                            const updatedErrorData = [...prev];
-                            updatedErrorData.splice(index, 1);
-                            return updatedErrorData;
-                          });
-                        }}
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {fileData.map((staff, index) => (
+    <tr key={index}>
+      <td>
+        <input
+          type='text'
+          value={staff['First name'] || ''}
+          onChange={(e) =>
+            handleInputChange(index, 'First name', e.target.value)
+          }
+          style={{
+            borderColor: errorData[index]?.Fname ? 'red' : '#059855',
+            boxShadow: errorData[index]?.Fname ? '0 0 5px red' : 'none',
+            outline: 'none',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
+          title={errorData[index]?.Fname ? errorData[index]?.FnameMessage : ''}
+        />
+      </td>
+      <td>
+        <input
+          type='text'
+          value={staff['Last name'] || ''}
+          onChange={(e) =>
+            handleInputChange(index, 'Last name', e.target.value)
+          }
+          style={{
+            borderColor: errorData[index]?.Lname ? 'red' : '#059855',
+            boxShadow: errorData[index]?.Lname ? '0 0 5px red' : 'none',
+            outline: 'none',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
+          title={errorData[index]?.Lname ? errorData[index]?.LnameMessage : ''}
+        />
+      </td>
+      <td>
+        <input
+          type='text'
+          value={staff['Mobile Phone Number'] || ''}
+          onChange={(e) =>
+            handleInputChange(index, 'Mobile Phone Number', e.target.value)
+          }
+          style={{
+            borderColor: errorData[index]?.PhoneNumber ? 'red' : '#059855',
+            boxShadow: errorData[index]?.PhoneNumber ? '0 0 5px red' : 'none',
+            outline: 'none',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
+          title={errorData[index]?.PhoneNumber ? errorData[index]?.PhoneNumberMessage : ''}
+        />
+      </td>
+      <td>
+        <input
+          type='email'
+          value={staff.Email || ''}
+          onChange={(e) =>
+            handleInputChange(index, 'Email', e.target.value)
+          }
+          style={{
+            borderColor: errorData[index]?.Email ? 'red' : '#059855',
+            boxShadow: errorData[index]?.Email ? '0 0 5px red' : 'none',
+            outline: 'none',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
+          title={errorData[index]?.Email ? errorData[index]?.EmailMessage : ''}
+        />
+      </td>
+      <td>
+        <input
+          type='text'
+          value={staff['Staff ID'] || ''}
+          onChange={(e) =>
+            handleInputChange(index, 'Staff ID', e.target.value)
+          }
+          style={{
+            borderColor: errorData[index]?.ID ? 'red' : '#059855',
+            boxShadow: errorData[index]?.ID ? '0 0 5px red' : 'none',
+            outline: 'none',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
+          title={errorData[index]?.ID ? errorData[index]?.IDMessage : ''}
+        />
+      </td>
+      <td style={{ textAlign: 'center' }}>
+        {errorData[index]?.Fname ||
+        errorData[index]?.Lname ||
+        errorData[index]?.PhoneNumber ||
+        errorData[index]?.Email ||
+        errorData[index]?.ID ? (
+          <FaTimes
+            style={{
+              color: 'red',
+              marginLeft: '10px',
+              marginTop: '5px',
+            }}
+            title='Not Valid'
+          />
+        ) : (
+          <FaCheck
+            style={{
+              color: 'green',
+              marginLeft: '10px',
+              marginTop: '5px',
+            }}
+            title='Valid'
+          />
+        )}
+      </td>
+      <td>
+        <button
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'red',
+          }}
+          onClick={() => {
+            const newFileData = [...fileData];
+            newFileData.splice(index, 1);
+            setFileData(newFileData);
+            setErrorData((prev) => {
+              const updatedErrorData = [...prev];
+              updatedErrorData.splice(index, 1);
+              return updatedErrorData;
+            });
+          }}
+        >
+          <FaTrash />
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
             </table>
-            {currentStep === 1 && (
-              <button
-                style={{
-                  borderRadius: '5px',
-                  backgroundColor: '#059855',
-                  border: 'none',
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  marginTop: '20px',
-                  color: 'white',
-                  marginRight: '10px',
-                  fontFamily: 'Open Sans',
-                }}
-                onClick={() => {
-                  setCurrentStep(0);
-                  validateAllFields(fileData, 0);
-                }}
-              >
-                Back
-              </button>
-            )}
-            {currentStep !== 1 && (
-              <button
-                onClick={() => navigate('/gdtaddstaff')} // Navigate to Staff List page
-                style={{
-                  borderRadius: '5px',
-                  backgroundColor: '#059855',
-                  border: 'none',
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  marginTop: '20px',
-                  color: 'white',
-                  marginRight: '10px',
-                  fontFamily: 'Open Sans',
-                }}
-              >
-                Cancel
-              </button>
-            )}
 
             <button
-              onClick={() => {
-                switch (currentStep) {
-                  case 0:
-                    setCurrentStep(1);
-                    validateAllFields(fileData, 1);
-                    break;
-                  case 1:
-                    handleAddStaff();
-                    break;
-                  default:
-                    break;
-                }
+              onClick={() => navigate('/gdtaddstaff')} // Navigate to Staff List page
+              style={{
+                borderRadius: '5px',
+                backgroundColor: '#059855',
+                border: 'none',
+                padding: '10px 20px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                marginTop: '20px',
+                color: 'white',
+                marginRight: '10px',
+                fontFamily: 'Open Sans',
               }}
+            >
+              Cancel
+            </button>
+
+            <button
               disabled={isButtonDisabled}
+              onClick={handleAddStaff}
               className={s.editBtn}
               style={{
                 marginBottom: '40px',
+                borderRadius: '5px',
+                backgroundColor: '#059855',
+                border: 'none',
+                padding: '10px 20px',
+                fontSize: '16px',
+                
               }}
             >
-              {currentStep === 1 ? 'Add Staff List' : 'Next'}
+              Add to Staff List
             </button>
           </div>
         )}
 
-        {popupVisible && (
-          <Modal
-            title={null}
-            visible={popupVisible}
-            onCancel={handleClosePopup}
-            footer={<p style={{ textAlign: 'center' }}>{popupMessage}</p>}
-            style={{ top: '38%' }}
-            className='custom-modal'
-            closeIcon={<span className='custom-modal-close-icon'>×</span>}
+{popupVisible && (
+  <Modal
+    title={null}
+    visible={popupVisible}
+    onCancel={handleClosePopup}
+    footer={
+      <div style={{ textAlign: 'center' }}>
+        <p>{popupMessage}</p>
+        {popupImage === successImage && ( // Show OK button only on success
+          <button
+            onClick={() => {
+              navigate('/gdtstafflist'); // Navigate to the staff list
+              handleClosePopup(); // Close the popup
+            }}
+            style={{
+              padding: '1px 10px',
+              height: '30px',
+              fontSize: '13px',
+              cursor: 'pointer',
+              marginTop: '17px',
+              textAlign: 'center',
+              borderRadius: '5px',
+              backgroundColor: '#059855',
+              border: 'none',
+              color: 'white',
+              fontFamily: 'Open Sans',
+            }}
+            // onMouseEnter={(e) => {
+            //   e.target.style.borderColor = 'white'; // Change border to green on hover
+            //   e.target.style.color = '#059855'; // Change text to green on hover
+            // }}
+            // onMouseLeave={(e) => {
+            //   e.target.style.borderColor = '#059855'; // Revert border color
+            //   e.target.style.color = 'white'; // Revert text color
+            // }}
           >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-              }}
-            >
-              <img
-                src={popupImage}
-                alt='Popup'
-                style={{ width: '20%', marginBottom: '16px' }}
-              />
-            </div>
-          </Modal>
+            Back to staff list
+          </button>
         )}
+      </div>
+    }
+    style={{ top: '38%' }}
+    className='custom-modal'
+    closeIcon={<span className='custom-modal-close-icon'>×</span>}
+  >
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+      }}
+    >
+      <img
+        src={popupImage}
+        alt='Popup'
+        style={{ width: '20%', marginBottom: '16px' }}
+      />
+    </div>
+  </Modal>
+)}
       </div>
     </div>
   );

@@ -167,6 +167,40 @@ const GDTComplaintList = () => {
       },
     },
     {
+      title: "Respose By",
+      key: "Resposed",
+      align: "center",
+      render: (text, record) => {
+        const formattedStatus =
+          record.Status.charAt(0).toUpperCase() +
+          record.Status.slice(1).toLowerCase();
+          
+          if (record.RespondedBy) {
+            // Render the RespondedBy value with an underline
+            return <span>{record.RespondedBy}</span>;
+          } else if (!record.RespondedBy) {
+            return (
+              <p
+                style={{
+                  backgroundColor: "transparent",
+                  color: "red",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "4px 8px",
+                  cursor: "default",
+                }}
+              >
+                Need for Response
+              </p>
+            );
+          } else {
+            return null;
+          }
+
+        //return <span style={{ color }}>{formattedStatus}</span>;
+      },
+    },
+    {
       title: "Date",
       key: "date",
       align: "center",
