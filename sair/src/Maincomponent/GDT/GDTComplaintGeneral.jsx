@@ -17,6 +17,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 
 const GDTComplaintGeneral = () => {
   const [currentComplaint, setCurrentComplaint] = useState({});
+  const [violations, setViolations] = useState([]);
   const [driverDetails, setDriverDetails] = useState({});
   const [GDT, setGDT] = useState({
     Lname: "",
@@ -97,6 +98,15 @@ const GDTComplaintGeneral = () => {
       }); // Format to 'HH:MM:SS AM/PM'
     }
     return ""; // Return an empty string if timestamp is not available
+  };
+
+  // SOS
+  const handleViewViolation = () => {
+    if (violations.length > 0) {
+      navigate(`/gdtviolations/general/${violations[0].id}`, {
+        state: { from: "GDTComplaintGeneral" },
+      }); // Navigate to the first complaint
+    } 
   };
 
     const handleShowPopupStaff = () => {
@@ -732,6 +742,24 @@ const GDTComplaintGeneral = () => {
             </p>
             <hr />
             <div style={{ marginBottom: "90px" }}>
+            {/* SOS */}
+              {/* View Violation Button */}
+              <Button
+                  onClick={handleViewViolation}
+                  // onClick={disableViewComplaints}
+                  style={{
+                    float: "left",
+                    width: "auto",
+                    height: "60px",
+                    fontSize: "15px",
+                    color: "#059855",
+                    borderColor: "#059855",
+                  }}
+                >
+                  <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
+                  View Violation
+                </Button>
+
               <Button
                 onClick={goBack}
                 style={{
