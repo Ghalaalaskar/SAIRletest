@@ -134,7 +134,7 @@ export const GDTNotification = () => {
 
           notifiedCrashes[crash.id] = true;
           localStorage.setItem("notifiedCrashes", JSON.stringify(notifiedCrashes));
-
+console.log('in gdt local storage',notifiedCrashes);
           if (showNotifications && gdtUID) {
             notification.open({
               message: <strong>Crash Alert</strong>,
