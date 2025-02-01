@@ -325,10 +325,11 @@ const GDTComplaintGeneral = () => {
           </p>
         </Modal>
 
-        <h2 className={s.title}>Complaint Details</h2>
+        <h2 className="title">Driver Details</h2>
+        <hr/>
+        
         {currentComplaint && driverDetails && (
           <>
-            <hr />
             <div>
               <h3
                 style={{
@@ -506,6 +507,8 @@ const GDTComplaintGeneral = () => {
                 </a>
               </p>
 
+              
+        <h2 className="title">Violation Details</h2>
               <hr />
             </div>
 
@@ -548,6 +551,9 @@ const GDTComplaintGeneral = () => {
             <p style={{ fontSize: "18px", marginLeft: "45px" }}>
               {currentComplaint.ViolationID}
             </p>
+
+            
+        <h2 className="title">Complaint Details</h2>
             <hr />
 
             {/* Complaint ID Section */}
