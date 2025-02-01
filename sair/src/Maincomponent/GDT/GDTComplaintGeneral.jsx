@@ -313,11 +313,10 @@ const GDTComplaintGeneral = () => {
         >
           <p>
             {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
-            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
-            clicking on reject or accepte button, you formally acknowledge your
-            responsibility for overseeing the management of this complaint and
-            assositeed violation. by accept this complaint the assosited
-            violation will be deleted for the driver
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by 
+            clicking the "Reject" or "Accept" button, you formally acknowledge 
+            your responsibility for managing this complaint and its associated violation. 
+            If you accept the complaint, the associated violation will be removed from the driver's record.
             <br />
             <br />
             {/* condition if rejected counter =! 0 */}
@@ -418,7 +417,7 @@ const GDTComplaintGeneral = () => {
                     stroke-linejoin="round"
                   />
                 </svg>
-                Name
+                Driver Name
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 {driverDetails.Fname} {driverDetails.Lname}
@@ -447,7 +446,7 @@ const GDTComplaintGeneral = () => {
                     stroke-linecap="round"
                   />
                 </svg>
-                Phone Number
+                Driver Phone Number
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 {driverDetails.PhoneNumber}
@@ -489,7 +488,7 @@ const GDTComplaintGeneral = () => {
                     stroke-linejoin="round"
                   />
                 </svg>
-                Email
+                Driver Email
               </h3>
               <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                 {" "}
