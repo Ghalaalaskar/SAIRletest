@@ -201,7 +201,7 @@ const GDTStafflist = () => {
             style: {
               backgroundColor:
                 sessionStorage.getItem(`staff_${record.id}`) ?
-"#f0f8f0" : "transparent",
+"#d0e0d0" : "transparent",
             },
           })}
         />

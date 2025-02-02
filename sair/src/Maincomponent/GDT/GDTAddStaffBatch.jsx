@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { db, auth } from '../../firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { Modal } from 'antd';
+import { Button, Modal } from 'antd';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
@@ -25,7 +25,8 @@ const GDTAddStaffBatch = () => {
   const navigate = useNavigate();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-
+  const [isDeletePopupVisible, setIsDeletePopupVisible] = useState(false);
+  const [staffToRemove, setStaffToRemove] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleInputChange = (index, field, value) => {
@@ -39,6 +40,18 @@ const GDTAddStaffBatch = () => {
     updatedData.forEach((staff, index) =>
       validateStaffMember(staff, index, updatedData)
     );
+  };
+
+  const handleDeleteStaff = (index) => {
+    const updatedFileData = [...fileData];
+    updatedFileData.splice(index, 1);
+    
+    const updatedErrorData = [...errorData];
+    updatedErrorData.splice(index, 1);
+  
+    setFileData(updatedFileData);
+    setErrorData(updatedErrorData);
+    setIsDeletePopupVisible(false);
   };
 
   const validateStaffMember = async (staff, index, allStaff) => {
@@ -207,7 +220,7 @@ const GDTAddStaffBatch = () => {
       setPopupImage(errorImage);
       setPopupVisible(true);
     } else {
-      setPopupMessage(`${successCount} Staff Added Successfully!`);
+      setPopupMessage(`A total of ${successCount} Staff Added Successfully!`);
       setPopupImage(successImage);
       setPopupVisible(true);
     }
@@ -588,30 +601,50 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
         )}
       </td>
       <td>
-        <button
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'red',
-          }}
-          onClick={() => {
-            const newFileData = [...fileData];
-            newFileData.splice(index, 1);
-            setFileData(newFileData);
-            setErrorData((prev) => {
-              const updatedErrorData = [...prev];
-              updatedErrorData.splice(index, 1);
-              return updatedErrorData;
-            });
-          }}
-        >
-          <FaTrash />
-        </button>
-      </td>
+  <button
+    style={{
+      backgroundColor: 'transparent',
+      border: 'none',
+      cursor: 'pointer',
+      color: 'red',
+    }}
+    onClick={() => {
+      setStaffToRemove(staff); // Set the staff member to be removed
+      setIsDeletePopupVisible(true); // Show the confirmation modal
+    }}
+  >
+    <FaTrash />
+  </button>
+</td>
     </tr>
   ))}
 </tbody>
+
+{/* Delete Confirmation Modal */}
+<Modal
+  visible={isDeletePopupVisible}
+  onCancel={() => setIsDeletePopupVisible(false)}
+  title="Confirm Deletion"
+  style={{ top: '38%' }}
+  footer={[
+    <Button key="no" onClick={() => setIsDeletePopupVisible(false)}>
+      No
+    </Button>,
+    <Button key="yes" type="primary" danger onClick={() => handleDeleteStaff(fileData.indexOf(staffToRemove))}>
+      Yes
+    </Button>,
+  ]}
+  className="custom-modal"
+  closeIcon={
+    <span className="custom-modal-close-icon">×</span>
+  }
+>
+  <div>
+    <p>
+      Are you sure you want to delete {staffToRemove?.['First name']} {staffToRemove?.['Last name']}?
+    </p>
+  </div>
+</Modal>
             </table>
 
             <button
@@ -711,7 +744,10 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
       />
     </div>
   </Modal>
+
 )}
+
+
       </div>
     </div>
   );
