@@ -124,17 +124,6 @@ const GDTStafflist = () => {
     };
 
     fetchStaff();
-// Read added staff IDs from sessionStorage
-const addedStaffIDs = Object.keys(sessionStorage)
-.filter(key => key.startsWith('staff_'))
-.map(key => sessionStorage.getItem(key));
-
-if (addedStaffIDs.length > 0) {
-setHighlightedStaff(addedStaffIDs);
-}
-
-// Clear highlighted staff IDs from sessionStorage
-sessionStorage.clear(); // Clear after reading to ensure they won't persist
 }, []);
 
 
@@ -202,18 +191,19 @@ sessionStorage.clear(); // Clear after reading to ensure they won't persist
         <br />
 
         <Table
-            columns={columns}
-            dataSource={filteredData.map(staff => ({
-              ...staff,
-              isHighlighted: highlightedStaff.includes(staff.id), // Add highlight flag only for filtered data
-          }))}
-            rowKey="id"
-            pagination={{ pageSize: 5 }}
-            onRow={(record) => ({
-                style: {
-                    backgroundColor: record.isHighlighted ? "#f0f8f0" : "transparent", // Highlight style
-                },
-            })}
+          columns={columns}
+          dataSource={filteredData}
+          rowKey="id"
+          pagination={{ pageSize: 5 }}
+          style={{ width: '1200px', whiteSpace: 'nowrap', overflow:
+'hidden', textOverflow: 'ellipsis', margin: '0 auto' }}
+          onRow={(record) => ({
+            style: {
+              backgroundColor:
+                sessionStorage.getItem(`staff_${record.id}`) ?
+"#f0f8f0" : "transparent",
+            },
+          })}
         />
 
         {/* Delete Confirmation Modal */}

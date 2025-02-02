@@ -154,9 +154,9 @@ const GDTAddStaff = () => {
                     isAdmin: false,
                     isDefaultPassword: true,
                 });
-                            // Store the added staff ID in session storage
-            sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
-            
+                // Store the added staff ID in session storage
+                sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
+
                 setPopupMessage("Staff added successfully!");
                 setPopupImage(successImage);
                 //setManualStaff({ Fname: '', Lname: '', PhoneNumber: '+966', Email: '', StaffID: '' });

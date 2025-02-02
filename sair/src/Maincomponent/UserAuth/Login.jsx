@@ -1198,14 +1198,30 @@ const Login = () => {
                   !showDetailsFormStaff ? (
                     <button
                       className={s.submitButton}
+                      onClick={handleback}
+                      type="button"
+                      style={{ marginLeft: "0px" }}
+                    >
+                      Back
+                    </button>
+                  ) : null}
+
+                  
+                  {showDetailsFormAdmin &&
+                  showPasswordDetails &&
+                  !showDetailsFormStaff ? (
+                    <button
+                      className={s.submitButton}
                       onClick={handleNext2}
                       type="button"
-                      style={{ marginLeft: "2px" }}
+                      style={{ marginLeft: "10px" }}
                     >
                       Next
                     </button>
                   ) : null}
 
+
+                  
                   {!showDetailsFormAdmin &&
                   showPasswordDetails &&
                   showDetailsFormStaff ? (
@@ -1218,18 +1234,7 @@ const Login = () => {
                     </button>
                   ) : null}
 
-                  {showDetailsFormAdmin &&
-                  showPasswordDetails &&
-                  !showDetailsFormStaff ? (
-                    <button
-                      className={s.submitButton}
-                      onClick={handleback}
-                      type="button"
-                      style={{ marginLeft: "9px" }}
-                    >
-                      Back
-                    </button>
-                  ) : null}
+                  
                 </div>
               ) : null}
               {showConfirmLogin &&

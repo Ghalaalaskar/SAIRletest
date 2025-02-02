@@ -296,9 +296,11 @@ const GDTAddStaffBatch = () => {
     for (const staff of fileData) {
       try {
         const addedStaff = await addStaffToDatabase(staff);
-            addedStaffIDs.push(addedStaff.id); // Store the added staff ID
-            successCount++;
-      } catch (error) {
+        addedStaffIDs.push(addedStaff.id); // Store the added staff ID
+        successCount++;
+        // Store the staff ID in sessionStorage
+        sessionStorage.setItem(`staff_${addedStaff.ID}`, addedStaff.ID);
+      }  catch (error) {
         errorList.push({
           message: `Error adding staff ${staff['First name']} ${staff['Last name']}: ${error.message}`,
         });
@@ -331,8 +333,8 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
         isAdmin: false,
         isDefaultPassword: true,
       });
-                  // Store the added staff ID in session storage for batch adds
-                  sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
+      // Store the added staff ID in session storage for batch adds
+      sessionStorage.setItem(`staff_${addedStaff.id}`, addedStaff.id);
                   
       sendEmail(Email, `${Fname} ${Lname}`, password);
       return addedStaff;
@@ -664,28 +666,27 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
               handleClosePopup(); // Close the popup
             }}
             style={{
-              border: '2px solid grey', // Grey border
               padding: '1px 10px',
-              height:"23px",
-              fontSize: '12px',
+              height: '30px',
+              fontSize: '13px',
               cursor: 'pointer',
-              backgroundColor: 'transparent',
-              color: 'grey',
-              marginTop:'17px',
-              textAlign:'center',
-              borderRadius: '5px', // Optional: rounded corners
-              transition: 'border-color 0.3s', // Smooth transition for border color
+              marginTop: '17px',
+              textAlign: 'center',
+              borderRadius: '5px',
+              backgroundColor: '#059855',
+              border: 'none',
+              color: 'white',
+              fontFamily: 'Open Sans',
             }}
-            onMouseEnter={(e) => {
-              e.target.style.borderColor = '#059855'; // Change border to green on hover
-              e.target.style.color = '#059855'; // Change text to green on hover
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.borderColor = 'grey'; // Revert border color
-              e.target.style.color = 'grey'; // Revert text color
-            }}
+            // onMouseEnter={(e) => {
+            //   e.target.style.borderColor = 'white'; // Change border to green on hover
+            //   e.target.style.color = '#059855'; // Change text to green on hover
+            // }}
+            // onMouseLeave={(e) => {
+            //   e.target.style.borderColor = '#059855'; // Revert border color
+            //   e.target.style.color = 'white'; // Revert text color
+            // }}
           >
-
             Back to staff list
           </button>
         )}
