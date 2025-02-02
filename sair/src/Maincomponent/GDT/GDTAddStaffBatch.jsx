@@ -462,6 +462,7 @@ sessionStorage.setItem('addedStaffIDs', JSON.stringify(updatedIDs));
             {errorMessage && (
               <p style={{ color: 'red', margin: '10px 0' }}>
                 {errorMessage} <br />
+                You can hover over a specific cell to see the error.
               </p>
             )}
             <table style={{ marginTop: '15px' }}>
