@@ -554,7 +554,7 @@ const CrashList = () => {
               style: {
                 backgroundColor:
                   !viewedCrashes[record.id] && !record.RespondedBy
-                    ? "#f0f8f0"
+                    ? "#d0e0d0"
                     : "transparent",
               },
             })}
