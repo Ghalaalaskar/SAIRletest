@@ -180,38 +180,46 @@ const GDTComplaintGeneral = () => {
 
   const handleResponse = async () => {
     // setModalVisible(false); // Close the modal
+
     // try {
-    //   // Check if crashID exists and is valid
+    //   // Check if ComplaintID exists and is valid
     //   if (!currentComplaint.complaintId) {
-    //     console.error("Crash ID is missing");
+    //     console.error("Complaint ID is missing");
     //     return;
     //   }
+
     //   // Ensure the GDT data is valid
-    //   if (!GDT.Fname || !GDT.Lname) {
+    //   if (!GDT.ID) {
     //     console.error("Responder details are incomplete");
     //     return;
     //   }
-    //   console.log("Before updatedCrash");
-    //   const updatedCrash = {
+
+    //   console.log("Before updatedComplaint");
+    //   const updatedComplaint = {
     //     ...currentComplaint,
-    //     RespondedBy: (GDT.ID), // Combine first and last name
+    //     RespondedBy: GDT.ID, // Combine first and last name
     //   };
-    //   console.log("After updatedCrash");
-    //   const crashDocRef = doc(db, "Complaint", complaintId );
-    //   console.log("Firestore document reference:", crashDocRef.path);
+    //   console.log("After updatedComplaint");
+
+    //   const complaintDocRef = doc(db, "Complaint", complaintId);
+    //   console.log("Firestore document reference:", complaintDocRef.path);
+
     //   // Check if document exists
-    //   const docSnapshot = await getDoc(crashDocRef);
+    //   const docSnapshot = await getDoc(complaintDocRef);
     //   if (!docSnapshot.exists()) {
-    //     console.error("No document found with ID:", complaintId );
+    //     console.error("No document found with ID:", complaintId);
     //     return;
     //   }
+
     //   // Update Firestore with the new RespondedBy field
-    //   await updateDoc(crashDocRef, { RespondedBy: updatedCrash.RespondedBy });
-    //   // Update the local state with the new crash details
-    //   setCurrentComplaint(updatedCrash);
-    //   console.log("complaint response updated successfully");
+    //   await updateDoc(complaintDocRef, { RespondedBy: updatedComplaint.RespondedBy });
+
+    //   // Update the local state with the new Complaint details
+    //   setCurrentComplaint(updatedComplaint);
+
+    //   console.log("Compllaint response updated successfully");
     // } catch (error) {
-    //   console.error("Error updating complaint response:", error);
+    //   console.error("Error updating Complaint response:", error);
     // }
   };
 
