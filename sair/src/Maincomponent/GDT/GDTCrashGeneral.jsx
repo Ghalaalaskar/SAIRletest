@@ -50,6 +50,7 @@ const CrashGeneral = () => {
             const crashData = doc.data();
             setCurrentCrash(crashData);
 
+            if (crashData.RespondedBy) {
             // Query the GDT collection to fetch the GDT details based on the GDT ID
             const gdtQuery = query(
               collection(db, "GDT"),
@@ -67,6 +68,7 @@ const CrashGeneral = () => {
                 crashData.RespondedBy
               );
             }
+          }
 
             // Fetch driver details using the driver's ID
             const driverCollection = query(
