@@ -27,6 +27,13 @@ const GDTComplaintGeneral = () => {
     Fname: "",
     ID: "",
   });
+  const [respondingGDT, setRespondingGDT] = useState({
+    Fname: "",
+    Lname: "", 
+    ID: "",
+    GDTEmail: "",
+    PhoneNumber: "",
+  });
   const { complaintId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,6 +68,26 @@ const GDTComplaintGeneral = () => {
         if (complaintDoc.exists()) {
           const complaintData = complaintDoc.data();
           setCurrentComplaint(complaintData);
+
+          if (complaintData.RespondedBy) {
+          // Query the GDT collection to fetch the GDT details based on the GDT ID
+          const gdtQuery = query(
+            collection(db, "GDT"),
+            where("ID", "==", complaintData.RespondedBy)
+          );
+
+          const gdtSnapshot = await getDocs(gdtQuery);
+
+          if (gdtSnapshot.size > 0) {
+            const gdtData = gdtSnapshot.docs[0].data();
+            setRespondingGDT({ Fname: gdtData.Fname, Lname: gdtData.Lname, ID: gdtData.ID, GDTEmail: gdtData.GDTEmail , PhoneNumber: gdtData.PhoneNumber });
+          } else {
+            console.error(
+              "No GDT document found with ID:",
+              complaintData.RespondedBy
+            );
+          }
+        }
 
           // Fetch driver details using the driver's ID
           const driverCollection = query(
@@ -778,13 +805,13 @@ const GDTComplaintGeneral = () => {
             {currentComplaint.RespondedBy && (
               <div class={formstyle.banner}>
                 <strong>
-                  This crash was responded by
+                  This complaint was responded by
                   <span
                     class={formstyle.underline}
                     onClick={handleShowPopupStaff}
                     style={{ marginLeft: "4px" }}
                   >
-                    {currentComplaint.RespondedBy}
+                    {respondingGDT.Fname} {respondingGDT.Lname}
                   </span>
                 </strong>
               </div>
@@ -852,7 +879,7 @@ const GDTComplaintGeneral = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      {GDT.ID}
+                      {respondingGDT.ID}
                     </p>
 
                     <h3
@@ -905,7 +932,7 @@ const GDTComplaintGeneral = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      {GDT.Fname} {GDT.Lname}
+                      {respondingGDT.Fname} {respondingGDT.Lname}
                     </p>
 
                     <h3
@@ -987,7 +1014,7 @@ const GDTComplaintGeneral = () => {
                         href={`mailto:${employerDetails?.CompanyEmail}`}
                         style={{ color: "#444", textDecoration: "underline" }}
                       >
-                        {GDT.GDTEmail}
+                        {respondingGDT.GDTEmail}
                       </a>
                     </p>
                   </div>
