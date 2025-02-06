@@ -18,7 +18,7 @@ const GDTHeader = ({ active }) => {
   const [name, setName] = useState("");
   // const [isAdmin, setIsAdmin] = useState(false); // New state for isAdmin
   const isAdmin = sessionStorage.getItem("isAdmin") === "true"; // Retrieve isAdmin once
-
+//
   const [hasNewCrashes, setHasNewCrashes] = useState(() => {
     const saved = localStorage.getItem("hasNewCrashes");
     return saved ? JSON.parse(saved) : false;
