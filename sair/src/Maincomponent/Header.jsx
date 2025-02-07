@@ -249,11 +249,47 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   // }, [hasNewCrashes, refreshKey]); // Add refreshKey as a dependency
 
   
-  const handleallread =()=>{
-    
-  }
 
 
+  const handleallread = async () => {
+    // Retrieve 'notReadCrashes22' from localStorage once
+    let allNotRead = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+    console.log(allNotRead);
+    // Create a new object for updated read crashes
+    const updatedReadCrashes = { ...readCrashes };
+  
+    // Loop over all crashes that are not read
+    Object.values(allNotRead).forEach((crash) => {
+      // Update readCrashes with the current crash
+      updatedReadCrashes[crash.id] = crash;
+  
+      // Move crash to read notifications
+      setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
+  
+      // Remove crash from 'notReadCrashes22'
+      delete allNotRead[crash.id];
+    });
+  
+    // After the loop, update localStorage and state once
+    localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+    localStorage.setItem("notReadCrashes22", JSON.stringify(allNotRead));
+
+    setNotReadCrashes([]);  // Clear the unread crashes since all have been moved to read
+  
+    let allNotRead2 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+
+    // Update the read crashes state
+    setReadCrashes(updatedReadCrashes);
+    console.log('1',readCrashes);
+    console.log('1',allNotRead2);
+    console.log('1',notReadCrashes);
+
+
+    // Set the 'hasNewCrashes' flag to false in localStorage and state
+    setHasNewCrashes(false);
+    localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+  };
+  
   useEffect(() => {
     fetchDriversAndCrashes();
   }, [fetchDriversAndCrashes]);
