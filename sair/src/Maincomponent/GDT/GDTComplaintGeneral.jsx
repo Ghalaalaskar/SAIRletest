@@ -511,7 +511,6 @@ const GDTComplaintGeneral = () => {
             style={{
               marginTop: 10,
               marginBottom: 15,
-              color: userInput.length >= maxLength ? "red" : "black",
             }}
           />
         </Modal>
