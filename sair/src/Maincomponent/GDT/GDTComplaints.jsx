@@ -144,6 +144,43 @@ const GDTComplaintList = () => {
     fetchDriversAndComplaints();
   }, [gdtUID]);
 
+    const GDTResponse = async (RespondedBy) => {
+      try {
+        // Query the GDT collection to fetch the GDT details based on the GDT ID
+        const gdtQuery = query(
+          collection(db, "GDT"),
+          where("ID", "==", RespondedBy)
+        );
+    
+        const gdtSnapshot = await getDocs(gdtQuery);
+    
+        if (!gdtSnapshot.empty) {
+          const gdtData = gdtSnapshot.docs[0].data();
+          return `${gdtData.Fname} ${gdtData.Lname}`; // Properly return concatenated names
+        } else {
+          console.error("No GDT document found with ID:", RespondedBy);
+          return null; // Return null if no document is found
+        }
+      } catch (error) {
+        console.error("Error fetching GDT details:", error);
+        return null;
+      }
+    };
+  
+    const ResponseBy = ({ respondedBy }) => {
+      const [responseByName, setResponseByName] = useState("");
+    
+      useEffect(() => {
+        if (respondedBy) {
+          GDTResponse(respondedBy).then((name) => {
+            setResponseByName(name || "");
+          });
+        }
+      }, [respondedBy]);
+    
+      return <span>{responseByName}</span>;
+    };
+
   const filteredComplaints = complaints
     .sort((a, b) => (b.DateTime?.seconds || 0) - (a.DateTime?.seconds || 0)) // Sort by DateTime in descending order
     .filter((complaint) => {
@@ -233,7 +270,7 @@ const GDTComplaintList = () => {
 
         if (record.RespondedBy) {
           // Render the RespondedBy value with an underline
-          return <span>{record.RespondedBy}</span>;
+          return <ResponseBy respondedBy={record.RespondedBy} />;
         } else if (!record.RespondedBy) {
           return (
             <p
