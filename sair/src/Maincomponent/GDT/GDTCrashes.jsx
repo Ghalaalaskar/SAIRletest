@@ -226,37 +226,37 @@ const CrashList = () => {
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
 
-  const GDTResponse = async (RespondedBy) => {
+  const GDTResponse = (RespondedBy, setResponseByName) => {
     try {
-      // Query the GDT collection to fetch the GDT details based on the GDT ID
-      const gdtQuery = query(
-        collection(db, "GDT"),
-        where("ID", "==", RespondedBy)
-      );
+      // Query the GDT collection based on RespondedBy ID
+      const gdtQuery = query(collection(db, "GDT"), where("ID", "==", RespondedBy));
   
-      const gdtSnapshot = await getDocs(gdtQuery);
+      // Set up a real-time listener
+      const unsubscribe = onSnapshot(gdtQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const gdtData = snapshot.docs[0].data();
+          setResponseByName(`${gdtData.Fname} ${gdtData.Lname}`);
+        } else {
+          console.error("No GDT document found with ID:", RespondedBy);
+          setResponseByName("Unknown");
+        }
+      });
   
-      if (!gdtSnapshot.empty) {
-        const gdtData = gdtSnapshot.docs[0].data();
-        return `${gdtData.Fname} ${gdtData.Lname}`; // Properly return concatenated names
-      } else {
-        console.error("No GDT document found with ID:", RespondedBy);
-        return null; // Return null if no document is found
-      }
+      // Cleanup function to remove listener when component unmounts
+      return unsubscribe;
     } catch (error) {
       console.error("Error fetching GDT details:", error);
-      return null;
+      setResponseByName("Error");
     }
   };
-
+  
   const ResponseBy = ({ respondedBy }) => {
     const [responseByName, setResponseByName] = useState("");
   
     useEffect(() => {
       if (respondedBy) {
-        GDTResponse(respondedBy).then((name) => {
-          setResponseByName(name || "");
-        });
+        const unsubscribe = GDTResponse(respondedBy, setResponseByName);
+        return () => unsubscribe && unsubscribe(); // Cleanup listener on unmount
       }
     }, [respondedBy]);
   
