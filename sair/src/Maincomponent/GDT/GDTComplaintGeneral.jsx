@@ -14,11 +14,12 @@ import { db } from "../../firebase";
 import Header from "./GDTHeader";
 import s from "../../css/ViolationDetail.module.css";
 import formstyle from "../../css/Profile.module.css";
-import { Button, Modal } from "antd";
+import { Button, Modal, Input } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 
 const GDTComplaintGeneral = () => {
   const [currentComplaint, setCurrentComplaint] = useState({});
+  const [AssositedViolation, setAssositedViolation] = useState({});
   const [violations, setViolations] = useState([]);
   const [driverDetails, setDriverDetails] = useState({});
   const [employerDetails, setEmployerDetails] = useState({});
@@ -29,16 +30,22 @@ const GDTComplaintGeneral = () => {
   });
   const [respondingGDT, setRespondingGDT] = useState({
     Fname: "",
-    Lname: "", 
+    Lname: "",
     ID: "",
     GDTEmail: "",
     PhoneNumber: "",
   });
+  const [userInput, setUserInput] = useState("");
+  const maxLength = 245;
+  const minLength = 10;
   const { complaintId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [isPopupVisibleStaff, setIsPopupVisibleStaff] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const [WarningVisible, setWarningVisible] = useState(false);
+  const [MINWarningVisible, setMINWarningVisible] = useState(false);
   const from = location.state?.from; // Get the source of navigation
   const violationId = location.state?.violationId; // Get violationId from state
 
@@ -64,81 +71,90 @@ const GDTComplaintGeneral = () => {
     const fetchComplaintDetails = async () => {
       try {
         const complaintDocRef = doc(db, "Complaint", complaintId);
-        const complaintDoc = await getDoc(complaintDocRef); // Change to getDoc
-        if (complaintDoc.exists()) {
-          const complaintData = complaintDoc.data();
-          setCurrentComplaint(complaintData);
-
-          if (complaintData.RespondedBy) {
-          // Query the GDT collection to fetch the GDT details based on the GDT ID
-          const gdtQuery = query(
-            collection(db, "GDT"),
-            where("ID", "==", complaintData.RespondedBy)
-          );
-
-          const gdtSnapshot = await getDocs(gdtQuery);
-
-          if (gdtSnapshot.size > 0) {
-            const gdtData = gdtSnapshot.docs[0].data();
-            setRespondingGDT({ Fname: gdtData.Fname, Lname: gdtData.Lname, ID: gdtData.ID, GDTEmail: gdtData.GDTEmail , PhoneNumber: gdtData.PhoneNumber });
-          } else {
-            console.error(
-              "No GDT document found with ID:",
-              complaintData.RespondedBy
+        
+        const unsubscribe = onSnapshot(complaintDocRef, async (doc) => {
+          if (doc.exists()) {
+            const complaintData = doc.data();
+            setCurrentComplaint(complaintData);
+    
+            if (complaintData.RespondedBy) {
+              // Query the GDT collection to fetch the GDT details based on the GDT ID
+              const gdtQuery = query(
+                collection(db, "GDT"),
+                where("ID", "==", complaintData.RespondedBy)
+              );
+    
+              const gdtSnapshot = await getDocs(gdtQuery);
+    
+              if (!gdtSnapshot.empty) {
+                const gdtData = gdtSnapshot.docs[0].data();
+                setRespondingGDT({
+                  Fname: gdtData.Fname,
+                  Lname: gdtData.Lname,
+                  ID: gdtData.ID,
+                  GDTEmail: gdtData.GDTEmail,
+                  PhoneNumber: gdtData.PhoneNumber,
+                });
+              } else {
+                console.error(
+                  "No GDT document found with ID:",
+                  complaintData.RespondedBy
+                );
+              }
+            }
+    
+            // Fetch driver details using the driver's ID
+            const driverCollection = query(
+              collection(db, "Driver"),
+              where("DriverID", "==", complaintData.driverID)
             );
-          }
-        }
-
-          // Fetch driver details using the driver's ID
-          const driverCollection = query(
-            collection(db, "Driver"),
-            where("DriverID", "==", complaintData.driverID)
-          );
-          const driverSnapshot = await getDocs(driverCollection);
-          if (!driverSnapshot.empty) {
-            const driverData = driverSnapshot.docs[0].data();
-            setDriverDetails(driverData);
-            fetchEmployerDetails(driverData.CompanyName);
+            const driverSnapshot = await getDocs(driverCollection);
+            if (!driverSnapshot.empty) {
+              const driverData = driverSnapshot.docs[0].data();
+              setDriverDetails(driverData);
+              fetchEmployerDetails(driverData.CompanyName);
+            } else {
+              console.error("Driver not found for ID:", complaintData.driverID);
+            }
           } else {
-            console.error("Driver not found for ID:", complaintData.driverID);
+            console.error("Complaint document not found for ID:", complaintId);
           }
-        } else {
-          console.error("Complaint document not found for ID:", complaintId);
-        }
+        });
+    
+        return () => unsubscribe();
       } catch (error) {
         console.error("Error fetching complaint details:", error);
       }
     };
-
+    
     fetchGDT();
     fetchComplaintDetails();
-    fetchEmployerDetails(GDT.Fname);
+    fetchEmployerDetails(GDT?.Fname);
   }, [complaintId]);
 
-  
-    const fetchEmployerDetails = (companyName) => {
-      const employerQuery = query(
-        collection(db, "Employer"),
-        where("CompanyName", "==", companyName)
-      );
-  
-      const unsubscribe = onSnapshot(employerQuery, (snapshot) => {
-        if (!snapshot.empty) {
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            setEmployerDetails({
-              CompanyEmail: data.CompanyEmail,
-              CompanyName: data.CompanyName,
-              PhoneNumber: data.PhoneNumber,
-              ShortCompanyName: data.ShortCompanyName,
-              commercialNumber: data.commercialNumber,
-            });
+  const fetchEmployerDetails = (companyName) => {
+    const employerQuery = query(
+      collection(db, "Employer"),
+      where("CompanyName", "==", companyName)
+    );
+
+    const unsubscribe = onSnapshot(employerQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          setEmployerDetails({
+            CompanyEmail: data.CompanyEmail,
+            CompanyName: data.CompanyName,
+            PhoneNumber: data.PhoneNumber,
+            ShortCompanyName: data.ShortCompanyName,
+            commercialNumber: data.commercialNumber,
           });
-        }
-      });
-  
-      return unsubscribe;
-    };
+        });
+      }
+    });
+
+    return unsubscribe;
+  };
 
   const goBack = () => {
     navigate(-1); // Navigate back to the previous page
@@ -177,50 +193,168 @@ const GDTComplaintGeneral = () => {
   const handleConfirmResponse = () => {
     setModalVisible(true); // Show the confirmation modal
   };
+  const handleConfirmResponse2 = () => {
+    setModalVisible(true); // Show the confirmation modal
+  };
 
-  const handleResponse = async () => {
+  const handleAccept = async () => {
     // setModalVisible(false); // Close the modal
-
     // try {
     //   // Check if ComplaintID exists and is valid
     //   if (!currentComplaint.complaintId) {
     //     console.error("Complaint ID is missing");
     //     return;
     //   }
-
     //   // Ensure the GDT data is valid
     //   if (!GDT.ID) {
     //     console.error("Responder details are incomplete");
     //     return;
     //   }
-
     //   console.log("Before updatedComplaint");
     //   const updatedComplaint = {
     //     ...currentComplaint,
     //     RespondedBy: GDT.ID, // Combine first and last name
     //   };
     //   console.log("After updatedComplaint");
-
     //   const complaintDocRef = doc(db, "Complaint", complaintId);
     //   console.log("Firestore document reference:", complaintDocRef.path);
-
     //   // Check if document exists
     //   const docSnapshot = await getDoc(complaintDocRef);
     //   if (!docSnapshot.exists()) {
     //     console.error("No document found with ID:", complaintId);
     //     return;
     //   }
-
     //   // Update Firestore with the new RespondedBy field
     //   await updateDoc(complaintDocRef, { RespondedBy: updatedComplaint.RespondedBy });
-
     //   // Update the local state with the new Complaint details
     //   setCurrentComplaint(updatedComplaint);
-
     //   console.log("Compllaint response updated successfully");
     // } catch (error) {
     //   console.error("Error updating Complaint response:", error);
     // }
+  };
+
+
+  const handleReject = async () => {
+    if (!userInput.trim()) {
+      setWarningVisible(true); // Show warning popup if the text area is empty
+      return;
+    } else if (userInput.length < minLength) {
+      setMINWarningVisible(true);
+      return;
+    }else {
+
+    setModalVisible(false); // Close the modal
+
+    try {
+      console.log(currentComplaint.complaintId);
+      console.log("only",complaintId);
+      // Check if ComplaintID exists and is valid
+      if (!complaintId) { 
+        console.error("Complaint ID is missing");
+        return;
+      }
+
+      // Ensure the GDT data is valid
+      if (!GDT.ID) {
+        console.error("Responder details are incomplete");
+        return;
+      }
+
+      console.log("Before updating complaint");
+
+      const updatedComplaint = {
+        ...currentComplaint,
+        RespondedBy: GDT.ID, 
+        GDTResponse: userInput, 
+        Status: "Rejected", 
+      };
+
+      console.log("After updating complaint");
+
+      const complaintDocRef = doc(
+        db,
+        "Complaint",
+        complaintId
+      );
+      console.log("Firestore document reference:", complaintDocRef.path);
+
+      // Check if document exists
+      const docSnapshot = await getDoc(complaintDocRef);
+      if (!docSnapshot.exists()) {
+        console.error(
+          "No document found with ID:",
+          complaintId
+        );
+        return;
+      }
+
+      // Update Firestore with new fields
+      await updateDoc(complaintDocRef, {
+        RespondedBy: updatedComplaint.RespondedBy,
+        GDTResponse: updatedComplaint.GDTResponse,
+        Status: updatedComplaint.Status,
+      });
+
+      // Update local state with new complaint details
+      setCurrentComplaint(updatedComplaint);
+
+
+      // Handle the assosiated violation---------------------------NO NEED 
+      // console.log(currentComplaint.ViolationID);
+      // console.log("only",currentComplaint.ViolationID);
+      // // Check if ComplaintID exists and is valid
+      // if (!currentComplaint.ViolationID) { 
+      //   console.error("Violation ID is missing");
+      //   return;
+      // }
+
+      // // Ensure the GDT data is valid
+      // if (!GDT.ID) {
+      //   console.error("Responder details are incomplete");
+      //   return;
+      // }
+
+      // console.log("Before updating violation");
+
+      // const updatedCViolation = {
+      //   ...currentComplaint,
+      //   ComplaintStatus: "Rejected", 
+      // };
+
+      // console.log("After updating violation");
+
+      // const violationDocRef = doc(
+      //   db,
+      //   "Violation",
+      //   currentComplaint.ViolationID
+      // );
+      // console.log("Firestore document reference:", complaintDocRef.path);
+
+      // // Check if document exists
+      // const ViodocSnapshot = await getDoc(complaintDocRef);
+      // if (!docSnapshot.exists()) {
+      //   console.error(
+      //     "No document found with ID:",
+      //     complaintId
+      //   );
+      //   return;
+      // }
+
+      // // Update Firestore with new fields
+      // await updateDoc(violationDocRef, {
+      //   ComplaintStatus: updatedCViolation.ComplaintStatus,
+      // });
+
+      // // Update local state with new complaint details
+      // setAssositedViolation(updatedCViolation);
+
+      console.log("Complaint response updated successfully");
+    } catch (error) {
+      console.error("Error updating complaint response:", error);
+    }
+
+  }
   };
 
   // Determine the active state for the Header rawan
@@ -324,6 +458,10 @@ const GDTComplaintGeneral = () => {
             <Button type="primary" onClick={handleConfirmResponse}>
               Confirm Response
             </Button>
+
+            <Button type="primary" onClick={handleConfirmResponse2}>
+              Confirm Response2
+            </Button>
           </div>
         )}
 
@@ -332,6 +470,59 @@ const GDTComplaintGeneral = () => {
           visible={modalVisible}
           onCancel={() => setModalVisible(false)} // Close the modal when canceled
           centered
+          width={700}
+          footer={[
+            <Button
+              key="reject"
+              type="primary"
+              style={{ backgroundColor: "red", color: "white" }}
+              onClick={handleReject}
+            >
+              Reject
+            </Button>,
+
+            <Button key="accept" type="primary" onClick={handleAccept}>
+              Accept
+            </Button>,
+          ]}
+        >
+          <p>
+            {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
+            clicking the "Reject" or "Accept" button, you formally acknowledge
+            your responsibility for managing this complaint and its associated
+            violation. If you accept the complaint, the associated violation
+            will be removed from the driver's record.
+            <br />
+            <br />
+            {/* condition if rejected counter =! 0 */}
+            NOTE: the driver {driverDetails.Fname} {driverDetails.Lname}, have
+            'counter' rejected complaint within this year
+          </p>
+
+          <Input.TextArea
+            placeholder="Please provide a reason for your response, as it is mandatory when selecting reject."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            autoSize={{ minRows: 5, maxRows: 10 }}
+            maxLength={245}
+            minLength={10}
+            showCount
+            style={{
+              marginTop: 10,
+              marginBottom: 15,
+              color: userInput.length >= maxLength ? "red" : "black",
+            }}
+          />
+        </Modal>
+
+        {/* 2nd option */}
+        <Modal
+          title="Confirm Response"
+          visible={modalVisible2}
+          onCancel={() => setModalVisible(false)} // Close the modal when canceled
+          centered
+          width={700}
           footer={[
             <Button
               key="reject"
@@ -341,28 +532,73 @@ const GDTComplaintGeneral = () => {
             >
               Reject
             </Button>,
-            <Button key="accept" type="primary" onClick={handleResponse}>
+            <Button key="accept" type="primary" onClick={handleAccept}>
               Accept
             </Button>,
           ]}
         >
           <p>
             {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
-            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by 
-            clicking the "Reject" or "Accept" button, you formally acknowledge 
-            your responsibility for managing this complaint and its associated violation. 
-            If you accept the complaint, the associated violation will be removed from the driver's record.
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, by
+            clicking the "Reject" or "Accept" button, you formally acknowledge
+            your responsibility for managing this complaint and its associated
+            violation. If you accept the complaint, the associated violation
+            will be removed from the driver's record.
             <br />
             <br />
             {/* condition if rejected counter =! 0 */}
             NOTE: the driver {driverDetails.Fname} {driverDetails.Lname}, have
             'counter' rejected complaint within this year
           </p>
+
+          <Input.TextArea
+            placeholder="Please provide a reason for your response, as it is mandatory when selecting reject."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            autoSize={{ minRows: 5, maxRows: 10 }}
+            maxLength={245}
+            showCount
+            style={{
+              marginTop: 10,
+              marginBottom: 15,
+              color: userInput.length >= maxLength ? "red" : "black",
+            }}
+          />
+        </Modal>
+
+        {/* Text is empty */}
+        <Modal
+          title="Warning"
+          visible={WarningVisible}
+          onCancel={() => setWarningVisible(false)} // Close the modal when canceled
+          centered
+          footer={[]}
+        >
+          <p>
+            Dear {GDT.Fname.charAt(0).toUpperCase() + GDT.Fname.slice(1)}{" "}
+            {GDT.Lname.charAt(0).toUpperCase() + GDT.Lname.slice(1)}, please
+            provide a reason for rejecting the complaint in the text area before
+            proceeding.
+          </p>
+        </Modal>
+
+        {/* text is too short */}
+        <Modal
+          title="Warning"
+          visible={MINWarningVisible}
+          onCancel={() => setMINWarningVisible(false)} // Close the modal when canceled
+          centered
+          footer={[]}
+        >
+          <p>
+            The provided reason is too short. Please provide more details, with
+            at least one full sentence.
+          </p>
         </Modal>
 
         <h2 className="title">Driver Details</h2>
-        <hr/>
-        
+        <hr />
+
         {currentComplaint && driverDetails && (
           <>
             <div>
@@ -542,8 +778,7 @@ const GDTComplaintGeneral = () => {
                 </a>
               </p>
 
-              
-        <h2 className="title">Violation Details</h2>
+              <h2 className="title">Violation Details</h2>
               <hr />
             </div>
 
@@ -587,8 +822,7 @@ const GDTComplaintGeneral = () => {
               {currentComplaint.ViolationID}
             </p>
 
-            
-        <h2 className="title">Complaint Details</h2>
+            <h2 className="title">Complaint Details</h2>
             <hr />
 
             {/* Complaint ID Section */}
@@ -808,7 +1042,7 @@ const GDTComplaintGeneral = () => {
             <p style={{ fontSize: "18px", marginLeft: "45px" }}>
               {currentComplaint.Description}
             </p>
-            <hr/>
+            <hr />
 
             {currentComplaint.RespondedBy && (
               <div class={formstyle.banner}>
@@ -819,7 +1053,7 @@ const GDTComplaintGeneral = () => {
                     onClick={handleShowPopupStaff}
                     style={{ marginLeft: "4px" }}
                   >
-                    {respondingGDT.Fname} {respondingGDT.Lname}
+                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
                   </span>
                 </strong>
               </div>
