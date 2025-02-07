@@ -175,7 +175,9 @@ const Header = ({ active }) => {
           localStorage.setItem("notReadCrashes22", JSON.stringify(updatedReadCrashes));///for the red circul
           setnotReadCrashes22(updatedReadCrashes);
         })
-        if(Object.keys(notReadCrashes22).length > 0){
+
+        const r= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+        if(Object.keys(r).length > 0){
           setHasNewCrashes(true);
           localStorage.setItem("hasNewCrashes", JSON.stringify(true));
           console.log('yees',hasNewCrashes);
@@ -195,7 +197,6 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   });//not sure
 
   
-  
 
   // Update crash as read and navigate to details page
   const handleNotificationClick = async (crash) => {
@@ -214,11 +215,12 @@ console.log('notReadCrashes222222:',notReadCrashes22);
       delete notReadCrashes22[crash.id];
       localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
 
+      const rr= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
 
-      if(Object.keys(notReadCrashes22).length > 0){
+      if(Object.keys(rr).length > 0){
         setHasNewCrashes(true);
         localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-        console.log('yees',hasNewCrashes);
+        console.log('llllol',hasNewCrashes);
             }
             else{
               setHasNewCrashes(false);
@@ -247,7 +249,10 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   // }, [hasNewCrashes, refreshKey]); // Add refreshKey as a dependency
 
   
-  
+  const handleallread =()=>{
+    
+  }
+
 
   useEffect(() => {
     fetchDriversAndCrashes();
@@ -324,9 +329,25 @@ console.log('notReadCrashes222222:',notReadCrashes22);
 
       }}
     />
-    
- <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'5px' }}>new Notifications</p>
-
+    <div style={{ display: 'flex', alignItems: 'center', gap: '158px' }}>
+ <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'5px' }}>Unread</p> 
+ <button style={{
+    backgroundColor: '#E0E0E0', 
+    color: 'black',
+    border: 'none',
+    padding: '5px 12px',
+    fontSize: '13px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background 0.3s ease',
+  }}
+  onClick={() => handleallread()}
+  onMouseOver={(e) => e.target.style.backgroundColor = '#C8C8C8'}
+  onMouseOut={(e) => e.target.style.backgroundColor = '#E0E0E0'}
+  >
+    Mark all as read
+  </button>
+</div>
       { notReadCrashes.length > 0 ? (
         <>
    
@@ -360,11 +381,26 @@ console.log('notReadCrashes222222:',notReadCrashes22);
       ) : (
         <div style={{ textAlign: 'center', marginTop: '50px', color: '#aaa' }}>
           <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-          <p>No new notifications</p>
+          <p
+           style={{
+            marginBottom: '90px', 
+          }}
+          >No new notifications</p>
+          <hr
+      style={{
+        border: '0',
+        borderTop: '1px solid #ddd',
+        marginTop: '0', 
+        marginBottom: '10px', 
+
+      }}
+    />
         </div>
+        
       )}
 
-<p style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>Read Notifications</p>
+ 
+<p style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>Read</p>
 
 {  Object.keys(readCrashes).length > 0 ? (
   <>
@@ -399,7 +435,11 @@ console.log('notReadCrashes222222:',notReadCrashes22);
 ) : (
   <div style={{ textAlign: 'center', marginTop: '50px', color: '#aaa' }}>
     <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-    <p>No read notifications</p>
+    <p
+    style={{
+      marginBottom: '90px', 
+    }}
+    >No read notifications</p>
   </div>
 )}
     </div>
