@@ -198,41 +198,63 @@ const GDTComplaintGeneral = () => {
   };
 
   const handleAccept = async () => {
-    // setModalVisible(false); // Close the modal
-    // try {
-    //   // Check if ComplaintID exists and is valid
-    //   if (!currentComplaint.complaintId) {
-    //     console.error("Complaint ID is missing");
-    //     return;
-    //   }
-    //   // Ensure the GDT data is valid
-    //   if (!GDT.ID) {
-    //     console.error("Responder details are incomplete");
-    //     return;
-    //   }
-    //   console.log("Before updatedComplaint");
-    //   const updatedComplaint = {
-    //     ...currentComplaint,
-    //     RespondedBy: GDT.ID, // Combine first and last name
-    //   };
-    //   console.log("After updatedComplaint");
-    //   const complaintDocRef = doc(db, "Complaint", complaintId);
-    //   console.log("Firestore document reference:", complaintDocRef.path);
-    //   // Check if document exists
-    //   const docSnapshot = await getDoc(complaintDocRef);
-    //   if (!docSnapshot.exists()) {
-    //     console.error("No document found with ID:", complaintId);
-    //     return;
-    //   }
-    //   // Update Firestore with the new RespondedBy field
-    //   await updateDoc(complaintDocRef, { RespondedBy: updatedComplaint.RespondedBy });
-    //   // Update the local state with the new Complaint details
-    //   setCurrentComplaint(updatedComplaint);
-    //   console.log("Compllaint response updated successfully");
-    // } catch (error) {
-    //   console.error("Error updating Complaint response:", error);
-    // }
-  };
+    setModalVisible(false); // Close the modal
+  
+    try {
+      console.log("Current Complaint ID:", currentComplaint?.complaintId);
+      console.log("Complaint ID:", complaintId);
+  
+      // Validate Complaint ID
+      if (!complaintId) {
+        console.error("Complaint ID is missing");
+        return;
+      }
+  
+      // Validate GDT responder details
+      if (!GDT?.ID) {
+        console.error("Responder details are incomplete");
+        return;
+      }
+  
+      console.log("Before checking Firestore document");
+  
+      // Reference the Firestore document
+      const complaintDocRef = doc(db, "Complaint", complaintId);
+      
+      // Check if document exists
+      const docSnapshot = await getDoc(complaintDocRef);
+      if (!docSnapshot.exists()) {
+        console.error("No document found with ID:", complaintId);
+        return;
+      }
+  
+      console.log("Document exists. Preparing update...");
+  
+      // Define fields to update
+      const updateData = {
+        RespondedBy: GDT.ID, // Always update RespondedBy
+        Status: "Accepted",  // Always update Status
+      };
+  
+      // Only update GDTResponse if userInput is not empty
+      if (userInput && userInput.trim() !== "") {
+        updateData.GDTResponse = userInput;
+      }
+  
+      // Perform the update
+      await updateDoc(complaintDocRef, updateData);
+  
+      // Update local state
+      setCurrentComplaint((prevComplaint) => ({
+        ...prevComplaint,
+        ...updateData,
+      }));
+  
+      console.log("Complaint response updated successfully:", updateData);
+    } catch (error) {
+      console.error("Error updating complaint response:", error);
+    }
+  };  
 
 
   const handleReject = async () => {
