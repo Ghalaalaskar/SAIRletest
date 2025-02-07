@@ -340,6 +340,21 @@ console.log('notReadCrashes222222:',notReadCrashes22);
     }
   };
 
+  const getRecentCrashes = (crashes) => {
+    const currentDate = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(currentDate.getMonth() - 1); // Set to one month ago
+  
+    return Object.values(crashes).filter(crash => {
+      const crashDate = new Date(crash.time * 1000); // Convert Unix timestamp to Date
+      return crashDate >= oneMonthAgo; // Check if crash occurred within the last month
+    });
+  };
+  
+  // Check for recent crashes before rendering
+  const recentCrashes = getRecentCrashes(readCrashes);
+  const hasRecentCrashes = recentCrashes.length > 0;
+  
  
   const notificationMenu = (
     <div
@@ -438,14 +453,20 @@ console.log('notReadCrashes222222:',notReadCrashes22);
  
 <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>Read</p>
 
-{  Object.keys(readCrashes).length > 0 ? (
+{ hasRecentCrashes ? (
   <>
 
 {Object.values(readCrashes).map((crash) => {
+
+const currentDate = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(currentDate.getMonth() - 1); // Set to one month ago
+    const crashDate = new Date(crash.time * 1000); // Convert Unix timestamp to Date
+    
     const date = formatDate(crash.time);
     const time = new Date(crash.time * 1000).toLocaleTimeString();
     const driverName = drivers[crash.driverID] || 'Unknown Driver';
-
+if(crashDate >= oneMonthAgo){
     return (
       <div
         key={crash.id}
@@ -464,7 +485,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
           Crash detected on {date} at {time}.
         </span>
       </div>
-    );
+    );}
   })}
 
 </>
