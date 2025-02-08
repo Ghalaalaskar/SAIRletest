@@ -16,6 +16,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { BsCheck2Square } from "react-icons/bs"; // Importing the icon
 import { FaRegCheckCircle } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
+import { FaCheckDouble } from "react-icons/fa6";
+import { IoCheckmarkDoneSharp } from "react-icons/io5";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 
 const Header = ({ active }) => {
@@ -28,6 +32,7 @@ const Header = ({ active }) => {
   const [readCrashes, setReadCrashes] = useState(
     JSON.parse(localStorage.getItem("readCrashes")) || {}
   );
+  const [isShown, setIsShown] = useState(false);
 
   const [notReadCrashes22, setnotReadCrashes22] = useState(
     JSON.parse(localStorage.getItem("notReadCrashes22")) || {}
@@ -408,15 +413,41 @@ console.log('notReadCrashes222222:',notReadCrashes22);
     display: "flex",
     alignItems: "center",
     cursor: "pointer", // Makes it clickable
+    position: "relative",
 
   }}
   onClick={() => handleallread(notReadCrashes)}
-
+  onMouseEnter={() => setIsShown(true)}
+  onMouseLeave={() => setIsShown(false)}
   
 >
-  <FaRegCheckCircle size={30} color="black" />
+  <IoCheckmarkDoneSharp 
+   
+   size={25} color="black" />
+    {isShown && (
+         <div
+         style={{
+          position: "absolute",
+          bottom: "-30px", // Position the tooltip above the icon
+          left: "-10px",
+          transform: "translateX(-50%)",
+          backgroundColor: "white",
+          color: "black",
+          borderColor:'black',
+          padding: "5px 10px",
+          borderRadius: "5px",
+          fontSize: "12px",
+          whiteSpace: "nowrap",
+          boxShadow: "0px 2px 4px rgba(0,0,0,0.3)",
+          opacity: isShown ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
+         }}
+       >
+        Mark all as read       
+         </div>
+      )}
 </div>
-
+ 
   </div>
       <hr
       style={{
@@ -518,7 +549,8 @@ if(crashDate >= oneMonthAgo){
       <div
         key={crash.id}
         style={{
-          padding: '17px',
+          paddingLeft:'28px',
+          padding: '10px',
           borderBottom: '1px solid #ddd',
           cursor: 'pointer',
           backgroundColor:'#f0f0f0',
