@@ -106,7 +106,11 @@ const Header = ({ active }) => {
     // Update localStorage whenever storedCrashIds changes
     localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
   }, [storedCrashIds]);
-
+  
+  // useEffect(() => {
+  //   // Update localStorage whenever storedCrashIds changes
+  //   localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes));
+  // }, [notReadCrashes]);
   
   // Fetch drivers and crashes based on employer UID and company name
   const fetchDriversAndCrashes = useCallback(async () => {
@@ -222,6 +226,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
       localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
 
       const rr= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+      console.log('check11',rr);
 
       if(Object.keys(rr).length > 0){
         setHasNewCrashes(true);
@@ -257,39 +262,60 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   
 
 
-  const handleallread = async () => {
+  const handleallread = async (notReadCrashes) => {
     // Retrieve 'notReadCrashes22' from localStorage once
-    let allNotRead = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-    console.log(allNotRead);
+    console.log('check',notReadCrashes);
     // Create a new object for updated read crashes
-  
-    // Loop over all crashes that are not read
-    Object.values(allNotRead).forEach((crash) => {
-      // Update readCrashes with the current crash
-      const updatedReadCrashes = { ...readCrashes, [crash.id]: crash };
-      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
-      setReadCrashes(updatedReadCrashes);
-      // Move crash to read notifications
-      setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
-  
-      // Remove crash from 'notReadCrashes22'
-      delete allNotRead[crash.id];
-      localStorage.setItem("notReadCrashes22", JSON.stringify(allNotRead));
+    let updatedReadCrashes = { ...readCrashes};
+    let notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
 
+    
+    // for (let i = 0; i < notReadCrashes.length; i++) {
+    //   const crash = notReadCrashes[i];     
+    //   updatedReadCrashes = {  [crash.id]: crash };
+    //   console.log('updated',updatedReadCrashes);
+    //   localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+    //   const r= JSON.parse(localStorage.getItem("readCrashes")) || {};
+    //   console.log('readCrashes:',r);
+    //   setReadCrashes(readCrashes);
+    //   // Move crash to read notifications
+    //   setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
+
+    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+    //   delete notReadCrashes22[crash.id];
+    //   localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
+    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+
+    //   console.log('notReadCrashes22:',notReadCrashes22);
+    // }
+  
+    
+    // // setNotReadCrashes([]);  
+    // // setnotReadCrashes22({});
+
+   
+    // // Set the 'hasNewCrashes' flag to false in localStorage and state
+    // setHasNewCrashes(false);
+    // localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+
+    notReadCrashes.forEach(crash => {
+      updatedReadCrashes = { ...updatedReadCrashes, [crash.id]: crash };
+      delete notReadCrashes22[crash.id];
+  
+      // Update localStorage and state after the loop ends
+      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+  
+      // Log to check intermediate values
+      console.log('updatedReadCrashes:', updatedReadCrashes);
+      console.log('notReadCrashes22:', notReadCrashes22);
     });
   
-    // After the loop, update localStorage and state once
-
-    setNotReadCrashes([]);  // Clear the unread crashes since all have been moved to read
-    setnotReadCrashes22([]);
-
-    // Update the read crashes state
-   
-    console.log('1',readCrashes);
-    console.log('1',notReadCrashes);
+    // Update state after the loop
+    setReadCrashes(updatedReadCrashes);
+    setNotReadCrashes([]);
+    localStorage.setItem("notReadCrashes22", JSON.stringify({}));
 
 
-    // Set the 'hasNewCrashes' flag to false in localStorage and state
     setHasNewCrashes(false);
     localStorage.setItem("hasNewCrashes", JSON.stringify(false));
   };
@@ -384,7 +410,8 @@ console.log('notReadCrashes222222:',notReadCrashes22);
     cursor: "pointer", // Makes it clickable
 
   }}
-  onClick={handleallread}
+  onClick={() => handleallread(notReadCrashes)}
+
   
 >
   <FaRegCheckCircle size={30} color="black" />
