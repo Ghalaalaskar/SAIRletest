@@ -469,6 +469,25 @@ console.log('notReadCrashes222222:',notReadCrashes22);
           const driverName = drivers[crash.driverID] || 'Unknown Driver';
   
           return (
+          //   <div
+          //   key={crash.id}
+          //   style={{
+          //     paddingLeft:'28px',
+          //     padding: '10px',
+          //     borderBottom: '1px solid #ddd',
+          //     cursor: 'pointer',
+          //     backgroundColor:'#AFE1AF',
+          //   }}
+          //   onClick={() => handleNotificationClick2(crash)}
+          //   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#8FBC8B')}
+          //   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#AFE1AF')}
+          // >
+          //   <strong>Driver: {driverName}</strong>
+          //   <br />
+          //   <span>
+          //     Crash detected on {date} at {time}.
+          //   </span>
+          // </div>
             <div 
             key={crash.id}
             style={{ borderBottom: '1px solid #ddd' ,
@@ -549,7 +568,7 @@ if(crashDate >= oneMonthAgo){
       <div
         key={crash.id}
         style={{
-          paddingLeft:'28px',
+          paddingLeft:'18px',
           padding: '10px',
           borderBottom: '1px solid #ddd',
           cursor: 'pointer',
