@@ -524,8 +524,8 @@ if(crashDate >= oneMonthAgo){
           backgroundColor:'#f0f0f0',
         }}
         onClick={() => handleNotificationClick2(crash)}
-        // onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-        // onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#B8B8B8')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
       >
         <strong>Driver: {driverName}</strong>
         <br />
