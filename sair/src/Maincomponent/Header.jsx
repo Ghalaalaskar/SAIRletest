@@ -11,6 +11,12 @@ import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 import '../css/CustomModal.css';
 import { collection, onSnapshot, query, where,orderBy,updateDoc } from 'firebase/firestore';
 import styles from "../css/BadgeStyles.module.css";
+import { Check } from "lucide-react"; // Importing the check icon
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { BsCheck2Square } from "react-icons/bs"; // Importing the icon
+import { FaRegCheckCircle } from "react-icons/fa";
+
 
 const Header = ({ active }) => {
   const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
@@ -256,32 +262,30 @@ console.log('notReadCrashes222222:',notReadCrashes22);
     let allNotRead = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
     console.log(allNotRead);
     // Create a new object for updated read crashes
-    const updatedReadCrashes = { ...readCrashes };
   
     // Loop over all crashes that are not read
     Object.values(allNotRead).forEach((crash) => {
       // Update readCrashes with the current crash
-      updatedReadCrashes[crash.id] = crash;
-  
+      const updatedReadCrashes = { ...readCrashes, [crash.id]: crash };
+      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+      setReadCrashes(updatedReadCrashes);
       // Move crash to read notifications
       setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
   
       // Remove crash from 'notReadCrashes22'
       delete allNotRead[crash.id];
+      localStorage.setItem("notReadCrashes22", JSON.stringify(allNotRead));
+
     });
   
     // After the loop, update localStorage and state once
-    localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
-    localStorage.setItem("notReadCrashes22", JSON.stringify(allNotRead));
 
     setNotReadCrashes([]);  // Clear the unread crashes since all have been moved to read
-  
-    let allNotRead2 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+    setnotReadCrashes22([]);
 
     // Update the read crashes state
-    setReadCrashes(updatedReadCrashes);
+   
     console.log('1',readCrashes);
-    console.log('1',allNotRead2);
     console.log('1',notReadCrashes);
 
 
@@ -368,9 +372,25 @@ console.log('notReadCrashes222222:',notReadCrashes22);
         overflowY: 'auto', // Enable scrolling for long lists
       }}
     >
+      <div  style={{ display: 'flex', alignItems: 'center', gap: '136px' }}>
       <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>
         Crash Notifications
       </h3>
+    
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer", // Makes it clickable
+
+  }}
+  onClick={handleallread}
+  
+>
+  <FaRegCheckCircle size={30} color="black" />
+</div>
+
+  </div>
       <hr
       style={{
         border: '0',
@@ -380,25 +400,8 @@ console.log('notReadCrashes222222:',notReadCrashes22);
 
       }}
     />
-    <div style={{ display: 'flex', alignItems: 'center', gap: '158px' }}>
- <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'5px' }}>Unread</p> 
- <button style={{
-    backgroundColor: '#E0E0E0', 
-    color: 'black',
-    border: 'none',
-    padding: '5px 12px',
-    fontSize: '13px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background 0.3s ease',
-  }}
-  onClick={() => handleallread()}
-  onMouseOver={(e) => e.target.style.backgroundColor = '#C8C8C8'}
-  onMouseOut={(e) => e.target.style.backgroundColor = '#E0E0E0'}
-  >
-    Mark all as read
-  </button>
-</div>
+ <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'5px' ,marginLeft:'5px'}}>Unread</p> 
+ 
       { notReadCrashes.length > 0 ? (
         <>
    
@@ -408,20 +411,37 @@ console.log('notReadCrashes222222:',notReadCrashes22);
           const driverName = drivers[crash.driverID] || 'Unknown Driver';
   
           return (
-            <div
-              key={crash.id}
-              style={{
-                padding: '10px',
-                borderBottom: '1px solid #ddd',
-                cursor: 'pointer',
-              }}
+            <div 
+            key={crash.id}
+            style={{ borderBottom: '1px solid #ddd' ,
+              padding: '10px',
+              cursor: 'pointer',
+              transition: 'background 0.3s ease',}}
               onClick={() => handleNotificationClick(crash)}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}>
+            <div
+              
+              style={{
+                display: 'flex',
+        alignItems: 'center', // Aligns the circle and text in a row
+        gap: '10px', // Adds spacing between the circle and text
+        
+              }}
+              
             >
+             <div
+        style={{
+          width: '8px',
+          height: '8px',
+          backgroundColor: 'red',
+          borderRadius: '50%',
+          flexShrink: 0, // Prevents it from resizing
+        }}
+      ></div>
               <strong>Driver: {driverName}</strong>
-              <br />
-              <span>
+              <br /></div>
+              <span style={{padding: '17px',}}>
                 Crash detected on {date} at {time}.
               </span>
             </div>
@@ -451,7 +471,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
       )}
 
  
-<p style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>Read</p>
+<p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'20px',marginLeft:'5px' }}>Read</p>
 
 { hasRecentCrashes ? (
   <>
@@ -471,13 +491,14 @@ if(crashDate >= oneMonthAgo){
       <div
         key={crash.id}
         style={{
-          padding: '10px',
+          padding: '17px',
           borderBottom: '1px solid #ddd',
           cursor: 'pointer',
+          backgroundColor:'#f0f0f0',
         }}
         onClick={() => handleNotificationClick2(crash)}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+        // onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+        // onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
       >
         <strong>Driver: {driverName}</strong>
         <br />
