@@ -488,40 +488,84 @@ console.log('notReadCrashes222222:',notReadCrashes22);
           //     Crash detected on {date} at {time}.
           //   </span>
           // </div>
-            <div 
-            key={crash.id}
-            style={{ borderBottom: '1px solid #ddd' ,
-              padding: '10px',
-              cursor: 'pointer',
-              transition: 'background 0.3s ease',}}
-              onClick={() => handleNotificationClick(crash)}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}>
-            <div
+      //       <div 
+      //       key={crash.id}
+      //       style={{ borderBottom: '1px solid #ddd' ,
+      //         padding: '10px',
+      //         cursor: 'pointer',
+      //         transition: 'background 0.3s ease',}}
+      //         onClick={() => handleNotificationClick(crash)}
+      //         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+      //         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}>
+      //       <div
               
-              style={{
-                display: 'flex',
-        alignItems: 'center', // Aligns the circle and text in a row
-        gap: '10px', // Adds spacing between the circle and text
+      //         style={{
+      //           display: 'flex',
+      //   alignItems: 'center', // Aligns the circle and text in a row
+      //   gap: '10px', // Adds spacing between the circle and text
         
-              }}
+      //         }}
               
-            >
-             <div
-        style={{
-          width: '8px',
-          height: '8px',
-          backgroundColor: 'red',
-          borderRadius: '50%',
-          flexShrink: 0, // Prevents it from resizing
-        }}
-      ></div>
-              <strong>Driver: {driverName}</strong>
-              <br /></div>
-              <span style={{padding: '17px',}}>
-                Crash detected on {date} at {time}.
-              </span>
-            </div>
+      //       >
+      //        <div
+      //   style={{
+      //     width: '8px',
+      //     height: '8px',
+      //     backgroundColor: 'red',
+      //     borderRadius: '50%',
+      //     flexShrink: 0, // Prevents it from resizing
+      //   }}
+      // ></div>
+      //         <strong>Driver: {driverName}</strong>
+      //         <br /></div>
+      //         <span style={{padding: '17px',}}>
+      //           Crash detected on {date} at {time}.
+      //         </span>
+      //       </div>
+
+
+
+
+
+      <div 
+  key={crash.id}
+  style={{ 
+    borderBottom: '1px solid #ddd',
+    padding: '10px',
+    cursor: 'pointer',
+    transition: 'background 0.3s ease'
+  }}
+  onClick={() => handleNotificationClick(crash)}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center', // Aligns the line and text
+      gap: '10px' // Space between line and text
+    }}
+  >
+    {/* Vertical Red Line */}
+    <div
+      style={{
+        width: '2px',  // Thin width for a line
+            height: '30px', // Adjust height for line length
+            backgroundColor: '#059855',
+            borderRadius: '0', // No rounded corners
+            flexShrink: 0
+      }}
+    ></div>
+
+    {/* Text Container */}
+    <div>
+      <strong>Driver: {driverName}</strong>
+      <br />
+      <span>Crash detected on {date} at {time}.</span>
+    </div>
+  </div>
+</div>
+
           );
         })}
 
