@@ -532,6 +532,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   style={{ 
     borderBottom: '1px solid #ddd',
     padding: '10px',
+    paddingLeft: '-17px',
     cursor: 'pointer',
     transition: 'background 0.3s ease'
   }}
@@ -543,7 +544,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
     style={{
       display: 'flex',
       alignItems: 'center', // Aligns the line and text
-      gap: '10px' // Space between line and text
+      gap: '7px' // Space between line and text
     }}
   >
     {/* Vertical Red Line */}
@@ -553,7 +554,8 @@ console.log('notReadCrashes222222:',notReadCrashes22);
             height: '30px', // Adjust height for line length
             backgroundColor: '#059855',
             borderRadius: '0', // No rounded corners
-            flexShrink: 0
+            flexShrink: 0,
+          
       }}
     ></div>
 
