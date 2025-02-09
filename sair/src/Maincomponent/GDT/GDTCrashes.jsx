@@ -27,6 +27,13 @@ const CrashList = () => {
   const [currentCrash, setCurrentCrash] = useState({});
   const [drivers, setDrivers] = useState({});
   const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
+  const [respondingGDT, setRespondingGDT] = useState({
+    Fname: "",
+    Lname: "", 
+    ID: "",
+    GDTEmail: "",
+    PhoneNumber: "",
+  });
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchDriverID, setSearchDriverID] = useState("");
   const [searchDate, setSearchDate] = useState("");
@@ -219,6 +226,43 @@ const CrashList = () => {
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
 
+  const GDTResponse = (RespondedBy, setResponseByName) => {
+    try {
+      // Query the GDT collection based on RespondedBy ID
+      const gdtQuery = query(collection(db, "GDT"), where("ID", "==", RespondedBy));
+  
+      // Set up a real-time listener
+      const unsubscribe = onSnapshot(gdtQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const gdtData = snapshot.docs[0].data();
+          setResponseByName(`${gdtData.Fname} ${gdtData.Lname}`);
+        } else {
+          console.error("No GDT document found with ID:", RespondedBy);
+          setResponseByName("Unknown");
+        }
+      });
+  
+      // Cleanup function to remove listener when component unmounts
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error fetching GDT details:", error);
+      setResponseByName("Error");
+    }
+  };
+  
+  const ResponseBy = ({ respondedBy }) => {
+    const [responseByName, setResponseByName] = useState("");
+  
+    useEffect(() => {
+      if (respondedBy) {
+        const unsubscribe = GDTResponse(respondedBy, setResponseByName);
+        return () => unsubscribe && unsubscribe(); // Cleanup listener on unmount
+      }
+    }, [respondedBy]);
+  
+    return <span>{responseByName}</span>;
+  };
+
   const handleViewDetails = (record) => {
     setModalVisible(false);
     const updatedViewedCrashes = { ...viewedCrashes, [record.id]: true };
@@ -330,7 +374,7 @@ const CrashList = () => {
           return <span style={{ color: "grey" }}>No Response Needed</span>;
         } else if (formattedStatus === "Emergency sos" && record.RespondedBy) {
           // Render the RespondedBy value with an underline
-          return <span>{record.RespondedBy}</span>;
+          return <ResponseBy respondedBy={record.RespondedBy} />;
         } else if (formattedStatus === "Emergency sos" && !record.RespondedBy) {
           return (
             // i did not remove the function but only change button to p also remove on click
@@ -554,7 +598,7 @@ const CrashList = () => {
               style: {
                 backgroundColor:
                   !viewedCrashes[record.id] && !record.RespondedBy
-                    ? "#f0f8f0"
+                    ? "#d0e0d0"
                     : "transparent",
               },
             })}

@@ -28,6 +28,13 @@ const CrashGeneral = () => {
   const [driverDetails, setDriverDetails] = useState({});
   const [employerDetails, setEmployerDetails] = useState({});
   const [GDT, setGDT] = useState({ Fname: "", Lname: "" });
+  const [respondingGDT, setRespondingGDT] = useState({
+    Fname: "",
+    Lname: "", 
+    ID: "",
+    GDTEmail: "",
+    PhoneNumber: "",
+  });
   const [originalGDTData, setOriginalGDTData] = useState({});
   const { crashId } = useParams();
   const navigate = useNavigate();
@@ -42,6 +49,26 @@ const CrashGeneral = () => {
           if (doc.exists()) {
             const crashData = doc.data();
             setCurrentCrash(crashData);
+
+            if (crashData.RespondedBy) {
+            // Query the GDT collection to fetch the GDT details based on the GDT ID
+            const gdtQuery = query(
+              collection(db, "GDT"),
+              where("ID", "==", crashData.RespondedBy)
+            );
+
+            const gdtSnapshot = await getDocs(gdtQuery);
+
+            if (gdtSnapshot.size > 0) {
+              const gdtData = gdtSnapshot.docs[0].data();
+              setRespondingGDT({ Fname: gdtData.Fname, Lname: gdtData.Lname, ID: gdtData.ID, GDTEmail: gdtData.GDTEmail , PhoneNumber: gdtData.PhoneNumber });
+            } else {
+              console.error(
+                "No GDT document found with ID:",
+                crashData.RespondedBy
+              );
+            }
+          }
 
             // Fetch driver details using the driver's ID
             const driverCollection = query(
@@ -128,7 +155,7 @@ const CrashGeneral = () => {
   };
 
   const goBack = () => {
-    navigate("/GDTcrashes"); // Navigate back to the previous page 
+    navigate("/GDTcrashes"); // Navigate back to the previous page
   };
 
   const formatDate = (time) => {
@@ -163,7 +190,7 @@ const CrashGeneral = () => {
       }
 
       // Ensure the GDT data is valid
-      if (!GDT.Fname || !GDT.Lname) {
+      if (!GDT.ID) {
         console.error("Responder details are incomplete");
         return;
       }
@@ -171,7 +198,7 @@ const CrashGeneral = () => {
       console.log("Before updatedCrash");
       const updatedCrash = {
         ...currentCrash,
-        RespondedBy: `${GDT.Fname} ${GDT.Lname}`, // Combine first and last name
+        RespondedBy: GDT.ID, // Combine first and last name
       };
       console.log("After updatedCrash");
 
@@ -1166,7 +1193,7 @@ const CrashGeneral = () => {
                     onClick={handleShowPopupStaff}
                     style={{ marginLeft: "4px" }}
                   >
-                    {currentCrash.RespondedBy}
+                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
                   </span>
                 </strong>
               </div>
@@ -1234,7 +1261,7 @@ const CrashGeneral = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      {GDT.ID}
+                      {respondingGDT.ID}
                     </p>
 
                     <h3
@@ -1287,7 +1314,7 @@ const CrashGeneral = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      {GDT.Fname} {GDT.Lname}
+                      {respondingGDT.Fname} {respondingGDT.Lname}
                     </p>
 
                     <h3
@@ -1322,7 +1349,7 @@ const CrashGeneral = () => {
                         marginBottom: "20px",
                       }}
                     >
-                      {GDT.PhoneNumber}
+                      {respondingGDT.PhoneNumber}
                     </p>
 
                     <h3
@@ -1369,7 +1396,7 @@ const CrashGeneral = () => {
                         href={`mailto:${employerDetails?.CompanyEmail}`}
                         style={{ color: "#444", textDecoration: "underline" }}
                       >
-                        {GDT.GDTEmail}
+                        {respondingGDT.GDTEmail}
                       </a>
                     </p>
                   </div>

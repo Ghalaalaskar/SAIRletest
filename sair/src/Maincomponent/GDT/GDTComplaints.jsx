@@ -79,20 +79,19 @@ const GDTComplaintList = () => {
       return () => unsubscribeDrivers();
     };
 
+    const fetchCompany = async (companyName) => {
+      const companyQuery = query(
+        collection(db, "Employer"),
+        where("CompanyName", "==", companyName)
+      );
 
-        const fetchCompany = async (companyName) => {
-          const companyQuery = query(
-            collection(db, "Employer"),
-            where("CompanyName", "==", companyName)
-          );
-    
-          const snapshot = await getDocs(companyQuery);
-          if (!snapshot.empty) {
-            const companyData = snapshot.docs[0].data();
-            return companyData.ShortCompanyName || companyName; // Fallback to full name if short name not available
-          }
-          return companyName; // Return the original name if no match found
-        };
+      const snapshot = await getDocs(companyQuery);
+      if (!snapshot.empty) {
+        const companyData = snapshot.docs[0].data();
+        return companyData.ShortCompanyName || companyName; // Fallback to full name if short name not available
+      }
+      return companyName; // Return the original name if no match found
+    };
 
     const fetchComplaints = (driverIds) => {
       if (driverIds.length === 0) return;
@@ -144,6 +143,46 @@ const GDTComplaintList = () => {
     fetchDriversAndComplaints();
   }, [gdtUID]);
 
+  const GDTResponse = (RespondedBy, setResponseByName) => {
+    try {
+      // Reference to GDT collection with filtering
+      const gdtQuery = query(
+        collection(db, "GDT"),
+        where("ID", "==", RespondedBy)
+      );
+
+      // Set up a real-time listener
+      const unsubscribe = onSnapshot(gdtQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const gdtData = snapshot.docs[0].data();
+          setResponseByName(`${gdtData.Fname} ${gdtData.Lname}`);
+        } else {
+          console.error("No GDT document found with ID:", RespondedBy);
+          setResponseByName("Unknown");
+        }
+      });
+
+      // Cleanup function to remove listener when component unmounts
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error fetching GDT details:", error);
+      setResponseByName("Error");
+    }
+  };
+
+  const ResponseBy = ({ respondedBy }) => {
+    const [responseByName, setResponseByName] = useState("");
+
+    useEffect(() => {
+      if (respondedBy) {
+        const unsubscribe = GDTResponse(respondedBy, setResponseByName);
+        return () => unsubscribe && unsubscribe(); // Cleanup listener on unmount
+      }
+    }, [respondedBy]);
+
+    return <span>{responseByName}</span>;
+  };
+
   const filteredComplaints = complaints
     .sort((a, b) => (b.DateTime?.seconds || 0) - (a.DateTime?.seconds || 0)) // Sort by DateTime in descending order
     .filter((complaint) => {
@@ -191,7 +230,7 @@ const GDTComplaintList = () => {
       title: "Company Name",
       key: "CompanyName",
       align: "center",
-      
+
       render: (text, record) => {
         const companyName = drivers[record.driverID]?.shortCompanyName || "   ";
         const capitalizedCompanyName =
@@ -233,7 +272,7 @@ const GDTComplaintList = () => {
 
         if (record.RespondedBy) {
           // Render the RespondedBy value with an underline
-          return <span>{record.RespondedBy}</span>;
+          return <ResponseBy respondedBy={record.RespondedBy} />;
         } else if (!record.RespondedBy) {
           return (
             <p

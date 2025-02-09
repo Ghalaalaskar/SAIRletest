@@ -11,6 +11,16 @@ import { ShortCompanyNameContext } from '../ShortCompanyNameContext';
 import '../css/CustomModal.css';
 import { collection, onSnapshot, query, where,orderBy,updateDoc } from 'firebase/firestore';
 import styles from "../css/BadgeStyles.module.css";
+import { Check } from "lucide-react"; // Importing the check icon
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { BsCheck2Square } from "react-icons/bs"; // Importing the icon
+import { FaRegCheckCircle } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
+import { FaCheckDouble } from "react-icons/fa6";
+import { IoCheckmarkDoneSharp } from "react-icons/io5";
+import * as Tooltip from "@radix-ui/react-tooltip";
+
 
 const Header = ({ active }) => {
   const { shortCompanyName , setShortCompanyName} = useContext(ShortCompanyNameContext);
@@ -18,21 +28,29 @@ const Header = ({ active }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [crashes, setCrashes] = useState([]); // Store crash notifications
   const [drivers, setDrivers] = useState({});
+  const [notReadCrashes, setNotReadCrashes] = useState([]);
+  const [readCrashes, setReadCrashes] = useState(
+    JSON.parse(localStorage.getItem("readCrashes")) || {}
+  );
+  const [isShown, setIsShown] = useState(false);
 
-   ///ABOUT RED CIRCULE VISIBILITY
-   const [isFirstLogin, setIsFirstLogin] = useState(false);
-   const [hasNewCrashes, setHasNewCrashes] = useState(() => {
-    const saved = localStorage.getItem("hasNewCrashes");
-    return saved ? JSON.parse(saved) : false; // Default to false if not saved
-  });
+  const [notReadCrashes22, setnotReadCrashes22] = useState(
+    JSON.parse(localStorage.getItem("notReadCrashes22")) || {}
+  );
+  //  const [hasNewCrashes, setHasNewCrashes] = useState(() => {
+  //   const saved = localStorage.getItem("hasNewCrashes");
+  //   return saved ? JSON.parse(saved) : false; // Default to false if not saved
+  // });
+  const [hasNewCrashes, setHasNewCrashes] = useState(Object.keys(notReadCrashes22).length > 0);
+
      const [storedCrashIds, setStoredCrashIds] = useState(() => {
     const saved = localStorage.getItem("crashIds");
     return saved ? JSON.parse(saved) : []; // Parse JSON if found, else initialize as an empty array
   });
   const [refreshKey, setRefreshKey] = useState(0);
 
-
-    ///ABOUT RED CIRCULE VISIBILITY
+ 
+ 
 
 
   useEffect(() => {
@@ -73,16 +91,31 @@ const Header = ({ active }) => {
   // }, []);
  
 
-  useEffect(() => {
-    console.log('here when');
-    localStorage.setItem("hasNewCrashes", JSON.stringify(hasNewCrashes));
-  }, [hasNewCrashes]);
+//   useEffect(() => {
+//     const notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+// console.log('1',hasNewCrashes);
+// console.log('2',notReadCrashes22);
+
+//     if(Object.keys(notReadCrashes22).length > 0){
+// setHasNewCrashes(true);
+// localStorage.setItem("hasNewCrashes", JSON.stringify(true));
+// console.log('yees',hasNewCrashes);
+//     }
+//     else{
+//       setHasNewCrashes(false);
+// localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+//     }
+//   }, []);
 
   useEffect(() => {
     // Update localStorage whenever storedCrashIds changes
     localStorage.setItem("crashIds", JSON.stringify(storedCrashIds));
   }, [storedCrashIds]);
-
+  
+  // useEffect(() => {
+  //   // Update localStorage whenever storedCrashIds changes
+  //   localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes));
+  // }, [notReadCrashes]);
   
   // Fetch drivers and crashes based on employer UID and company name
   const fetchDriversAndCrashes = useCallback(async () => {
@@ -131,74 +164,167 @@ const Header = ({ active }) => {
       const crashCollection = query(
         collection(db, 'Crash'),
         where('driverID', 'in', chunk),
-        where('Status', '==', 'Confirmed'),
-        where('Flag', '==', true),
-        where('isRead', '==', false),
+        where('Status', '==', 'Emergency SOS'),
         orderBy('time', 'desc') // Order crashes by time in descending order
       );
-
       const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
+        
+        const storedReadCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage
+
         const crashList = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         
-        
-        setCrashes(crashList);
-        const newCrashIds = crashList.map((crash) => crash.id);
-        console.log("Fetched new crash IDs:", newCrashIds);
-        console.log('old',storedCrashIds);
+        // setCrashes(crashList);
+        // const newCrashIds = crashList.map((crash) => crash.id);
+        // console.log("Fetched new crash IDs:", newCrashIds);
+        // console.log('old',storedCrashIds);
+       
 
-        const isNewCrash = newCrashIds.some((id) => !storedCrashIds.includes(id));
-        if (isNewCrash) {
-          console.log("New crashes detected!");
-          const updatedCrashIds = [...new Set([...storedCrashIds, ...newCrashIds])]; // Merge arrays without duplicates
-          setStoredCrashIds(updatedCrashIds); // Update state
+        const newCrashes = crashList.filter(crash => !storedReadCrashes[crash.id]);
+
+
+        newCrashes.forEach(crash => {
+          const updatedReadCrashes = { ...notReadCrashes22, [crash.id]: crash };
+          localStorage.setItem("notReadCrashes22", JSON.stringify(updatedReadCrashes));///for the red circul
+          setnotReadCrashes22(updatedReadCrashes);
+        })
+
+        const r= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+        if(Object.keys(r).length > 0){
           setHasNewCrashes(true);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(true)); // Persist in localStorage
-          localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
+          localStorage.setItem("hasNewCrashes", JSON.stringify(true));
+          console.log('yees',hasNewCrashes);
+              }
+              else{
+                setHasNewCrashes(false);
+          localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+              }
 
-        }
-      }, []);
+console.log('notReadCrashes222222:',notReadCrashes22);
+        setNotReadCrashes(newCrashes);
+      });
       
         ///ABOUT RED CIRCULE VISIBILITY
       return () => unsubscribeCrashes();
     }
-  }, []);//not sure
+  });//not sure
 
   
-
 
   // Update crash as read and navigate to details page
   const handleNotificationClick = async (crash) => {
     try {
-      
-      await updateDoc(doc(db, "Crash", crash.id), { isRead: true });
+      console.log('id:',crash.id);
+      const updatedReadCrashes = { ...readCrashes, [crash.id]: crash };
+      console.log('updated',updatedReadCrashes);
+      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+     const r= JSON.parse(localStorage.getItem("readCrashes")) || {};
+    console.log('r:',r);
+      setReadCrashes(updatedReadCrashes);
+      // Move crash to read notifications
+      setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
 
-      console.log('h1',storedCrashIds);
-      console.log(crash.id);
-      const updatedCrashIds = storedCrashIds.filter((id) => id !== crash.id);
-      setStoredCrashIds(updatedCrashIds);
-      console.log('handle',storedCrashIds);
-      console.log("Setting hasNewCrashes to false after crash click");
-      setHasNewCrashes(false);
+      let notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+      delete notReadCrashes22[crash.id];
+      localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
 
-      localStorage.setItem("crashIds", JSON.stringify(updatedCrashIds)); //not sure place
-      localStorage.setItem("hasNewCrashes", JSON.stringify(false)); 
+      const rr= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+      console.log('check11',rr);
 
+      if(Object.keys(rr).length > 0){
+        setHasNewCrashes(true);
+        localStorage.setItem("hasNewCrashes", JSON.stringify(true));
+        console.log('llllol',hasNewCrashes);
+            }
+            else{
+              setHasNewCrashes(false);
+        localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+            }
+
+
+      console.log('after remove:',notReadCrashes22);
 
       navigate(`/crash/general/${crash.id}`);
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
-  useEffect(() => {
-    console.log('hasNewCrashes updated:', hasNewCrashes);
-  }, [hasNewCrashes, refreshKey]); // Add refreshKey as a dependency
+  const handleNotificationClick2 = async (crash) => {
+    try {
+     
+      navigate(`/crash/general/${crash.id}`);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+  
+  // useEffect(() => {
+  //   console.log('hasNewCrashes updated:', hasNewCrashes);
+  // }, [hasNewCrashes, refreshKey]); // Add refreshKey as a dependency
 
   
-  
 
+
+  const handleallread = async (notReadCrashes) => {
+    // Retrieve 'notReadCrashes22' from localStorage once
+    console.log('check',notReadCrashes);
+    // Create a new object for updated read crashes
+    let updatedReadCrashes = { ...readCrashes};
+    let notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+
+    
+    // for (let i = 0; i < notReadCrashes.length; i++) {
+    //   const crash = notReadCrashes[i];     
+    //   updatedReadCrashes = {  [crash.id]: crash };
+    //   console.log('updated',updatedReadCrashes);
+    //   localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+    //   const r= JSON.parse(localStorage.getItem("readCrashes")) || {};
+    //   console.log('readCrashes:',r);
+    //   setReadCrashes(readCrashes);
+    //   // Move crash to read notifications
+    //   setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
+
+    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+    //   delete notReadCrashes22[crash.id];
+    //   localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
+    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+
+    //   console.log('notReadCrashes22:',notReadCrashes22);
+    // }
+  
+    
+    // // setNotReadCrashes([]);  
+    // // setnotReadCrashes22({});
+
+   
+    // // Set the 'hasNewCrashes' flag to false in localStorage and state
+    // setHasNewCrashes(false);
+    // localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+
+    notReadCrashes.forEach(crash => {
+      updatedReadCrashes = { ...updatedReadCrashes, [crash.id]: crash };
+      delete notReadCrashes22[crash.id];
+  
+      // Update localStorage and state after the loop ends
+      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+  
+      // Log to check intermediate values
+      console.log('updatedReadCrashes:', updatedReadCrashes);
+      console.log('notReadCrashes22:', notReadCrashes22);
+    });
+  
+    // Update state after the loop
+    setReadCrashes(updatedReadCrashes);
+    setNotReadCrashes([]);
+    localStorage.setItem("notReadCrashes22", JSON.stringify({}));
+
+
+    setHasNewCrashes(false);
+    localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+  };
+  
   useEffect(() => {
     fetchDriversAndCrashes();
   }, [fetchDriversAndCrashes]);
@@ -226,12 +352,7 @@ const Header = ({ active }) => {
 
   
 
-  // const handleLogout = async () => {
-  //   await auth.signOut();
-  //   sessionStorage.removeItem('ShortCompanyName'); // Clear sessionStorage
-  //   navigate('/');
-  //   setModalVisible(false);
-  // };
+ 
   const handleLogout = async () => {
     try {
       await auth.signOut(); // Sign out the user
@@ -239,7 +360,11 @@ const Header = ({ active }) => {
       sessionStorage.removeItem('ShortCompanyName');
       sessionStorage.removeItem('employerUID');
       localStorage.removeItem('crashIds');
-      localStorage.removeItem('hasNewCrashes');
+      // localStorage.removeItem('readCrashes');
+      // localStorage.removeItem('notReadCrashes');
+      // localStorage.removeItem('notReadCrashes22');
+
+      // localStorage.removeItem('hasNewCrashes');
       window.dispatchEvent(new Event('storage')); // Notify other components
       // Navigate to the login page
       navigate('/');
@@ -250,6 +375,21 @@ const Header = ({ active }) => {
     }
   };
 
+  const getRecentCrashes = (crashes) => {
+    const currentDate = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(currentDate.getMonth() - 1); // Set to one month ago
+  
+    return Object.values(crashes).filter(crash => {
+      const crashDate = new Date(crash.time * 1000); // Convert Unix timestamp to Date
+      return crashDate >= oneMonthAgo; // Check if crash occurred within the last month
+    });
+  };
+  
+  // Check for recent crashes before rendering
+  const recentCrashes = getRecentCrashes(readCrashes);
+  const hasRecentCrashes = recentCrashes.length > 0;
+  
  
   const notificationMenu = (
     <div
@@ -263,9 +403,52 @@ const Header = ({ active }) => {
         overflowY: 'auto', // Enable scrolling for long lists
       }}
     >
+      <div  style={{ display: 'flex', alignItems: 'center', gap: '136px' }}>
       <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#333' }}>
         Crash Notifications
       </h3>
+    
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer", // Makes it clickable
+    position: "relative",
+
+  }}
+  onClick={() => handleallread(notReadCrashes)}
+  onMouseEnter={() => setIsShown(true)}
+  onMouseLeave={() => setIsShown(false)}
+  
+>
+  <IoCheckmarkDoneSharp 
+   
+   size={25} color="black" />
+    {isShown && (
+         <div
+         style={{
+          position: "absolute",
+          bottom: "-30px", // Position the tooltip above the icon
+          left: "-10px",
+          transform: "translateX(-50%)",
+          backgroundColor: "white",
+          color: "black",
+          borderColor:'black',
+          padding: "5px 10px",
+          borderRadius: "5px",
+          fontSize: "12px",
+          whiteSpace: "nowrap",
+          boxShadow: "0px 2px 4px rgba(0,0,0,0.3)",
+          opacity: isShown ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
+         }}
+       >
+        Mark all as read       
+         </div>
+      )}
+</div>
+ 
+  </div>
       <hr
       style={{
         border: '0',
@@ -275,38 +458,192 @@ const Header = ({ active }) => {
 
       }}
     />
-      {crashes.length > 0 ? (
-        crashes.map((crash) => {
+ <p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'5px' ,marginLeft:'5px'}}>Unread</p> 
+ 
+      { notReadCrashes.length > 0 ? (
+        <>
+   
+    {notReadCrashes.map((crash) => {
           const date = formatDate(crash.time);
           const time = new Date(crash.time * 1000).toLocaleTimeString();
           const driverName = drivers[crash.driverID] || 'Unknown Driver';
   
           return (
-            <div
-              key={crash.id}
-              style={{
-                padding: '10px',
-                borderBottom: '1px solid #ddd',
-                cursor: 'pointer',
-              }}
-              onClick={() => handleNotificationClick(crash)}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
-            >
-              <strong>Driver: {driverName}</strong>
-              <br />
-              <span>
-                Crash detected on {date} at {time}.
-              </span>
-            </div>
+          //   <div
+          //   key={crash.id}
+          //   style={{
+          //     paddingLeft:'28px',
+          //     padding: '10px',
+          //     borderBottom: '1px solid #ddd',
+          //     cursor: 'pointer',
+          //     backgroundColor:'#AFE1AF',
+          //   }}
+          //   onClick={() => handleNotificationClick2(crash)}
+          //   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#8FBC8B')}
+          //   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#AFE1AF')}
+          // >
+          //   <strong>Driver: {driverName}</strong>
+          //   <br />
+          //   <span>
+          //     Crash detected on {date} at {time}.
+          //   </span>
+          // </div>
+      //       <div 
+      //       key={crash.id}
+      //       style={{ borderBottom: '1px solid #ddd' ,
+      //         padding: '10px',
+      //         cursor: 'pointer',
+      //         transition: 'background 0.3s ease',}}
+      //         onClick={() => handleNotificationClick(crash)}
+      //         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+      //         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}>
+      //       <div
+              
+      //         style={{
+      //           display: 'flex',
+      //   alignItems: 'center', // Aligns the circle and text in a row
+      //   gap: '10px', // Adds spacing between the circle and text
+        
+      //         }}
+              
+      //       >
+      //        <div
+      //   style={{
+      //     width: '8px',
+      //     height: '8px',
+      //     backgroundColor: 'red',
+      //     borderRadius: '50%',
+      //     flexShrink: 0, // Prevents it from resizing
+      //   }}
+      // ></div>
+      //         <strong>Driver: {driverName}</strong>
+      //         <br /></div>
+      //         <span style={{padding: '17px',}}>
+      //           Crash detected on {date} at {time}.
+      //         </span>
+      //       </div>
+
+
+
+
+
+      <div 
+  key={crash.id}
+  style={{ 
+    borderBottom: '1px solid #ddd',
+    padding: '10px',
+    paddingLeft: '-17px',
+    cursor: 'pointer',
+    transition: 'background 0.3s ease'
+  }}
+  onClick={() => handleNotificationClick(crash)}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center', // Aligns the line and text
+      gap: '7px' // Space between line and text
+    }}
+  >
+    {/* Vertical Red Line */}
+    <div
+      style={{
+        width: '2px',  // Thin width for a line
+            height: '30px', // Adjust height for line length
+            backgroundColor: '#059855',
+            borderRadius: '0', // No rounded corners
+            flexShrink: 0,
+          
+      }}
+    ></div>
+
+    {/* Text Container */}
+    <div>
+      <strong>Driver: {driverName}</strong>
+      <br />
+      <span>Crash detected on {date} at {time}.</span>
+    </div>
+  </div>
+</div>
+
           );
-        })
+        })}
+
+  </>
       ) : (
         <div style={{ textAlign: 'center', marginTop: '50px', color: '#aaa' }}>
           <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-          <p>No new notifications</p>
+          <p
+           style={{
+            marginBottom: '90px', 
+          }}
+          >No new notifications</p>
+          <hr
+      style={{
+        border: '0',
+        borderTop: '1px solid #ddd',
+        marginTop: '0', 
+        marginBottom: '10px', 
+
+      }}
+    />
         </div>
+        
       )}
+
+ 
+<p style={{ fontSize: '18px', marginBottom: '10px', color: '#333', marginTop:'20px',marginLeft:'5px' }}>Read</p>
+
+{ hasRecentCrashes ? (
+  <>
+
+{Object.values(readCrashes).map((crash) => {
+
+const currentDate = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(currentDate.getMonth() - 1); // Set to one month ago
+    const crashDate = new Date(crash.time * 1000); // Convert Unix timestamp to Date
+    
+    const date = formatDate(crash.time);
+    const time = new Date(crash.time * 1000).toLocaleTimeString();
+    const driverName = drivers[crash.driverID] || 'Unknown Driver';
+if(crashDate >= oneMonthAgo){
+    return (
+      <div
+        key={crash.id}
+        style={{
+          paddingLeft:'18px',
+          padding: '10px',
+          borderBottom: '1px solid #ddd',
+          cursor: 'pointer',
+          backgroundColor:'#f0f0f0',
+        }}
+        onClick={() => handleNotificationClick2(crash)}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#B8B8B8')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+      >
+        <strong>Driver: {driverName}</strong>
+        <br />
+        <span>
+          Crash detected on {date} at {time}.
+        </span>
+      </div>
+    );}
+  })}
+
+</>
+) : (
+  <div style={{ textAlign: 'center', marginTop: '50px', color: '#aaa' }}>
+    <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
+    <p
+    style={{
+      marginBottom: '90px', 
+    }}
+    >No read notifications</p>
+  </div>
+)}
     </div>
   );
   

@@ -1,11 +1,18 @@
 {
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "axios": "^1.7.9",
     "axois": "^0.0.1-security",
     "cors": "^2.8.5",
     "emailjs-com": "^3.2.0",
     "express": "^4.21.2",
     "firebase-admin": "^13.0.2",
+    "lucide-react": "^0.475.0",
+    "shadcn-ui": "^0.9.4",
     "uuid": "^11.0.5",
     "xlsx": "^0.18.5"
   },
