@@ -218,6 +218,12 @@ Email</h3>
             ) : (
               <p>No motorcycles associated with this driver.</p> 
             )}
+            <Button onClick={goBack} style={{
+              float: 'right', marginBottom: '100px', width: 'auto',
+              height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
+            }}>
+              <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
+            </Button>
             <button onClick={handleViewViolations} style={{
               backgroundColor: '#059855',
               color: 'white',
@@ -234,12 +240,7 @@ Email</h3>
               View Violations
             </button>
 
-            <Button onClick={goBack} style={{
-              float: 'right', marginBottom: '100px', width: 'auto',
-              height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
-            }}>
-              <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
-            </Button>
+            
           </>
         ) : null}
       </main>

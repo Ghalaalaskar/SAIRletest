@@ -653,7 +653,21 @@ const ViolationDetail = () => {
           </div>
         </div>
         <hr />
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "90px" }}>
+        <Button
+            onClick={goBack}
+            style={{
+              float: "right",
+              marginBottom: "100px",
+              width: "auto",
+              height: "60px",
+              fontSize: "15px",
+              color: "#059855",
+              borderColor: "#059855",
+            }}
+          >
+            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+          </Button>
           {/* View Complaints Button */}
           <Button
             onClick={handleViewComplaints}
@@ -672,20 +686,7 @@ const ViolationDetail = () => {
             <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
             View Complaints
           </Button>
-          <Button
-            onClick={goBack}
-            style={{
-              float: "right",
-              marginBottom: "100px",
-              width: "auto",
-              height: "60px",
-              fontSize: "15px",
-              color: "#059855",
-              borderColor: "#059855",
-            }}
-          >
-            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-          </Button>
+          
         </div>
       </main>
       {/* Popup for no complaints */}

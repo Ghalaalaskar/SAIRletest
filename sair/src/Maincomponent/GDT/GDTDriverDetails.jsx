@@ -882,6 +882,20 @@ const DriverDetails = () => {
               <p>No motorcycles associated with this driver.</p>
             )}
             <div style={{ marginBottom: "20px" }}></div>
+            <Button
+              onClick={goBack}
+              style={{
+                float: "right",
+                marginBottom: "100px",
+                width: "auto",
+                height: "60px",
+                fontSize: "15px",
+                color: "#059855",
+                borderColor: "#059855",
+              }}
+            >
+              <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+            </Button>
             <div style={{ marginBottom: "50px", paddingBottom: "20px" }}>            <Button
               onClick={handleViewViolations}
               style={{
@@ -898,20 +912,7 @@ const DriverDetails = () => {
               View Violations{" "}
             </Button>
 
-            <Button
-              onClick={goBack}
-              style={{
-                float: "right",
-                marginBottom: "100px",
-                width: "auto",
-                height: "60px",
-                fontSize: "15px",
-                color: "#059855",
-                borderColor: "#059855",
-              }}
-            >
-              <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-            </Button>  </div>
+              </div>
           </>
         ) : null}
       

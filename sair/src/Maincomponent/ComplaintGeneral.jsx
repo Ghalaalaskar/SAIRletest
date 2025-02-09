@@ -11,6 +11,7 @@ const ComplaintGeneral = () => {
     const [currentComplaint, setCurrentComplaint] = useState({});
     const [driverDetails, setDriverDetails] = useState({});
     const { complaintId } = useParams();
+    const [violationDocId, setViolationDocId] = useState(null);
     const location = useLocation();
     const navigate = useNavigate();
     const from = location.state?.from; // Get the source of navigation
@@ -26,6 +27,20 @@ const ComplaintGeneral = () => {
                     const complaintData = complaintDoc.data();
                     setCurrentComplaint(complaintData);
     
+                    const violationQuery = query(
+                        collection(db, "Violation"),
+                        where("violationID", "==", complaintData.ViolationID) // Querying by the violationID field
+                      );
+                
+                      const violationSnapshot = await getDocs(violationQuery);
+                      if (!violationSnapshot.empty) {
+                        // Assuming there's only one document with that violationID
+                        const violationDoc = violationSnapshot.docs[0];
+                        setViolationDocId(violationDoc.id); // Store the document ID
+                        console.log("Violation document found:", violationDoc.data());
+                      } else {
+                        console.error("Violation document not found for ID:", complaintData.ViolationID);
+                      }
                     // Fetch driver details using the driver's ID
                     const driverCollection = query(
                         collection(db, 'Driver'),
@@ -52,6 +67,16 @@ const ComplaintGeneral = () => {
     const goBack = () => {
         navigate(-1); // Navigate back to the previous page
     };
+
+    const viewViolation = () => {
+        if (violationDocId) {
+            navigate(`/gdtviolation/general/${violationDocId}`, {
+              state: { from: "GDTComplaintGeneral", breadcrumbParam: "From Complaint" },
+            });
+          } else {
+            console.error("No violation document ID found.");
+          }
+        };
 
     const formatDateTime = (timestamp) => {
         if (timestamp && timestamp.seconds) {
@@ -222,13 +247,40 @@ Email</h3>
                         <p style={{ fontSize: '18px', marginLeft: '45px' }}>{currentComplaint.Description}</p>
                         <hr />
                         <div style={{ marginBottom: '90px' }}>
-              <Button onClick={goBack} style={{
-                float: 'right', marginBottom: '100px', width: 'auto',
-                height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
-              }}>
-                <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
-              </Button>
-            </div>
+                        <div>
+                            <Button onClick={goBack}
+                style={{
+                  float: "right",
+                  marginBottom: "100px",
+                  width: "auto",
+                  height: "60px",
+                  fontSize: "15px",
+                  color: "#059855",
+                  borderColor: "#059855",
+                }}
+              >
+                                <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
+                            </Button>
+                        </div>
+                            <div>
+                                {/* View Violation Button */}
+                                <Button
+                                    onClick={viewViolation}
+                                    style={{
+                                        float: "left",
+                                        width: "auto",
+                                        height: "60px",
+                                        fontSize: "15px",
+                                        color: "#059855",
+                                        borderColor: "#059855",
+                                      }}
+                                >
+                                    <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
+                                    View Violation
+                                </Button>
+                            </div>
+                            
+                        </div>
                     </>
                 )}
             </main>
