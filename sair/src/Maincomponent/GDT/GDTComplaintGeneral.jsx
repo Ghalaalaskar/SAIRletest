@@ -1011,6 +1011,21 @@ const GDTComplaintGeneral = () => {
               {currentComplaint.Description}
             </p>
 
+            {currentComplaint.RespondedBy && (
+              <div class={formstyle.banner}>
+                <strong>
+                  This complaint was responded by
+                  <span
+                    class={formstyle.underline}
+                    onClick={handleShowPopupStaff}
+                    style={{ marginLeft: "4px" }}
+                  >
+                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
+                  </span>
+                </strong>
+              </div>
+            )}
+
             {/* Status Section */}
             <h3
               style={{ color: "#059855", fontWeight: "bold", fontSize: "20px" }}
@@ -1076,21 +1091,6 @@ const GDTComplaintGeneral = () => {
             </>
             )}
             <hr />
-
-            {currentComplaint.RespondedBy && (
-              <div class={formstyle.banner}>
-                <strong>
-                  This complaint was responded by
-                  <span
-                    class={formstyle.underline}
-                    onClick={handleShowPopupStaff}
-                    style={{ marginLeft: "4px" }}
-                  >
-                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
-                  </span>
-                </strong>
-              </div>
-            )}
 
             {/*//////////////// POP-UP  ////////////////*/}
             <Modal
