@@ -1091,6 +1091,19 @@ const ViolationGeneral = () => {
                 <p style={{ fontSize: "18px", marginLeft: "45px" }}>
                   {currentViolation.violationID}
                 </p>
+                {/* Status Section */}
+          <h3 style={{ color: "#059855", fontWeight: 'bold', fontSize: '20px' }}><span style={{ 
+                                backgroundColor: currentViolation.Status === 'Active' ? 'green' : 'red', 
+                                                marginRight: '20px',
+                                                marginLeft:'5px',
+                                                borderRadius: '50%', 
+                                                display: 'inline-block', 
+                                                width: '12px', 
+                                                height: '12px' 
+                            }}></span>
+                            Violation Status   
+                        </h3>
+                        <p style={{ fontSize: '18px', marginLeft: '45px' }}>{currentViolation.Status}</p>
               </div>
               <div>
                 <h3
