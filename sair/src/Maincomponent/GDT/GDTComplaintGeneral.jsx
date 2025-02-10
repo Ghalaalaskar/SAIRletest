@@ -51,8 +51,7 @@ const GDTComplaintGeneral = () => {
   const violationId = location.state?.violationId; // Get violationId from state
 
   useEffect(() => {
-    const GDTUID = sessionStorage.getItem("gdtUID");
-  
+    const GDTUID = sessionStorage.getItem("gdtUID"); // Get the stored UID  
     const fetchGDT = async () => {
       try {
         const docRef = doc(db, "GDT", GDTUID);
@@ -116,7 +115,7 @@ const GDTComplaintGeneral = () => {
   
     fetchGDT();
     fetchComplaintDetails();
-  }, [complaintId, GDTUID]);
+  }, [complaintId]);
 
   const fetchEmployerDetails = (companyName) => {
     const employerQuery = query(
@@ -1306,7 +1305,7 @@ const GDTComplaintGeneral = () => {
             <Button
                 onClick={goBack}
                 style={{
-                  float: "right",
+                  float: "left",
                   marginBottom: "100px",
                   width: "auto",
                   height: "60px",
@@ -1322,7 +1321,7 @@ const GDTComplaintGeneral = () => {
                 onClick={handleViewViolation}
                 // onClick={disableViewComplaints}
                 style={{
-                  float: "left",
+                  float: "right",
                   width: "auto",
                   height: "60px",
                   fontSize: "15px",

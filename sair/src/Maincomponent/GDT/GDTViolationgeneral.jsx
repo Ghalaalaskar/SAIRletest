@@ -1485,7 +1485,7 @@ const ViolationGeneral = () => {
               <Button
                   onClick={goBack}
                   style={{
-                    float: "right",
+                    float: "left",
                     width: "auto",
                     height: "60px",
                     fontSize: "15px",
@@ -1500,7 +1500,7 @@ const ViolationGeneral = () => {
                   onClick={handleViewComplaints}
                   // onClick={disableViewComplaints}
                   style={{
-                    float: "left",
+                    float: "right",
                     width: "auto",
                     height: "60px",
                     fontSize: "15px",

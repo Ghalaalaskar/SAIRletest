@@ -250,7 +250,7 @@ Email</h3>
                         <div>
                             <Button onClick={goBack}
                 style={{
-                  float: "right",
+                  float: "left",
                   marginBottom: "100px",
                   width: "auto",
                   height: "60px",
@@ -267,7 +267,7 @@ Email</h3>
                                 <Button
                                     onClick={viewViolation}
                                     style={{
-                                        float: "left",
+                                        float: "right",
                                         width: "auto",
                                         height: "60px",
                                         fontSize: "15px",

@@ -1409,7 +1409,7 @@ const CrashGeneral = () => {
               <Button
                 onClick={goBack}
                 style={{
-                  float: "right",
+                  float: "left",
                   marginBottom: "100px",
                   width: "auto",
                   height: "60px",

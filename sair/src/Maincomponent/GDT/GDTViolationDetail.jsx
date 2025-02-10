@@ -288,7 +288,7 @@ const handleViewComplaints = () => {
           <div style={{ marginBottom: '10px' }}>
           <Button onClick={goBack}
             style={{
-            float: 'right', marginBottom: '100px', width: 'auto',
+            float: 'left', marginBottom: '100px', width: 'auto',
             height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
           }}>
             <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
@@ -297,6 +297,7 @@ const handleViewComplaints = () => {
                     <Button onClick={handleViewComplaints} style={{
               backgroundColor: '#059855',
               color: 'white',
+              float: 'right',
               border: 'none',
               borderRadius: '50px',
               alignItems: 'center',

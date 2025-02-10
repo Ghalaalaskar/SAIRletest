@@ -185,7 +185,7 @@ Email</h3>
             )}
 <hr />
 <Button onClick={goBack} style={{
-              float: 'right', marginBottom: '100px', width: 'auto',
+              float: 'left', marginBottom: '100px', width: 'auto',
               height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
             }}>
               <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
@@ -197,6 +197,7 @@ Email</h3>
                 backgroundColor: '#059855',
                 color: 'white',
                 border: 'none',
+                float: 'right',
                 borderRadius: '50px',
                 alignItems: 'center',
                 cursor: 'pointer',

@@ -885,7 +885,7 @@ const DriverDetails = () => {
             <Button
               onClick={goBack}
               style={{
-                float: "right",
+                float: "left",
                 marginBottom: "100px",
                 width: "auto",
                 height: "60px",
@@ -899,7 +899,7 @@ const DriverDetails = () => {
             <div style={{ marginBottom: "50px", paddingBottom: "20px" }}>            <Button
               onClick={handleViewViolations}
               style={{
-                float: "left",
+                float: "right",
                 marginBottom: "100px",
                 width: "auto",
                 height: "60px",

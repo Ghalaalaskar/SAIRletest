@@ -657,7 +657,7 @@ const ViolationDetail = () => {
         <Button
             onClick={goBack}
             style={{
-              float: "right",
+              float: "left",
               marginBottom: "100px",
               width: "auto",
               height: "60px",
@@ -675,6 +675,7 @@ const ViolationDetail = () => {
               backgroundColor: "#059855",
               color: "white",
               border: "none",
+              float: "right",
               borderRadius: "50px",
               alignItems: "center",
               cursor: "pointer",

@@ -941,7 +941,7 @@ const ViolationGeneral = () => {
               <Button
                   onClick={goBack}
                   style={{
-                    float: "right",
+                    float: "left",
                     width: "auto",
                     height: "60px",
                     fontSize: "15px",
@@ -955,7 +955,7 @@ const ViolationGeneral = () => {
                 <Button
                   onClick={handleViewComplaints}
                   style={{
-                    float: "left",
+                    float: "right",
                     width: "auto",
                     height: "60px",
                     fontSize: "15px",
@@ -968,19 +968,6 @@ const ViolationGeneral = () => {
                   View Complaints
                 </Button>
 
-                <Button
-                  onClick={goBack}
-                  style={{
-                    float: "right",
-                    width: "auto",
-                    height: "60px",
-                    fontSize: "15px",
-                    color: "#059855",
-                    borderColor: "#059855",
-                  }}
-                >
-                  <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-                </Button>
               </div>
             </div>
           </>
