@@ -218,28 +218,30 @@ Email</h3>
             ) : (
               <p>No motorcycles associated with this driver.</p> 
             )}
-            <button onClick={handleViewViolations} style={{
-              backgroundColor: '#059855',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50px',
-              alignItems: 'center',
-              cursor: 'pointer',
-              padding: '20px 10px',
-              width: 'auto',
-              height: '60px',
-              fontFamily: 'Open Sans',
-            }}>    <i className="fas fa-eye" style={{ marginRight: '8px' }}></i>
-
-              View Violations
-            </button>
-
+            <div style={{ marginBottom: "90px" }}>
             <Button onClick={goBack} style={{
-              float: 'right', marginBottom: '100px', width: 'auto',
+              float: 'left', marginBottom: '100px', width: 'auto',
               height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
             }}>
               <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
             </Button>
+            {/* View Violation Button */}
+                                <Button
+                                    onClick={handleViewViolations}
+                                    style={{
+                                        float: "right",
+                                        width: "auto",
+                                        height: "60px",
+                                        fontSize: "15px",
+                                        color: "#059855",
+                                        borderColor: "#059855",
+                                      }}
+                                >
+                                    <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
+                                    View Violation
+                                </Button>
+                                </div>
+            
           </>
         ) : null}
       </main>

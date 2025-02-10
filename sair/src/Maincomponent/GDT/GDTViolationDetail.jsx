@@ -286,10 +286,18 @@ const handleViewComplaints = () => {
           </div>
           <hr/>
           <div style={{ marginBottom: '10px' }}>
+          <Button onClick={goBack}
+            style={{
+            float: 'left', marginBottom: '100px', width: 'auto',
+            height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
+          }}>
+            <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
+          </Button>
                     {/* View Complaints Button */}
                     <Button onClick={handleViewComplaints} style={{
               backgroundColor: '#059855',
               color: 'white',
+              float: 'right',
               border: 'none',
               borderRadius: '50px',
               alignItems: 'center',
@@ -300,13 +308,7 @@ const handleViewComplaints = () => {
             }}><i className="fas fa-eye" style={{ marginRight: '8px' }}></i>
               View Complaints
             </Button>
-            <Button onClick={goBack}
-            style={{
-            float: 'right', marginBottom: '100px', width: 'auto',
-            height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
-          }}>
-            <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back
-          </Button>
+            
         </div>
       </main>
   {/* Popup for no complaints */}
