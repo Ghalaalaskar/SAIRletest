@@ -470,9 +470,6 @@ const GDTComplaintGeneral = () => {
               Confirm Response
             </Button>
 
-            <Button type="primary" onClick={handleConfirmResponse2}>
-              Confirm Response2
-            </Button>
           </div>
         )}
 
