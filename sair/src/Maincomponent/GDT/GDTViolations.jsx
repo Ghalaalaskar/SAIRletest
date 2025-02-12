@@ -29,6 +29,18 @@ const ViolationList = () => {
   const [violationTypeFilter, setViolationTypeFilter] = useState("");
   const gdtUID = sessionStorage.getItem("gdtUID");
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+    const [filters, setFilters] = useState({
+      type: [],
+      status: [],
+    });
+const [dropdownOpen, setDropdownOpen] = useState(false);
+const [selectedValues, setSelectedValues] = useState([]);
+const options = [
+  { value: "Reckless Violations", label: "Reckless Violations" },
+  { value: "Normal Violations", label: "Regular Violations" },
+  { value: "Active", label: "Active" },
+  { value: "Revoked", label: "Revoked" },
+];
   const [clickedViolations, setClickedViolations] = useState(() => {
     // Load clicked violations from local storage using a user-specific key
     const savedClickedViolations = localStorage.getItem(`clickedViolations_${gdtUID}`);
@@ -175,39 +187,51 @@ const ViolationList = () => {
   };
 
   // Filtering violations
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const handleSelect = (value) => {
+    const newSelection = selectedValues.includes(value)
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value];
+
+    setSelectedValues(newSelection);
+    const newType = newSelection.filter(val => val === "Reckless Violations" || val === "Normal Violations");
+    const newStatus = newSelection.filter(val => val === "Active" || val === "Revoked");
+    setFilters({ type: newType, status: newStatus });
+  };
+
   const filteredViolations = violations
-    .filter((violation) => {
-      const driverName = drivers[violation.driverID]?.name || "";
-      const driverId = violation.driverID;
-      const licensePlate = motorcycles[violation.violationID] || " ";
-      const companyName = drivers[violation.driverID]?.shortCompanyName || "";
+  .filter((violation) => {
+    const driverName = drivers[violation.driverID]?.name || "";
+    const licensePlate = motorcycles[violation.violationID] || ' ';
 
-      let violationDate = "";
-      if (violation.time) {
-        violationDate = new Date(violation.time * 1000)
-          .toISOString()
-          .split("T")[0];
-      }
+    let violationDate = "";
+    if (violation.time) {
+      violationDate = new Date(violation.time * 1000)
+        .toISOString()
+        .split("T")[0];
+    }
 
-      const matchesSearchQuery =
-        driverId.includes(searchQuery) ||
-        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSearchDate = searchDate
-        ? violationDate === searchDate
-        : true;
+    const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearchDate = searchDate
+      ? violationDate === searchDate
+      : true;
 
-      let matchesTypeFilter = true;
-      if (violationTypeFilter === "Reckless Violations") {
-        matchesTypeFilter = violation.isReckless;
-      } else if (violationTypeFilter === "Normal Violations") {
-        matchesTypeFilter = !violation.isReckless;
-      }
+    const matchesTypeFilter = filters.type.length === 0 ||
+      (filters.type.includes("Reckless Violations") && violation.isReckless) ||
+      (filters.type.includes("Normal Violations") && !violation.isReckless);
 
-      return matchesSearchQuery && matchesSearchDate && matchesTypeFilter;
-    })
-    .sort((a, b) => {
-      return (b.time || 0) - (a.time || 0);
-    });
+    const matchesStatusFilter = filters.status.length === 0 ||
+      filters.status.includes(violation.Status); // Make sure this matches your data
+
+    console.log(`Checking violation: ${violation.id} - Status: ${violation.Status}, Matches Status Filter: ${matchesStatusFilter}`);
+
+    return matchesSearchQuery && matchesSearchDate && matchesTypeFilter && matchesStatusFilter;
+  })
+  .sort((a, b) => {
+    return (b.time || 0) - (a.time || 0);
+  });
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string
@@ -266,6 +290,17 @@ const ViolationList = () => {
       align: "center",
       render: (text, record) =>
         record.isReckless ? "Reckless Violation" : "Regular Violation",
+    },
+    {
+      title: "Status",
+      dataIndex: "Status",
+      key: "Status",
+      align: "center",
+      render: (text, record) => (
+        <span style={{ color: record.Status === "Active" ? 'green' : 'red' }}>
+          {record.Status}
+        </span>
+      ),    
     },
     {
       title: "Date",
@@ -334,24 +369,89 @@ const ViolationList = () => {
                 />
               </div>
               <div className={s.searchContainer}>
-                <div className={s.selectWrapper}>
+                <div className={`${s.selectWrapper} ${s.dropdownContainer}`}>
                   <FaFilter className={s.filterIcon} />
-                  <select
-                    className={s.customSelect}
-                    onChange={(e) => setViolationTypeFilter(e.target.value)}
-                    value={violationTypeFilter}
-                  >
-                    <option value="" disabled>
-                      Filter Violations
-                    </option>
-                    <option value="">All</option>
-                    <option value="Reckless Violations">
-                      Reckless Violations
-                    </option>
-                    <option value="Normal Violations">
-                      Regular Violations
-                    </option>
-                  </select>
+                  <div style={{ position: 'relative', width: '300px', height: '30px' }}>
+                    <div
+                      onClick={toggleDropdown}
+                      style={{
+                        padding: '10px',
+                        backgroundColor: 'transparent', // Make background transparent
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        transition: 'border 0.3s',
+                        color: 'grey', // Set text color to grey
+                        lineHeight: '0.8', 
+                      }}
+                    >
+                      {'Filter violations'}
+                    </div>
+                    {dropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    background: 'white',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    zIndex: 1000,
+                    width: '230px', // Set a wider width for the dropdown
+                    left: '-40px', // Adjust this value to move the dropdown left
+              
+                  }}
+                >
+                  <div style={{ padding: '10px', fontWeight: 'bold' }}>Type</div>
+                  {options.filter(option => option.value === "Reckless Violations" || option.value === "Normal Violations").map((option) => (
+                    <div key={option.value} style={{ padding: '10px', cursor: 'pointer' }}>
+                      <label style={{ display: 'flex', alignItems: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedValues.includes(option.value)}
+                          onChange={() => handleSelect(option.value)}
+                          style={{ marginRight: '10px' }} // Space between checkbox and text
+                        />
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                  <div style={{ padding: '10px', fontWeight: 'bold' }}>Status</div>
+                  {options.filter(option => option.value === "Active" || option.value === "Revoked").map((option) => (
+                    <div key={option.value} style={{ padding: '10px', cursor: 'pointer' }}>
+                      <label style={{ display: 'flex', alignItems: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedValues.includes(option.value)}
+                          onChange={() => handleSelect(option.value)}
+                          style={{ marginRight: '10px' }} // Space between checkbox and text
+                        />
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                  {/* Reset Button */}
+                  <div style={{ padding: '10px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedValues([]); // Reset selected values
+                        setFilters({ type: [], status: [] }); // Reset filters
+                        toggleDropdown(); // Optionally close the dropdown
+                      }}
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: 'blue',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '8px 0', // Adjust padding for better appearance
+                        cursor: 'pointer',
+                        width: '100%', 
+                        textAlign:'left',
+                      }}
+                    >
+                      Reset Filter
+                    </button>
+                  </div>
+                </div>
+              )}
+                </div>
                 </div>
               </div>
               <div

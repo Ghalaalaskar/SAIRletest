@@ -38,7 +38,7 @@ const ViolationList = () => {
   
     const options = [
       { value: "Reckless Violations", label: "Reckless Violations" },
-      { value: "Normal Violations", label: "Normal Violations" },
+      { value: "Normal Violations", label: "Regular Violations" },
       { value: "Active", label: "Active" },
       { value: "Revoked", label: "Revoked" },
     ];
@@ -393,13 +393,14 @@ const ViolationList = () => {
           toggleDropdown(); // Optionally close the dropdown
         }}
         style={{
-          backgroundColor: '#1c7a50',
-          color: 'white',
+          backgroundColor: 'transparent',
+          color: 'blue',
           border: 'none',
           borderRadius: '4px',
           padding: '8px 0', // Adjust padding for better appearance
           cursor: 'pointer',
           width: '100%', 
+          textAlign:'left',
         }}
       >
         Reset Filter
