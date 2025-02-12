@@ -359,7 +359,7 @@ const ViolationList = () => {
                 style={{ position: "relative" }}
               >
                 <div>
-                  {/* Your SVG Icon */}
+                  
                   <svg
                     onClick={() =>
                       document.getElementById("date-input").focus()
