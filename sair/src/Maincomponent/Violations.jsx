@@ -351,8 +351,6 @@ const ViolationList = () => {
       border: '1px solid #ccc',
       borderRadius: '4px',
       zIndex: 1000,
-      maxHeight: '200px',
-      overflowY: 'auto',
       width: '230px', // Set a wider width for the dropdown
       left: '-40px', // Adjust this value to move the dropdown left
 
@@ -399,11 +397,12 @@ const ViolationList = () => {
           color: 'white',
           border: 'none',
           borderRadius: '4px',
-          padding: '5px 10px',
+          padding: '8px 0', // Adjust padding for better appearance
           cursor: 'pointer',
+          width: '100%', 
         }}
       >
-        Reset
+        Reset Filter
       </button>
     </div>
   </div>
