@@ -205,33 +205,34 @@ const options = [
     const driverName = drivers[violation.driverID]?.name || "";
     const licensePlate = motorcycles[violation.violationID] || ' ';
 
-    let violationDate = "";
-    if (violation.time) {
-      violationDate = new Date(violation.time * 1000)
-        .toISOString()
-        .split("T")[0];
-    }
+    // Format the violation date using formatDate
+    const violationDate = violation.time ? formatDate(violation.time) : "";
+
+    // Format searchDate to MM/DD/YYYY
+    const formattedSearchDate = searchDate ? formatDate(new Date(searchDate).getTime() / 1000) : "";
 
     const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSearchDate = searchDate
-      ? violationDate === searchDate
-      : true;
+                               licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearchDate = formattedSearchDate ? violationDate === formattedSearchDate : true;
 
     const matchesTypeFilter = filters.type.length === 0 ||
       (filters.type.includes("Reckless Violations") && violation.isReckless) ||
       (filters.type.includes("Normal Violations") && !violation.isReckless);
 
     const matchesStatusFilter = filters.status.length === 0 ||
-      filters.status.includes(violation.Status); // Make sure this matches your data
+      filters.status.includes(violation.Status);
 
-    console.log(`Checking violation: ${violation.id} - Status: ${violation.Status}, Matches Status Filter: ${matchesStatusFilter}`);
+    console.log(`Checking violation: ${violation.id} - Status: ${violation.Status}, 
+                 Matches Status Filter: ${matchesStatusFilter}, 
+                 Matches Search Query: ${matchesSearchQuery}, 
+                 Matches Search Date: ${matchesSearchDate}, 
+                 Violation Date: ${violationDate}, 
+                 Search Date: ${formattedSearchDate}`);
 
     return matchesSearchQuery && matchesSearchDate && matchesTypeFilter && matchesStatusFilter;
   })
-  .sort((a, b) => {
-    return (b.time || 0) - (a.time || 0);
-  });
+  .sort((a, b) => (b.time || 0) - (a.time || 0));
+  
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string
