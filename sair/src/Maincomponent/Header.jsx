@@ -26,7 +26,7 @@ const Header = ({ active }) => {
   );
   const [isShown, setIsShown] = useState(false);
   const [showall, setshowall] = useState(false);
-  const [activeTab, setActiveTab] = useState('Crashes'); // Default tab is 'all'
+  const [activeTab, setActiveTab] = useState('Crashes'); // Default tab is 
   const [notReadCrashes22, setnotReadCrashes22] = useState(
     JSON.parse(localStorage.getItem("notReadCrashes22")) || {}
   );
@@ -697,6 +697,8 @@ return null;
           borderRadius: '50%',
           display: 'flex',
           marginLeft:'3px',
+          paddingRight:'2px',
+          paddingLeft:'2px',
           justifyContent: 'center',
           alignItems: 'center',
           color: 'white',
