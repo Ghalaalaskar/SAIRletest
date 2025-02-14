@@ -699,6 +699,8 @@ return null;
           marginLeft:'3px',
           paddingRight:'2px',
           paddingLeft:'2px',
+          paddingBottom:'2px',
+          paddingTop:'2px',
           justifyContent: 'center',
           alignItems: 'center',
           color: 'white',
@@ -847,15 +849,15 @@ return null;
         position: 'absolute',
         top: '-3px',  // Adjusts the position to be above the title
         right: '19px',  // Adjusts the position to the right
-        width: '19px',
-        height: '19px',
+        width: `${Math.max(19, NumberOfcrashesNotifications().toString().length * 6)}px`,  
+        height: `${Math.max(19, NumberOfcrashesNotifications().toString().length * 6)}px`,  
         backgroundColor: 'red',
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         color: 'white',
-        fontSize: '11px',  // Adjust font size for number if needed
+        fontSize: `${Math.max(11 - (NumberOfcrashesNotifications().toString().length - 2) * 2, 10)}px`,  
         zIndex: 1,
       }}
     >
@@ -883,15 +885,15 @@ return null;
         position: 'absolute',
         top: '-3px',  // Adjusts the position to be above the title
         left: '88px',  // Adjusts the position to the right
-        width: '19px',
-        height: '19px',
+        width: `${Math.max(19, NumberOfviolationsNotifications().toString().length * 6)}px`,  
+        height: `${Math.max(19, NumberOfviolationsNotifications().toString().length * 6)}px`,  
         backgroundColor: 'red',
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         color: 'white',
-        fontSize: '11px',  // Adjust font size for number if 
+        fontSize: `${Math.max(11 - (NumberOfviolationsNotifications().toString().length - 2) * 2, 10)}px`,  
         zIndex: 1,
       //  fontWeight: 'bold',
       }}
@@ -919,15 +921,15 @@ return null;
         position: 'absolute',
         top: '-3px',  // Adjusts the position to be above the title
         left: '92px',  // Adjusts the position to the right
-        width: '19px',
-        height: '19px',
+        width: `${Math.max(19, NumberOfcomplaintsNotifications().toString().length * 6)}px`,  
+        height: `${Math.max(19, NumberOfcomplaintsNotifications().toString().length * 6)}px`,  
         backgroundColor: 'red',
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         color: 'white',
-        fontSize: '11px',  // Adjust font size for number if needed
+        fontSize: `${Math.max(11 - (NumberOfcomplaintsNotifications().toString().length - 2) * 2, 10)}px`,  
         zIndex: 1,
       }}
     >
