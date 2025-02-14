@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Table, Select } from "antd"; // Import Select from antd
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
+import f from "../css/ComplaintList.module.css"; // CSS module for ComplaintList
+
 import { db } from "../firebase";
+import Header from './Header';
+
 import {
   doc,
   getDoc,
@@ -167,8 +171,8 @@ const NotificationsList = () => {
               DriverID: item.driverID || item.DriverID,
               Type: type,
               Status: details?.Status || item.Status || "Read",
-              ViolationID: details?.ViolationID || null,
-              CrashID: details?.CrashID || null,
+              ViolationID: details?.violationID || null,
+              CrashID: details?.crashID || null,
               ComplaintID: details?.ComplaintID || null,
               Fname: driverDetails?.Fname || "Unknown",
               Lname: driverDetails?.Lname || "Unknown",
@@ -302,7 +306,10 @@ const NotificationsList = () => {
   ];
 
   return (
+
     <div>
+     <Header active="notificationslist" /> 
+
       <div className="breadcrumb" style={{ marginRight: "100px" }}>
         <a onClick={() => navigate("/employer-home")}>Home</a>
         <span> / </span>
@@ -313,28 +320,30 @@ const NotificationsList = () => {
           <h2 className={s.title}>Notification List</h2>
           <div className={s.searchInputs}>
             <div className={s.searchContainer}>
-              <div className="selectWrapper">
+                <div className={f.selectWrapper}>
               {/* Add FaFilter with inline style for green color */}
-              <FaFilter
-                style={{
-                  color: "green",
-                  fontSize: "18px",
-                  marginRight: "10px",
-                }}
+              <FaFilter className={f.filterIcon} 
+                // style={{
+                //   color: "green",
+                //   fontSize: "18px",
+                //   marginRight: "10px",
+                // }}
               />
               {/* Replace Select with a standard <select> element */}
               <select
-                style={{
-                  flexGrow: 1,
-                  border: "none",
-                  backgroundColor: "transparent",
-                  fontSize: "16px",
-                  WebkitAppearance: "none", // For Safari/Chrome
-                  MozAppearance: "none", // For Firefox
-                  appearance: "none", // Standard property
-                  padding: "8px",
-                  outline: "none",
-                }}
+                // style={{
+                //   flexGrow: 1,
+                //   border: "none",
+                //   backgroundColor: "transparent",
+                //   fontSize: "16px",
+                //   WebkitAppearance: "none", // For Safari/Chrome
+                //   MozAppearance: "none", // For Firefox
+                //   appearance: "none", // Standard property
+                //   padding: "8px",
+                //   outline: "none",
+                // }}
+                
+                className={f.customSelect}
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
               >

@@ -279,6 +279,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
       const violationCollection = query(
         collection(db, 'Violation'),
         where('driverID', 'in', chunk),
+        where('Status','==','Active'),
         orderBy('time', 'desc') 
       );
       const unsubscribeViolations = onSnapshot(violationCollection, (snapshot) => {
