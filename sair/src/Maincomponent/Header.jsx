@@ -1186,7 +1186,7 @@ return null;
       <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
       <p style={{ marginBottom: '140px' }}>No new violations</p>
       <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'10px',
           padding: '8px 8px',
@@ -1322,7 +1322,7 @@ return null;
         <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
         <p style={{ marginBottom: '140px' }}>No new complaints</p>
         <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'10px',
           padding: '8px 8px',
