@@ -1,40 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import { db, auth } from '../firebase';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  collection, doc, onSnapshot, deleteDoc, query, where, getDoc, getDocs, updateDoc
-} from 'firebase/firestore';
-import TrashIcon from '../images/Trash.png';
-import PencilIcon from '../images/pencil.png';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SearchOutlined } from '@ant-design/icons';
+import { Table } from 'antd';
 import EyeIcon from '../images/eye.png';
-import successImage from '../images/Sucess.png';
-import errorImage from '../images/Error.png';
-import { SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
-import { Button, Table, Modal } from 'antd';
-import Header from './Header';
-import '../css/CustomModal.css';
-
 import s from "../css/DriverList.module.css";
 
 const NotificationsList = () => {
-  const [driverData, setDriverData] = useState([]);
-  const [driverToRemove, setDriverToRemove] = useState(null);
-  const [isDeletePopupVisible, setIsDeletePopupVisible] = useState(false);
-   const [searchQuery, setSearchQuery] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(true);
-  const [currentEmployerCompanyName, setCurrentEmployerCompanyName] = useState('');
-
+  const [notifications, setNotifications] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { driverId } = useParams();
-  const employerUID = sessionStorage.getItem('employerUID');
+
+  const safeParse = (key) => {
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error(`Error parsing ${key}:`, error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = () => {
+      const types = [
+        { key: 'notReadComplaints22', readKey: 'readComplaints', type: 'Complaint' },
+        { key: 'notReadViolations22', readKey: 'readViolations', type: 'Violation' },
+        { key: 'notReadCrashes22', readKey: 'readCrashes', type: 'Crash' }
+      ];
+  
+      let allNotifications = [];
+  
+      types.forEach(({ key, readKey, type }) => {
+        const unread = safeParse(key);
+        const read = safeParse(readKey);
+  
+        console.log(`Unread ${type}:`, unread);
+        console.log(`Read ${type}:`, read);
+  
+        const formattedUnread = unread.map(item => ({
+          ID: item.id || item.ID,
+          DriverID: item.driverID || item.DriverID,
+          Type: type,
+          Status: 'Unread',
+          Fname: item.Fname,
+          Lname: item.Lname,
+        }));
+  
+        const formattedRead = read.map(item => ({
+          ID: item.id || item.ID,
+          DriverID: item.driverID || item.DriverID,
+          Type: type,
+          Status: 'Read',
+          Fname: item.Fname,
+          Lname: item.Lname,
+        }));
+  
+        allNotifications = [...allNotifications, ...formattedUnread, ...formattedRead];
+      });
+  
+      console.log('All Notifications:', allNotifications);
+      setNotifications(allNotifications);
+    };
+  
+    fetchData();
+  }, []);
+  const filteredData = useMemo(() => {
+    return notifications.filter(item => {
+      const fullName = `${item.Fname} ${item.Lname}`.toLowerCase();
+      const driverID = String(item.DriverID).toLowerCase();
+      const query = searchQuery.toLowerCase();
+      return driverID.includes(query) || fullName.includes(query);
+    });
+  }, [notifications, searchQuery]);
 
   const columns = [
     {
-      title: 'Driver ID',
-      dataIndex: 'DriverID',
-      key: 'DriverID',
+      title: 'ID',
+      dataIndex: 'ID',
+      key: 'ID',
       align: 'center',
     },
     {
@@ -51,27 +94,13 @@ const NotificationsList = () => {
       align: 'center',
     },
     {
-      title: 'Email',
-      dataIndex: 'Email',
-      key: 'Email',
+      title: 'Status',
+      dataIndex: 'Status',
+      key: 'Status',
       align: 'center',
-      render: (text) => (
-        <a
-          href={`mailto:${text}`}
-          style={{
-            color: 'black', 
-            textDecoration: 'underline', 
-            transition: 'color 0.3s', 
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'green')} // Change color on hover
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'black')} // Revert color on mouse leave
-        >
-          {text}
-        </a>
-      ),
     },
     {
-      title: ' Details',
+      title: 'Details',
       key: 'Details',
       align: 'center',
       render: (text, record) => (
@@ -79,71 +108,22 @@ const NotificationsList = () => {
           style={{ cursor: 'pointer' }}
           src={EyeIcon}
           alt="Details"
-          onClick={() => viewDriverDetails(record.DriverID)}
+          onClick={() => navigate(`/driver-details/${record.DriverID}`)}
         />
       ),
     },
   ];
 
-  const filteredData = driverData.filter(driver => {
-    const fullName = `${driver.Fname} ${driver.Lname}`.toLowerCase();
-    const driverID = driver.DriverID.toLowerCase();
-    const query = searchQuery.toLowerCase();
-
-    return driverID.includes(query) || fullName.includes(query);
-  });
-
-  useEffect(() => {
-    const fetchEmployerCompanyName = async () => {
-      if (employerUID) {
-        const employerDoc = await getDoc(doc(db, 'Employer', employerUID));
-        if (employerDoc.exists()) {
-          setCurrentEmployerCompanyName(employerDoc.data().CompanyName);
-        } else {
-          console.error("No such employer!");
-        }
-      }
-    };
-
-    const fetchDrivers = () => {
-      const driverCollection = query(
-        collection(db, 'Driver'),
-        where('CompanyName', '==', currentEmployerCompanyName)
-      );
-      const unsubscribe = onSnapshot(driverCollection, (snapshot) => {
-        const driverList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setDriverData(driverList);
-      });
-      return () => unsubscribe();
-    };
-
-    fetchEmployerCompanyName().then(() => {
-      fetchDrivers();
- 
-    });
-  }, [employerUID, currentEmployerCompanyName]);
-
-  const viewDriverDetails = (driverID) => {
-    console.log('Navigating to details for driver ID:', driverID);
-    navigate(`/driver-details/${driverID}`);
-  };
-
   return (
     <div>
-
       <div className="breadcrumb" style={{ marginRight: '100px' }}>
         <a onClick={() => navigate('/employer-home')}>Home</a>
         <span> / </span>
         <a onClick={() => navigate('/notificationslist')}>Notification List</a>
       </div>
-
       <main>
         <div className={s.container}>
-          <h2 className={s.title}>Driver List</h2>
-
+          <h2 className={s.title}>Notification List</h2>
           <div className={s.searchInputs}>
             <div className={s.searchContainer}>
               <SearchOutlined style={{ color: '#059855' }} />
@@ -155,20 +135,16 @@ const NotificationsList = () => {
                 style={{ width: "300px" }}
               />
             </div>
-           
           </div>
         </div>
-
         <br />
-
         <Table
           columns={columns}
           dataSource={filteredData}
-          rowKey="id"
+          rowKey="ID"
           pagination={{ pageSize: 5 }}
-          style={{ width: '1200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto' }}
+          style={{ width: '1200px', margin: '0 auto' }}
         />
-
       </main>
     </div>
   );
