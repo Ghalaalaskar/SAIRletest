@@ -50,7 +50,7 @@ import GDTDriverDetails from './Maincomponent/GDT/GDTDriverDetails';
 import GDTViolationDriver from"./Maincomponent/GDT/GDTViolationDriver";
 import GDTAddStaffBatch from"./Maincomponent/GDT/GDTAddStaffBatch";
 import RicklessDrivers from './Maincomponent/ricklessdrives';
-import notificationList from './Maincomponent/notificationList';  
+import NotificationsList from './Maincomponent/NotificationsList';
 function App() {
   useEffect(() => {
     const sess = window.wialon.core.Session.getInstance();
@@ -132,7 +132,7 @@ function App() {
         <Route path="/gdtviolationdriver/:driverId" element={<GDTViolationDriver />} />
         <Route path="/gdtaddstaffbatch" element={<GDTAddStaffBatch />} />
         <Route path="/ricklessdrives" element={<RicklessDrivers />} />
-        <Route path="/notificationList" element={<notificationList />} /> 
+        <Route path="/notificationslist" element={<NotificationsList />} />
 
       </Routes>
     </Router>
