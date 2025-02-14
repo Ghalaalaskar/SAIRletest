@@ -721,7 +721,7 @@ return null;
   >
     {/* <BiShow size={25} color="black" /> */}
     <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           padding: '5px 5px',
           fontSize: '12px',
@@ -1025,7 +1025,7 @@ return null;
           <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px', }}>
 
        <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'20px',
           padding: '8px 8px',
@@ -1052,7 +1052,7 @@ return null;
       <p style={{ marginBottom: '140px' }}>No new crashes</p>
       
       <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'60px',
           padding: '8px 8px',
@@ -1161,7 +1161,7 @@ return null;
           <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px', }}>
 
      <button 
-        // onClick={() => navigate('')}
+        onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'10px',
           padding: '8px 8px',
@@ -1297,7 +1297,7 @@ return null;
        <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px',}}>
 
         <button 
-        // onClick={() => navigate('')}
+         onClick={() => navigate('/notificationslist')}
         style={{
           marginTop:'10px',
           padding: '8px 8px',
