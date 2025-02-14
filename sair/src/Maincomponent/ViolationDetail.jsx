@@ -258,6 +258,19 @@ const ViolationDetail = () => {
           <p style={{ fontSize: "18px", marginLeft: "45px" }}>
             {violation.violationID}
           </p>
+          {/* Status Section */}
+          <h3 style={{ color: "#059855", fontWeight: 'bold', fontSize: '20px' }}><span style={{ 
+                                backgroundColor: violation.Status === 'Active' ? 'green' : 'red', 
+                                                marginRight: '20px',
+                                                marginLeft:'5px',
+                                                borderRadius: '50%', 
+                                                display: 'inline-block', 
+                                                width: '12px', 
+                                                height: '12px' 
+                            }}></span>
+                            Violation Status   
+                        </h3>
+                        <p style={{ fontSize: '18px', marginLeft: '45px' }}>{violation.Status}</p>
           <h3
             style={{ color: "#059855", fontWeight: "bold", fontSize: "20px" }}
           >
@@ -653,7 +666,21 @@ const ViolationDetail = () => {
           </div>
         </div>
         <hr />
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "90px" }}>
+        <Button
+            onClick={goBack}
+            style={{
+              float: "left",
+              marginBottom: "100px",
+              width: "auto",
+              height: "60px",
+              fontSize: "15px",
+              color: "#059855",
+              borderColor: "#059855",
+            }}
+          >
+            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+          </Button>
           {/* View Complaints Button */}
           <Button
             onClick={handleViewComplaints}
@@ -661,6 +688,7 @@ const ViolationDetail = () => {
               backgroundColor: "#059855",
               color: "white",
               border: "none",
+              float: "right",
               borderRadius: "50px",
               alignItems: "center",
               cursor: "pointer",
@@ -672,20 +700,7 @@ const ViolationDetail = () => {
             <i className="fas fa-eye" style={{ marginRight: "8px" }}></i>
             View Complaints
           </Button>
-          <Button
-            onClick={goBack}
-            style={{
-              float: "right",
-              marginBottom: "100px",
-              width: "auto",
-              height: "60px",
-              fontSize: "15px",
-              color: "#059855",
-              borderColor: "#059855",
-            }}
-          >
-            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-          </Button>
+          
         </div>
       </main>
       {/* Popup for no complaints */}

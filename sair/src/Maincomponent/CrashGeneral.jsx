@@ -235,7 +235,7 @@ Email</h3>
             <hr />
             <div style={{ marginBottom: '80px' }}>
               <Button onClick={goBack} style={{
-                float: 'right', marginBottom: '100px', width: 'auto',
+                float: 'left', marginBottom: '100px', width: 'auto',
                 height: '60px', fontSize: '15px', color: '#059855', borderColor: '#059855'
               }}>
                 <ArrowLeftOutlined style={{ marginRight: '8px' }} /> Go Back

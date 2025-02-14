@@ -23,6 +23,7 @@ const GDTComplaintGeneral = () => {
   const [violations, setViolations] = useState([]);
   const [driverDetails, setDriverDetails] = useState({});
   const [employerDetails, setEmployerDetails] = useState({});
+  const [violationDocId, setViolationDocId] = useState(null);
   const [GDT, setGDT] = useState({
     Lname: "",
     Fname: "",
@@ -50,16 +51,13 @@ const GDTComplaintGeneral = () => {
   const violationId = location.state?.violationId; // Get violationId from state
 
   useEffect(() => {
-    const GDTUID = sessionStorage.getItem("gdtUID");
-
+    const GDTUID = sessionStorage.getItem("gdtUID"); // Get the stored UID  
     const fetchGDT = async () => {
       try {
         const docRef = doc(db, "GDT", GDTUID);
         const docSnap = await getDoc(docRef);
-
         if (docSnap.exists()) {
-          console.log("Document data:", docSnap.data());
-          setGDT(docSnap.data()); // Set the retrieved data to the GDT state
+          setGDT(docSnap.data());
         } else {
           console.error("No such document!");
         }
@@ -67,43 +65,31 @@ const GDTComplaintGeneral = () => {
         console.error("Error fetching document:", error);
       }
     };
-
+  
     const fetchComplaintDetails = async () => {
       try {
         const complaintDocRef = doc(db, "Complaint", complaintId);
-
         const unsubscribe = onSnapshot(complaintDocRef, async (doc) => {
           if (doc.exists()) {
             const complaintData = doc.data();
             setCurrentComplaint(complaintData);
-
+  
             if (complaintData.RespondedBy) {
-              // Query the GDT collection to fetch the GDT details based on the GDT ID
               const gdtQuery = query(
                 collection(db, "GDT"),
                 where("ID", "==", complaintData.RespondedBy)
               );
-
+  
               const gdtSnapshot = await getDocs(gdtQuery);
-
               if (!gdtSnapshot.empty) {
                 const gdtData = gdtSnapshot.docs[0].data();
-                setRespondingGDT({
-                  Fname: gdtData.Fname,
-                  Lname: gdtData.Lname,
-                  ID: gdtData.ID,
-                  GDTEmail: gdtData.GDTEmail,
-                  PhoneNumber: gdtData.PhoneNumber,
-                });
+                setRespondingGDT(gdtData);
               } else {
-                console.error(
-                  "No GDT document found with ID:",
-                  complaintData.RespondedBy
-                );
+                console.error("No GDT document found with ID:", complaintData.RespondedBy);
               }
             }
-
-            // Fetch driver details using the driver's ID
+  
+            // Fetch driver details
             const driverCollection = query(
               collection(db, "Driver"),
               where("DriverID", "==", complaintData.driverID)
@@ -120,16 +106,15 @@ const GDTComplaintGeneral = () => {
             console.error("Complaint document not found for ID:", complaintId);
           }
         });
-
+  
         return () => unsubscribe();
       } catch (error) {
         console.error("Error fetching complaint details:", error);
       }
     };
-
+  
     fetchGDT();
     fetchComplaintDetails();
-    fetchEmployerDetails(GDT?.Fname);
   }, [complaintId]);
 
   const fetchEmployerDetails = (companyName) => {
@@ -173,12 +158,14 @@ const GDTComplaintGeneral = () => {
     return ""; // Return an empty string if timestamp is not available
   };
 
-  // SOS
+  
   const handleViewViolation = () => {
-    if (violations.length > 0) {
-      navigate(`/gdtviolations/general/${violations[0].id}`, {
-        state: { from: "GDTComplaintGeneral" },
-      }); // Navigate to the first complaint
+    if (violationDocId) {
+      navigate(`/gdtviolation/general/${violationDocId}`, {
+        state: { from: "GDTComplaintGeneral", breadcrumbParam: "From Complaint" },
+      });
+    } else {
+      console.error("No violation document ID found.");
     }
   };
 
@@ -470,9 +457,6 @@ const GDTComplaintGeneral = () => {
               Confirm Response
             </Button>
 
-            <Button type="primary" onClick={handleConfirmResponse2}>
-              Confirm Response2
-            </Button>
           </div>
         )}
 
@@ -1027,6 +1011,21 @@ const GDTComplaintGeneral = () => {
               {currentComplaint.Description}
             </p>
 
+            {currentComplaint.RespondedBy && (
+              <div class={formstyle.banner}>
+                <strong>
+                  This complaint was responded by
+                  <span
+                    class={formstyle.underline}
+                    onClick={handleShowPopupStaff}
+                    style={{ marginLeft: "4px" }}
+                  >
+                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
+                  </span>
+                </strong>
+              </div>
+            )}
+
             {/* Status Section */}
             <h3
               style={{ color: "#059855", fontWeight: "bold", fontSize: "20px" }}
@@ -1092,21 +1091,6 @@ const GDTComplaintGeneral = () => {
             </>
             )}
             <hr />
-
-            {currentComplaint.RespondedBy && (
-              <div class={formstyle.banner}>
-                <strong>
-                  This complaint was responded by
-                  <span
-                    class={formstyle.underline}
-                    onClick={handleShowPopupStaff}
-                    style={{ marginLeft: "4px" }}
-                  >
-                    {`${respondingGDT.Fname} ${respondingGDT.Lname}`}
-                  </span>
-                </strong>
-              </div>
-            )}
 
             {/*//////////////// POP-UP  ////////////////*/}
             <Modal
@@ -1315,13 +1299,26 @@ const GDTComplaintGeneral = () => {
             {/*///////////////////////////////END POP-UP/////////////////////////////////////////// */}
 
             <div style={{ marginBottom: "90px" }}>
-              {/* SOS */}
+            <Button
+                onClick={goBack}
+                style={{
+                  float: "left",
+                  marginBottom: "100px",
+                  width: "auto",
+                  height: "60px",
+                  fontSize: "15px",
+                  color: "#059855",
+                  borderColor: "#059855",
+                }}
+              >
+                <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+              </Button>
               {/* View Violation Button */}
               <Button
                 onClick={handleViewViolation}
                 // onClick={disableViewComplaints}
                 style={{
-                  float: "left",
+                  float: "right",
                   width: "auto",
                   height: "60px",
                   fontSize: "15px",
@@ -1333,20 +1330,7 @@ const GDTComplaintGeneral = () => {
                 View Violation
               </Button>
 
-              <Button
-                onClick={goBack}
-                style={{
-                  float: "right",
-                  marginBottom: "100px",
-                  width: "auto",
-                  height: "60px",
-                  fontSize: "15px",
-                  color: "#059855",
-                  borderColor: "#059855",
-                }}
-              >
-                <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-              </Button>
+              
             </div>
           </>
         )}

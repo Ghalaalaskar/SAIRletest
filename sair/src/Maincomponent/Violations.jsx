@@ -12,12 +12,13 @@ import {
 import EyeIcon from "../images/eye.png";
 import { Table } from "antd";
 import Header from "./Header";
-import { Button, Modal } from "antd";
+import { Button, Modal, Select,} from "antd";
 import { Pagination } from "antd";
 import s from "../css/Violations.module.css";
 import "../css/CustomModal.css";
 import X from "../images/redx.webp";
 import { FaFilter } from "react-icons/fa";
+
 const ViolationList = () => {
   const [motorcycles, setMotorcycles] = useState({});
   const [violations, setViolations] = useState([]);
@@ -25,7 +26,22 @@ const ViolationList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchDate, setSearchDate] = useState("");
   const navigate = useNavigate();
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const { Option } = Select; // Destructure Option from Select
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filters, setFilters] = useState({
+    type: [],
+    status: [],
+  });
+    const [isPopupVisible, setIsPopupVisible] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [selectedValues, setSelectedValues] = useState([]);
+  
+    const options = [
+      { value: "Reckless Violations", label: "Reckless Violations" },
+      { value: "Normal Violations", label: "Regular Violations" },
+      { value: "Active", label: "Active" },
+      { value: "Revoked", label: "Revoked" },
+    ];
   const [viewedViolations, setViewedViolations] = useState(() => {
     const storedViewedViolations = localStorage.getItem("viewedViolations");
     return storedViewedViolations ? JSON.parse(storedViewedViolations) : {};
@@ -125,39 +141,6 @@ const ViolationList = () => {
 
     return () => unsubscribe();
   };
-
-  // Filtering violations
-  const filteredViolations = violations
-    .filter((violation) => {
-      const driverName = drivers[violation.driverID]?.name || "";
-      const licensePlate = motorcycles[violation.violationID] || ' ';
-
-      let violationDate = "";
-      if (violation.time) {
-        violationDate = new Date(violation.time * 1000)
-          .toISOString()
-          .split("T")[0];
-      }
-
-      const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase())||
-        licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSearchDate = searchDate
-        ? violationDate === searchDate
-        : true;
-
-      let matchesTypeFilter = true;
-      if (violationTypeFilter === "Reckless Violations") {
-        matchesTypeFilter = violation.isReckless;
-      } else if (violationTypeFilter === "Normal Violations") {
-        matchesTypeFilter = !violation.isReckless;
-      }
-
-      return matchesSearchQuery && matchesSearchDate && matchesTypeFilter;
-    })
-    .sort((a, b) => {
-      return (b.time || 0) - (a.time || 0);
-    });
-
   // Function to format the date
   const formatDate = (time) => {
     const date = new Date(time * 1000); // Assuming timestamp is in seconds
@@ -166,6 +149,54 @@ const ViolationList = () => {
     const day = date.getDate().toString().padStart(2, "0"); // Days are 1-based
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
+  // Filtering violations
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const handleSelect = (value) => {
+    const newSelection = selectedValues.includes(value)
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value];
+
+    setSelectedValues(newSelection);
+    const newType = newSelection.filter(val => val === "Reckless Violations" || val === "Normal Violations");
+    const newStatus = newSelection.filter(val => val === "Active" || val === "Revoked");
+    setFilters({ type: newType, status: newStatus });
+  };
+
+  const filteredViolations = violations
+  .filter((violation) => {
+    const driverName = drivers[violation.driverID]?.name || "";
+    const licensePlate = motorcycles[violation.violationID] || ' ';
+
+    // Format the violation date using formatDate
+    const violationDate = violation.time ? formatDate(violation.time) : "";
+
+    // Format searchDate to MM/DD/YYYY
+    const formattedSearchDate = searchDate ? formatDate(new Date(searchDate).getTime() / 1000) : "";
+
+    const matchesSearchQuery = driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               licensePlate.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearchDate = formattedSearchDate ? violationDate === formattedSearchDate : true;
+
+    const matchesTypeFilter = filters.type.length === 0 ||
+      (filters.type.includes("Reckless Violations") && violation.isReckless) ||
+      (filters.type.includes("Normal Violations") && !violation.isReckless);
+
+    const matchesStatusFilter = filters.status.length === 0 ||
+      filters.status.includes(violation.Status);
+
+    console.log(`Checking violation: ${violation.id} - Status: ${violation.Status}, 
+                 Matches Status Filter: ${matchesStatusFilter}, 
+                 Matches Search Query: ${matchesSearchQuery}, 
+                 Matches Search Date: ${matchesSearchDate}, 
+                 Violation Date: ${violationDate}, 
+                 Search Date: ${formattedSearchDate}`);
+
+    return matchesSearchQuery && matchesSearchDate && matchesTypeFilter && matchesStatusFilter;
+  })
+  .sort((a, b) => (b.time || 0) - (a.time || 0));
+
+
 
   const handleViewDetails = (record) => {
     const updatedViewedViolations = { ...viewedViolations, [record.id]: true };
@@ -224,6 +255,17 @@ const ViolationList = () => {
         record.isReckless ? "Reckless Violation" : "Regular Violation",
     },
     {
+      title: "Status",
+      dataIndex: "Status",
+      key: "Status",
+      align: "center",
+      render: (text, record) => (
+        <span style={{ color: record.Status === "Active" ? 'green' : 'red' }}>
+          {record.Status}
+        </span>
+      ),    
+    },
+    {
       title: "Date",
       key: "date",
       align: "center",
@@ -243,6 +285,8 @@ const ViolationList = () => {
       ),
     },
   ];
+
+  
 
   return (
     <>
@@ -282,37 +326,176 @@ const ViolationList = () => {
                 />
               </div>
               <div className={s.searchContainer}>
-                 <div className={s.selectWrapper}>
-                  <FaFilter className={s.filterIcon} />
-                  <select
-                    className={s.customSelect}
-                    onChange={(e) => setViolationTypeFilter(e.target.value)}
-                    value={violationTypeFilter}
-                  >
-                    <option value="" disabled>
-                      Filter Violations
-                    </option>
-                    <option value="">All</option>
-                    <option value="Reckless Violations">
-                      Reckless Violations
-                    </option>
-                    <option value="Normal Violations">
-                      Regular Violations
-                    </option>
-                  </select>
-                </div>
-                </div>
-              <div className={s.searchContainer}>
-             
-                <input
-                  type="date"
-                  value={searchDate}
-                  onChange={(e) => setSearchDate(e.target.value)}
-                  style={{ width: "120px", backgroundColor: "transparent" }}
-                />
-              </div>
-            </div>
-          </div>
+  <div className={`${s.selectWrapper} ${s.dropdownContainer}`}>
+    <FaFilter className={s.filterIcon} />
+    <div style={{ position: 'relative', width: '300px', height: '30px' }}>
+      <div
+        onClick={toggleDropdown}
+        style={{
+          padding: '10px',
+          backgroundColor: 'transparent', // Make background transparent
+          cursor: 'pointer',
+          borderRadius: '4px',
+          transition: 'border 0.3s',
+          color: 'grey', // Set text color to grey
+          lineHeight: '0.8', 
+        }}
+      >
+        {'Filter violations'}
+      </div>
+      {dropdownOpen && (
+  <div
+    style={{
+      position: 'absolute',
+      background: 'white',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      zIndex: 1000,
+      width: '230px', // Set a wider width for the dropdown
+      left: '-40px', // Adjust this value to move the dropdown left
+
+    }}
+  >
+    <div style={{ padding: '10px', fontWeight: 'bold' }}>Type</div>
+    {options.filter(option => option.value === "Reckless Violations" || option.value === "Normal Violations").map((option) => (
+      <div key={option.value} style={{ padding: '10px', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={selectedValues.includes(option.value)}
+            onChange={() => handleSelect(option.value)}
+            style={{ marginRight: '10px' }} // Space between checkbox and text
+          />
+          {option.label}
+        </label>
+      </div>
+    ))}
+    <div style={{ padding: '10px', fontWeight: 'bold' }}>Status</div>
+    {options.filter(option => option.value === "Active" || option.value === "Revoked").map((option) => (
+      <div key={option.value} style={{ padding: '10px', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={selectedValues.includes(option.value)}
+            onChange={() => handleSelect(option.value)}
+            style={{ marginRight: '10px' }} // Space between checkbox and text
+          />
+          {option.label}
+        </label>
+      </div>
+    ))}
+    {/* Reset Button */}
+    <div style={{ padding: '10px', textAlign: 'center' }}>
+      <button
+        onClick={() => {
+          setSelectedValues([]); // Reset selected values
+          setFilters({ type: [], status: [] }); // Reset filters
+          toggleDropdown(); // Optionally close the dropdown
+        }}
+        style={{
+          backgroundColor: 'transparent',
+          color: 'blue',
+          border: 'none',
+          borderRadius: '4px',
+          padding: '8px 0', // Adjust padding for better appearance
+          cursor: 'pointer',
+          width: '100%', 
+          textAlign:'left',
+        }}
+      >
+        Reset Filter
+      </button>
+    </div>
+  </div>
+)}
+  </div>
+  </div>
+</div>
+              <div
+                              className={s.searchContainerdate}
+                              style={{ position: "relative" }}
+                            >
+                              <div>
+                                
+                                <svg
+                                  onClick={() =>
+                                    document.getElementById("date-input").focus()
+                                  }
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  style={{
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "1px",
+                                    transform: "translateY(-50%)",
+                                    cursor: "pointer",
+                                    width: "40px", // Adjusted width
+                                    height: "40px", // Adjusted height
+                                  }}
+                                >
+                                  <path
+                                    d="M18 2V4M6 2V4"
+                                    stroke="#059855"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  <path
+                                    d="M11.9955 13H12.0045M11.9955 17H12.0045M15.991 13H16M8 13H8.00897M8 17H8.00897"
+                                    stroke="#059855"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  <path
+                                    d="M3.5 8H20.5"
+                                    stroke="#059855"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  <path
+                                    d="M2.5 12.2432C2.5 7.88594 2.5 5.70728 3.75212 4.35364C5.00424 3 7.01949 3 11.05 3H12.95C16.9805 3 18.9958 3 20.2479 4.35364C21.5 5.70728 21.5 7.88594 21.5 12.2432V12.7568C21.5 17.1141 21.5 19.2927 20.2479 20.6464C18.9958 22 16.9805 22 12.95 22H11.05C7.01949 22 5.00424 22 3.75212 20.6464C2.5 19.2927 2.5 17.1141 2.5 12.7568V12.2432Z"
+                                    stroke="#059855"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  <path
+                                    d="M3 8H21"
+                                    stroke="#059855"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                                {/* <input
+                                                  type="date"
+                                                  value={searchDate}
+                                                  onChange={(e) => setSearchDate(e.target.value)}
+                                                  style={{ width: "120px", backgroundColor: "transparent" }}
+                                                /> */}
+              
+                                <input
+                                  id="date-input"
+                                  type="date"
+                                  value={searchDate}
+                                  onChange={(e) => setSearchDate(e.target.value)}
+                                  style={{
+                                    width: "100%",
+                                    height: "40px", // Adjusted height
+                                    fontSize: "16px",
+                                    paddingLeft: "40px", // Add padding to avoid overlap with the icon
+                                    backgroundColor: "transparent",
+                                    border: "0px solid #ccc",
+                                    borderRadius: "4px",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
           <Table
             columns={columns}

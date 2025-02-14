@@ -251,3 +251,32 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .highlightRow {
   background-color: #f0f8f0
 }
+
+.custom-select .ant-select-selector {
+  border: none !important; /* Remove border */
+  box-shadow: none !important; /* Remove shadow */
+}
+
+.custom-select .ant-select-selector:focus {
+  border: none !important; /* Remove border on focus */
+  box-shadow: none !important; /* Remove shadow on focus */
+}
+
+/* Optional: Add any other styles you want for the dropdown */
+.custom-select .ant-select {
+  border-radius: 4px; /* Adjust border radius if desired */
+}
+
+.custom-select .ant-select-selector {
+  border: none !important; /* Remove the border */
+  box-shadow: none !important; /* Remove shadow */
+}
+
+.custom-select .ant-select-selector:focus {
+  border: none !important; /* Ensure no border on focus */
+  box-shadow: none !important; /* Ensure no shadow on focus */
+}
+
+.custom-select .ant-select-arrow {
+  color: inherit; /* Keep arrow color as per the theme */
+}
