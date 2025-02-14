@@ -844,7 +844,7 @@ return null;
       style={{
         position: 'absolute',
         top: '-3px',  // Adjusts the position to be above the title
-        right: '15px',  // Adjusts the position to the right
+        right: '19px',  // Adjusts the position to the right
         width: '19px',
         height: '19px',
         backgroundColor: 'red',
