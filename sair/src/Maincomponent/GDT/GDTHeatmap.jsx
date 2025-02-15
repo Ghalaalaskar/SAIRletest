@@ -3,30 +3,24 @@ import homeBackground from '../../images/homebackground7.png';
 import Header from './GDTHeader';
 import '../../css/EmployerHome.module.css';
 import '../../css/CustomModal.css';
+import Map from "./GDTMap"; 
 
 const GDTHeatMap = () => {
   const pageStyles = {
-    backgroundImage: `url(${homeBackground})`,
-    backgroundSize: '1000px', 
-    backgroundPosition: 'right', 
-    height: '100vh',
-    width: '100%', 
-    backgroundRepeat: 'no-repeat',
+    margin: 10,
   };
 
-  const h1WrapperStyles = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 'calc(100vh - 50px)', 
-  };
+  const locations = [
+    { lat: 24.7136, lng: 46.6753, placeName: "Riyadh Center" },
+    { lat: 24.7455, lng: 46.6566, placeName: "Al Olaya District" },
+    { lat: 24.7740, lng: 46.7330, placeName: "King Abdullah Financial District" },
+    { lat: 24.6861, lng: 46.7318, placeName: "Diriyah" },
+  ];
 
   return (
     <div style={pageStyles}>
       <Header active="gdtheatmap" />
-      <div style={h1WrapperStyles}>
-        <h1>Heat-Map feature currently unavailable. Stay tuned for updates!</h1>
-      </div>
+      <Map locations={locations} />
     </div>
   );
 };
