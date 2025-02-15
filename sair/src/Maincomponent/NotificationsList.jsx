@@ -366,6 +366,7 @@ const NotificationsList = () => {
           rowKey="ID"
           pagination={{ pageSize: 5 }}
           style={{ width: "1200px", margin: "0 auto" }}
+          showSizeChanger={false}
         />
       </main>
     </div>
