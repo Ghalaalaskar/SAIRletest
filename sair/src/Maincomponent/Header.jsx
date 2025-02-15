@@ -1464,7 +1464,7 @@ if(crashDate >= oneMonthAgo){
           
           <Dropdown overlay={notificationMenu} trigger={['click']}>
              
-           <Badge dot={hasNewCrashes}  className={styles.customBadge}>
+           <Badge dot={hasNewCrashes}  className={styles.customBadge}   style={{ right: '-22px', left: 'auto' }}>
            <BellOutlined className={styles.bellIcon} 
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#059855')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'black')}
