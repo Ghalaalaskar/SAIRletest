@@ -355,7 +355,7 @@ const ViolationGeneral = () => {
       <div className="breadcrumb">{generateBreadcrumb()}</div>
 
       <main className={s.violation}>
-        <h2 className={s.title}>Violation Details</h2>
+        <h2 className={s.title}>Driver Details</h2>
         {currentViolation.GPSnumber && currentMotorCycle && (
           <>
             <hr />
@@ -552,6 +552,7 @@ const ViolationGeneral = () => {
                 </p>
               </div>
 
+              <h2 style={{ marginTop: "30px" }} className="title">Driver Company Details</h2>
               <hr />
               <div id="company name">
                 <h3
@@ -807,6 +808,7 @@ const ViolationGeneral = () => {
                 </p>
               </div>
 
+              <h2 style={{ marginTop: "30px" }} className="title">Motorcycle Details</h2>
               <hr />
               <div>
                 <h3
@@ -1047,6 +1049,8 @@ const ViolationGeneral = () => {
                 </p>
               </div>
 
+              
+              <h2 style={{ marginTop: "30px" }} className="title">Violation Details</h2>
               <hr />
               <div>
                 <h3
