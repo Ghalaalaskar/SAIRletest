@@ -25,7 +25,6 @@ const Header = ({ active }) => {
     JSON.parse(localStorage.getItem("readCrashes")) || {}
   );
   const [isShown, setIsShown] = useState(false);
-  const [showall, setshowall] = useState(false);
   const [activeTab, setActiveTab] = useState('Crashes'); // Default tab is 
   const [notReadCrashes22, setnotReadCrashes22] = useState(
     JSON.parse(localStorage.getItem("notReadCrashes22")) || {}
@@ -714,58 +713,7 @@ return null;
           
   {/* Show All Notifications Icon */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      cursor: "pointer",
-      position: "relative",
-    }}
-    onMouseEnter={() => setshowall(true)}
-    onMouseLeave={() => setshowall(false)}
-  >
-    {/* <BiShow size={25} color="black" /> */}
-    <button 
-        onClick={() => navigate('/notificationslist')}
-        style={{
-          padding: '5px 5px',
-          fontSize: '12px',
-          cursor: 'pointer',
-          border: '#D3D3D3',
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
-          borderRadius: '5px',
-          transition: 'background-color 0.3s ease',  
-        }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
-      >
-        View all
-      </button>
-    {showall && (
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-30px",
-          left: "-10px",
-          transform: "translateX(-50%)",
-          backgroundColor: "white",
-          color: "black",
-          border: "1px solid black",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          fontSize: "12px",
-          whiteSpace: "nowrap",
-          boxShadow: "0px 2px 4px rgba(0,0,0,0.3)",
-          opacity: 1,
-          transition: "opacity 0.2s ease-in-out",
-          zIndex: 2,
-        }}
-      >
-        View all notifications      
-      </div>
-    )}
-  </div>
+
 
   {/* Mark All as Read Icon */}
   <div
@@ -1036,16 +984,16 @@ return null;
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
       </button></div>
@@ -1054,29 +1002,28 @@ return null;
   ) : (
     <div style={{ textAlign: 'center', marginTop: '80px', color: '#aaa' }}>
       <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-      <p style={{ marginBottom: '140px' }}>No new crashes</p>
+      <p style={{ marginBottom: '141.50px' }}>No new crashes</p>
       
       <button 
         onClick={() => navigate('/notificationslist')}
         style={{
-          marginTop:'60px',
+          marginTop:'20px',
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
-      </button>
-    </div>
+      </button></div>
   )
 ) : activeTab === 'Violations' ? (
   notReadViolations.length > 0 ? (
@@ -1165,23 +1112,23 @@ return null;
       })}</div>
           <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px', }}>
 
-     <button 
+          <button 
         onClick={() => navigate('/notificationslist')}
         style={{
-          marginTop:'10px',
+          marginTop:'20px',
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
       </button></div>
@@ -1189,29 +1136,27 @@ return null;
   ) : (
     <div style={{ textAlign: 'center', marginTop: '80px', color: '#aaa' }}>
       <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-      <p style={{ marginBottom: '140px' }}>No new violations</p>
+      <p style={{ marginBottom: '141.50px' }}>No new violations</p>
       <button 
         onClick={() => navigate('/notificationslist')}
         style={{
-          marginTop:'10px',
+          marginTop:'20px',
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
-      </button>
-      
-    </div>
+      </button></div>
     )
   ) : activeTab === 'Complaints' ? (
     notReadComplaints.length > 0 ? (
@@ -1301,23 +1246,23 @@ return null;
         })}</div>
        <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px',}}>
 
-        <button 
-         onClick={() => navigate('/notificationslist')}
+       <button 
+        onClick={() => navigate('/notificationslist')}
         style={{
-          marginTop:'10px',
+          marginTop:'20px',
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
       </button></div>
@@ -1325,28 +1270,27 @@ return null;
     ) : (
       <div style={{ textAlign: 'center', marginTop: '80px', color: '#aaa' }}>
         <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
-        <p style={{ marginBottom: '140px' }}>No new complaints</p>
+        <p style={{ marginBottom: '141.50px' }}>No new complaints</p>
         <button 
         onClick={() => navigate('/notificationslist')}
         style={{
-          marginTop:'10px',
+          marginTop:'20px',
           padding: '8px 8px',
           fontSize: '13px',
           cursor: 'pointer',
-          border: '1px solid #D3D3D3', 
-          backgroundColor: '	#E0E0E0',
-          color: 'black',
+          border: 'none', 
+          backgroundColor: '	#059855',
+          color: 'white',
           borderRadius: '5px',
           transition: 'background-color 0.3s ease', 
           marginLeft: 'auto', // Align to the right
           display: 'block', 
         }}
-        onMouseEnter={(e) => e.target.style.backgroundColor = '#D3D3D3'}  // Change to darker green on hover
-        onMouseLeave={(e) => e.target.style.backgroundColor = '#E0E0E0'}  // Revert back on mouse leave
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#1c7a50'}  // Change to darker green on hover
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#059855'}  // Revert back on mouse leave
       >
         View all notifications 
-      </button>
-      </div>
+      </button></div>
       )
     ) : null}
    
@@ -1462,7 +1406,13 @@ if(crashDate >= oneMonthAgo){
           </Dropdown>
 
           
-          <Dropdown overlay={notificationMenu} trigger={['click']}>
+          <Dropdown overlay={notificationMenu} trigger={['click']}   
+          onVisibleChange={(visible) => {
+          if (!visible) {
+          setActiveTab('Crashes'); // Reset to "Crashes" when clicking outside
+    }
+  }}
+>
              
            <Badge dot={hasNewCrashes}  className={styles.customBadge}   style={{ right: '-22px', left: 'auto' }}>
            <BellOutlined className={styles.bellIcon} 
