@@ -351,7 +351,7 @@ const GDTComplaintList = () => {
                   placeholder="Search by Driver ID or License Plate"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ width: "280px" }}
+                  style={{ width: "235px", height:"20px" }}
                 />
               </div>
 
@@ -362,6 +362,13 @@ const GDTComplaintList = () => {
                     className={s.customSelect}
                     onChange={(event) => setSelectedStatus(event.target.value)}
                     defaultValue=""
+                    style={{
+                      width: "280px", 
+                      height:"35px", // Widen the select bar
+                      padding: "8px", // Add padding
+                      fontSize: "14px", // Adjust font size
+                      color:'grey'
+                    }}
                   >
                     <option value="" disabled>
                       Filter by Status
@@ -387,11 +394,31 @@ const GDTComplaintList = () => {
                 style={{ position: "relative" }}
               >
                 <div>
+                  {/* Conditional rendering for the green circle with tick */}
+                  {searchDate && (
+                    <div style={{
+                      position: "absolute",
+                      top: "-1px",  // Adjust to position it higher
+                      right: "-1px",  // Adjust to position it to the right
+                      width: "16px",  // Smaller size for better fit
+                      height: "16px", // Smaller size for better fit
+                      borderRadius: "50%",
+                      backgroundColor: "#059855",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: "white",
+                      fontSize: "12px", // Slightly smaller font size
+                      zIndex: 1, // Ensure it appears in front
+              
+                    }}>
+                      ✓ 
+                    </div>
+                  )}
+              
                   {/* Your SVG Icon */}
                   <svg
-                    onClick={() =>
-                      document.getElementById("date-input").focus()
-                    }
+                    onClick={() => document.getElementById("date-input").focus()}
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -441,6 +468,7 @@ const GDTComplaintList = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
+              
                   <input
                     id="date-input"
                     type="date"
