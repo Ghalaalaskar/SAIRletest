@@ -590,7 +590,7 @@ const GDTComplaintGeneral = () => {
           </p>
         </Modal>
 
-        <h2 className="title">Driver Details</h2>
+        <h2 style={{ marginTop: "30px" }} className="title">Driver Details</h2>
         <hr />
 
         {currentComplaint && driverDetails && (
@@ -772,7 +772,7 @@ const GDTComplaintGeneral = () => {
                 </a>
               </p>
 
-              <h2 className="title">Violation Details</h2>
+              <h2 style={{ marginTop: "30px" }} className="title">Violation Details</h2>
               <hr />
             </div>
 
@@ -816,7 +816,7 @@ const GDTComplaintGeneral = () => {
               {currentComplaint.ViolationID}
             </p>
 
-            <h2 className="title">Complaint Details</h2>
+            <h2 style={{ marginTop: "30px" }} className="title">Complaint Details</h2>
             <hr />
 
             {/* Complaint ID Section */}
@@ -1010,6 +1010,13 @@ const GDTComplaintGeneral = () => {
             <p style={{ fontSize: "18px", marginLeft: "45px" }}>
               {currentComplaint.Description}
             </p>
+
+            {currentComplaint.RespondedBy && (
+            <div>
+              <h2 style={{ marginTop: "30px" }} className="title">Complaint Response Details</h2>
+              <hr/>
+            </div>
+            )}
 
             {currentComplaint.RespondedBy && (
               <div class={formstyle.banner}>

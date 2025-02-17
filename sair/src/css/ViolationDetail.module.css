@@ -6,6 +6,10 @@ main{
   font-size: 32px;
   margin: 20px 0;
 }
+.titleDetails {
+  color: #059855;
+  font-size: 32px;
+}
 
 .map {
   margin: 60px auto;

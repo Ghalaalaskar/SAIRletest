@@ -157,6 +157,19 @@
   /* max-width: 90%; Ensure it doesn’t get too wide */
   animation: fadeIn 1s ease-in-out; /* Smooth fade-in animation WE DONT NEED IT*/
 }
+.bannerDetails {
+  background: linear-gradient(90deg, #059855, #05b06d); /* Gradient background */
+  color: #ffffff; 
+  font-size: 1.5rem; 
+  font-weight: bold;
+  text-align: center; 
+  padding: 15px 20px; 
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  margin: 20px auto; 
+  /* max-width: 90%; Ensure it doesn’t get too wide */
+  animation: fadeIn 1s ease-in-out; /* Smooth fade-in animation WE DONT NEED IT*/
+}
 
 @keyframes fadeIn {
   from {

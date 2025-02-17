@@ -603,8 +603,7 @@ position, speed, time) => {
             time: time,
             timestamp: admin.firestore.Timestamp.now(),
             Status: "Pending",
-            Flag: false,
-            isRead: false,
+            RespondedBy:null,
         });
         console.log('Crash stored successfully.');
     } catch (e) {

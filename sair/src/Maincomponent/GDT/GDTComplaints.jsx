@@ -29,9 +29,17 @@ const GDTComplaintList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const [searchDate, setSearchDate] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   //const employerUID = sessionStorage.getItem('employerUID');
   const gdtUID = sessionStorage.getItem("gdtUID");
+
+
+    // State to track viewed crashes
+    const [viewedComplaints, setViewedComplaints] = useState(() => {
+      const storedViewedComplaints = sessionStorage.getItem("viewedComplaints");
+      return storedViewedComplaints ? JSON.parse(storedViewedComplaints) : {};
+    });
 
   useEffect(() => {
     const fetchDriversAndComplaints = async () => {
@@ -142,6 +150,18 @@ const GDTComplaintList = () => {
 
     fetchDriversAndComplaints();
   }, [gdtUID]);
+
+  
+  const handleViewDetails = (record) => {
+    const updatedViewedComplaints = { ...viewedComplaints, [record.id]: true };
+    setViewedComplaints(updatedViewedComplaints);
+    sessionStorage.setItem(
+      "viewedComplaints",
+      JSON.stringify(updatedViewedComplaints)
+    );
+
+    navigate(`/gdtcomplaints/general/${record.id}`);
+  };
 
   const GDTResponse = (RespondedBy, setResponseByName) => {
     try {
@@ -308,10 +328,12 @@ const GDTComplaintList = () => {
       title: "Complaint Details",
       key: "Details",
       align: "center",
-      render: (text, record) => (
-        <Link to={`/gdtcomplaints/general/${record.id}`}>
-          <img style={{ cursor: "pointer" }} src={EyeIcon} alt="Details" />
-        </Link>
+      render: (text, record) => ( <Link
+        to={`/gdtcomplaints/general/${record.id}`}
+        onClick={() => handleViewDetails(record)}
+      >
+        <img style={{ cursor: "pointer" }} src={EyeIcon} alt="Details" />
+      </Link>
       ),
     },
   ];
@@ -494,6 +516,14 @@ const GDTComplaintList = () => {
             dataSource={filteredComplaints}
             rowKey="id"
             pagination={{ pageSize: 5 }}
+            onRow={(record) => ({
+              style: {
+                backgroundColor:
+                  !viewedComplaints[record.id] && !record.RespondedBy
+                    ? "#d0e0d0"
+                    : "transparent",
+              },
+            })}
           />
         </div>
       </main>

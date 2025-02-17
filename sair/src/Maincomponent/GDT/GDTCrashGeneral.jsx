@@ -292,10 +292,19 @@ const CrashGeneral = () => {
           </p>
         </Modal>
 
-        <h2 className={s.title}>Crash Details</h2>
+        {/* <h2 style={{ textAlign: "center" }} className={s.titleDetails}>Crash Details</h2><br /> */}
+        
+        {/* <div class={formstyle.bannerDetails}>
+          <strong>
+          Crash #{currentCrash.crashID} Details
+          </strong>
+        </div> */}
+        
         {currentCrash.GPSnumber && currentMotorCycle && (
           <>
-            <hr />
+            
+            <h2 className="title">Driver Details</h2>
+              <hr />
             <div>
               <h3
                 style={{
@@ -480,6 +489,8 @@ const CrashGeneral = () => {
                 </a>
               </p>
 
+              
+              <h2 style={{ marginTop: "30px" }} className="title">Driver Company Details</h2>
               <hr />
               <div id="company name">
                 <h3
@@ -727,8 +738,9 @@ const CrashGeneral = () => {
                   {employerDetails?.PhoneNumber}
                 </p>
               </div>
-              <hr />
 
+              <h2 style={{ marginTop: "30px" }} className="title">Motorcycle Details</h2>
+              <hr />
               <h3
                 style={{
                   color: "#059855",
@@ -965,7 +977,9 @@ const CrashGeneral = () => {
               </p>
             </div>
 
-            <hr />
+            
+            <h2 style={{ marginTop: "30px" }} className="title">Crash Details</h2>
+              <hr />
             <div>
               <h3
                 style={{
@@ -1182,7 +1196,14 @@ const CrashGeneral = () => {
                 />
               )}
             </div>
-            <hr />
+
+            
+            {currentCrash.RespondedBy && (
+            <div>
+              <h2 style={{ marginTop: "30px" }} className="title">Crash Response Details</h2>
+              <hr/>
+            </div>
+            )}
 
             {currentCrash.RespondedBy && (
               <div class={formstyle.banner}>
