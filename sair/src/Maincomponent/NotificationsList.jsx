@@ -106,29 +106,42 @@ const NotificationsList = () => {
   useEffect(() => {
     const fetchData = async () => {
       const types = [
-        { key: "notReadComplaints22", type: "Complaint", filterStatus: "Unread" },
+        {
+          key: "notReadComplaints22",
+          type: "Complaint",
+          filterStatus: "Unread",
+        },
         { key: "readComplaints", type: "Complaint", filterStatus: "Read" },
-        { key: "notReadViolations22", type: "Violation", filterStatus: "Unread" },
+        {
+          key: "notReadViolations22",
+          type: "Violation",
+          filterStatus: "Unread",
+        },
         { key: "readViolations", type: "Violation", filterStatus: "Read" },
         { key: "notReadCrashes22", type: "Crash", filterStatus: "Unread" },
         { key: "readCrashes", type: "Crash", filterStatus: "Read" },
       ];
-  
+
       let allNotifications = [];
-  
+
       for (const { key, type, filterStatus } of types) {
         const parsedData = safeParse(key) || []; // Ensure it's an array
-  
+
         const formattedData = await Promise.all(
           parsedData.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(type, item.id || item.ID);
-            const driverDetails = await fetchDriverDetails(item.driverID || item.DriverID);
-  
+            const details = await fetchDetailsFromDatabase(
+              type,
+              item.id || item.ID
+            );
+            const driverDetails = await fetchDriverDetails(
+              item.driverID || item.DriverID
+            );
+
             return {
               ID: item.id || item.ID,
               DriverID: item.driverID || item.DriverID,
               Type: type,
-              Status: details?.Status || "Pending", 
+              Status: details?.Status || "Pending",
               FilterStatus: filterStatus, // Used for filtering (Read or Unread)
               ViolationID: details?.violationID || null,
               CrashID: details?.crashID || null,
@@ -139,54 +152,53 @@ const NotificationsList = () => {
             };
           })
         );
-  
+
         allNotifications = [...allNotifications, ...formattedData];
       }
-  
+
       // Apply status filter
       const filteredNotifications =
         statusFilter === "All"
           ? allNotifications
           : allNotifications.filter((n) => n.FilterStatus === statusFilter);
-  
+
       // Sort by time (latest first)
       filteredNotifications.sort((a, b) => {
         const timeA = a.Time ? new Date(a.Time).getTime() : 0;
         const timeB = b.Time ? new Date(b.Time).getTime() : 0;
         return timeB - timeA;
       });
-  
+
       setNotifications(filteredNotifications);
     };
-  
+
     fetchData();
   }, [statusFilter]); // Runs when the status filter changes
-  
+
   const filteredData = useMemo(() => {
     let filteredNotifications = notifications;
-  
+
     // Apply status filter (Read/Unread)
     if (statusFilter !== "All") {
       filteredNotifications = filteredNotifications.filter((item) => {
         if (statusFilter === "Read") {
-          return item.FilterStatus === "Read"; 
+          return item.FilterStatus === "Read";
         } else if (statusFilter === "Unread") {
-          return item.FilterStatus === "Unread"; 
+          return item.FilterStatus === "Unread";
         }
         return true;
       });
     }
-  
+
     // Apply type filter (Violation, Crash, Complaint)
     if (filterType !== "All") {
       filteredNotifications = filteredNotifications.filter(
         (item) => item.Type === filterType
       );
     }
-  
+
     return filteredNotifications;
   }, [notifications, filterType, statusFilter]);
-  
 
   const columns = [
     {
@@ -341,6 +353,13 @@ const NotificationsList = () => {
             </div>
           </div>
         </div>
+        <style>
+  {`
+    .unread-row {
+      background-color: #d4edda !important;
+    }
+  `}
+</style>
 
         <br />
         <Table
@@ -348,10 +367,18 @@ const NotificationsList = () => {
           dataSource={filteredData}
           rowKey="ID"
           pagination={{
-            pageSize: 5, // Show 5 entries per page
-            showSizeChanger: false, // Optional: Hide page size changer if you want
+            pageSize: 5,
+            showSizeChanger: false,
           }}
           style={{ width: "1200px", margin: "0 auto" }}
+          rowClassName={(record) =>
+            record.FilterStatus === "Unread" ? "unread-row" : ""
+          }
+          rowStyle={(record) =>
+            record.FilterStatus === "Unread"
+              ? { backgroundColor: "#d4edda" }
+              : {}
+          }
         />
       </main>
     </div>
