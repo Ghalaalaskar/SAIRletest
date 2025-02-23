@@ -241,7 +241,7 @@ const NotificationsList = () => {
             color = "green";
             break;
           case "Pending":
-            color = "yellow";
+            color = "orange";
             break;
           case "Rejected":
           case "Revoked":
