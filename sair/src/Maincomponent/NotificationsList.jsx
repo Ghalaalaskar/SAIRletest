@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Select } from "antd"; // Import Select from antd
+import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
-import f from "../css/ComplaintList.module.css"; // CSS module for ComplaintList
-
+import f from "../css/ComplaintList.module.css";
 import { db } from "../firebase";
-import Header from './Header';
-
+import Header from "./Header";
 import {
   doc,
   getDoc,
@@ -16,31 +14,16 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { FaFilter } from "react-icons/fa"; // Import FaFilter icon
-const { Option } = Select; // Destructure Option from Select
+import { FaFilter } from "react-icons/fa";
 
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filterType, setFilterType] = useState("All"); // State for filter type
+  const [filterType, setFilterType] = useState("All");
   const navigate = useNavigate();
-
+  const [statusFilter, setStatusFilter] = useState("All");
   const fetchDetailsFromDatabase = async (type, id) => {
     try {
-      let collectionName;
-      switch (type) {
-        case "Violation":
-          collectionName = "Violation";
-          break;
-        case "Complaint":
-          collectionName = "Complaint";
-          break;
-        case "Crash":
-          collectionName = "Crash";
-          break;
-        default:
-          throw new Error("Invalid type");
-      }
-
+      const collectionName = type;
       const docRef = doc(db, collectionName, id);
       const docSnap = await getDoc(docRef);
 
@@ -65,8 +48,7 @@ const NotificationsList = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        const docData = querySnapshot.docs[0].data();
-        return docData;
+        return querySnapshot.docs[0].data();
       } else {
         console.log(`No driver found with ID ${driverID}`);
         return null;
@@ -94,6 +76,16 @@ const NotificationsList = () => {
       return [];
     }
   };
+  const convertToUnixTimestamp = (dateString) => {
+    const date = new Date(dateString);
+    return Math.floor(date.getTime() / 1000); // Convert milliseconds to seconds
+  };
+  const isWithinLastMonth = (time) => {
+    const now = new Date();
+    const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
+    const notificationDate = new Date(time);
+    return notificationDate >= oneMonthAgo;
+  };
 
   const formatDate = (time) => {
     if (!time) return "N/A";
@@ -114,39 +106,30 @@ const NotificationsList = () => {
   useEffect(() => {
     const fetchData = async () => {
       const types = [
-        {
-          key: "notReadComplaints22",
-          readKey: "readComplaints",
-          type: "Complaint",
-        },
-        {
-          key: "notReadViolations22",
-          readKey: "readViolations",
-          type: "Violation",
-        },
-        { key: "notReadCrashes22", readKey: "readCrashes", type: "Crash" },
+        { key: "notReadComplaints22", type: "Complaint", filterStatus: "Unread" },
+        { key: "readComplaints", type: "Complaint", filterStatus: "Read" },
+        { key: "notReadViolations22", type: "Violation", filterStatus: "Unread" },
+        { key: "readViolations", type: "Violation", filterStatus: "Read" },
+        { key: "notReadCrashes22", type: "Crash", filterStatus: "Unread" },
+        { key: "readCrashes", type: "Crash", filterStatus: "Read" },
       ];
-
+  
       let allNotifications = [];
-
-      for (const { key, readKey, type } of types) {
-        const unread = safeParse(key);
-        const read = safeParse(readKey);
-
-        const formattedUnread = await Promise.all(
-          unread.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(
-              type,
-              item.id || item.ID
-            );
-            const driverDetails = await fetchDriverDetails(
-              item.driverID || item.DriverID
-            );
+  
+      for (const { key, type, filterStatus } of types) {
+        const parsedData = safeParse(key) || []; // Ensure it's an array
+  
+        const formattedData = await Promise.all(
+          parsedData.map(async (item) => {
+            const details = await fetchDetailsFromDatabase(type, item.id || item.ID);
+            const driverDetails = await fetchDriverDetails(item.driverID || item.DriverID);
+  
             return {
               ID: item.id || item.ID,
               DriverID: item.driverID || item.DriverID,
               Type: type,
-              Status: details?.Status || "Unread",
+              Status: details?.Status || "Pending", // Shows actual status (Pending, Accepted, etc.)
+              FilterStatus: filterStatus, // Used for filtering (Read or Unread)
               ViolationID: details?.violationID || null,
               CrashID: details?.crashID || null,
               ComplaintID: details?.ComplaintID || null,
@@ -156,56 +139,53 @@ const NotificationsList = () => {
             };
           })
         );
-
-        const formattedRead = await Promise.all(
-          read.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(
-              type,
-              item.id || item.ID
-            );
-            const driverDetails = await fetchDriverDetails(
-              item.driverID || item.DriverID
-            );
-            return {
-              ID: item.id || item.ID,
-              DriverID: item.driverID || item.DriverID,
-              Type: type,
-              Status: details?.Status || item.Status || "Read",
-              ViolationID: details?.violationID || null,
-              CrashID: details?.crashID || null,
-              ComplaintID: details?.ComplaintID || null,
-              Fname: driverDetails?.Fname || "Unknown",
-              Lname: driverDetails?.Lname || "Unknown",
-              Time: details?.time || details?.DateTime || null,
-            };
-          })
-        );
-
-        allNotifications = [
-          ...allNotifications,
-          ...formattedUnread,
-          ...formattedRead,
-        ];
+  
+        allNotifications = [...allNotifications, ...formattedData];
       }
-
-      allNotifications.sort((a, b) => {
-        const timeA = a.Time?.toDate ? a.Time.toDate().getTime() : a.Time || 0;
-        const timeB = b.Time?.toDate ? b.Time.toDate().getTime() : b.Time || 0;
+  
+      // Apply status filter
+      const filteredNotifications =
+        statusFilter === "All"
+          ? allNotifications
+          : allNotifications.filter((n) => n.FilterStatus === statusFilter);
+  
+      // Sort by time (latest first)
+      filteredNotifications.sort((a, b) => {
+        const timeA = a.Time ? new Date(a.Time).getTime() : 0;
+        const timeB = b.Time ? new Date(b.Time).getTime() : 0;
         return timeB - timeA;
       });
-
-      setNotifications(allNotifications);
+  
+      setNotifications(filteredNotifications);
     };
-
+  
     fetchData();
-  }, []);
-
+  }, [statusFilter]); // Runs when the status filter changes
+  
   const filteredData = useMemo(() => {
-    if (filterType === "All") {
-      return notifications; // Return all notifications if "All" is selected
+    let filteredNotifications = notifications;
+
+    // Apply status filter
+    if (statusFilter !== "All") {
+      filteredNotifications = notifications.filter((item) => {
+        if (statusFilter === "Read") {
+          return item.Status === "Read";
+        } else if (statusFilter === "Unread") {
+          return item.Status === "Unread";
+        }
+        return true;
+      });
     }
-    return notifications.filter((item) => item.Type === filterType); // Filter by type
-  }, [notifications, filterType]);
+
+    // Apply type filter
+    if (filterType !== "All") {
+      filteredNotifications = filteredNotifications.filter(
+        (item) => item.Type === filterType
+      );
+    }
+
+    return filteredNotifications;
+  }, [notifications, filterType, statusFilter]);
 
   const columns = [
     {
@@ -306,10 +286,8 @@ const NotificationsList = () => {
   ];
 
   return (
-
     <div>
-     <Header active="notificationslist" /> 
-
+      <Header active="notificationslist" />
       <div className="breadcrumb" style={{ marginRight: "100px" }}>
         <a onClick={() => navigate("/employer-home")}>Home</a>
         <span> / </span>
@@ -318,55 +296,61 @@ const NotificationsList = () => {
       <main>
         <div className={s.container}>
           <h2 className={s.title}>Notification List</h2>
-          <div className={s.searchInputs}>
+          <div
+            className={s.searchInputs}
+            style={{ display: "flex", gap: "20px" }}
+          >
+            {/* Type Filter */}
             <div className={s.searchContainer}>
-                <div className={f.selectWrapper}>
-              {/* Add FaFilter with inline style for green color */}
-              <FaFilter className={f.filterIcon} 
-                // style={{
-                //   color: "green",
-                //   fontSize: "18px",
-                //   marginRight: "10px",
-                // }}
-              />
-              {/* Replace Select with a standard <select> element */}
-              <select
-                // style={{
-                //   flexGrow: 1,
-                //   border: "none",
-                //   backgroundColor: "transparent",
-                //   fontSize: "16px",
-                //   WebkitAppearance: "none", // For Safari/Chrome
-                //   MozAppearance: "none", // For Firefox
-                //   appearance: "none", // Standard property
-                //   padding: "8px",
-                //   outline: "none",
-                // }}
-                
-                className={f.customSelect}
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-              >
-                <option value="All" disabled>
-                  Filter by Type
-                </option>
-                <option value="All">All</option>
-                <option value="Violation">Violation</option>
-                <option value="Crash">Crash</option>
-                <option value="Complaint">Complaint</option>
-              </select>
+              <div className={f.selectWrapper}>
+                <FaFilter className={f.filterIcon} />
+                <select
+                  className={f.customSelect}
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <option value="All" disabled>
+                    Filter by Type
+                  </option>
+                  <option value="All">All</option>
+                  <option value="Violation">Violation</option>
+                  <option value="Crash">Crash</option>
+                  <option value="Complaint">Complaint</option>
+                </select>
+              </div>
             </div>
+
+            {/* Status Filter */}
+            <div className={s.searchContainer}>
+              <div className={f.selectWrapper}>
+                <FaFilter className={f.filterIcon} />
+                <select
+                  className={f.customSelect}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="All" disabled>
+                    Filter by Status
+                  </option>
+                  <option value="All">All</option>
+                  <option value="Read">Read</option>
+                  <option value="Unread">Unread</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
+
         <br />
         <Table
           columns={columns}
           dataSource={filteredData}
           rowKey="ID"
-          pagination={{ pageSize: 5 }}
+          pagination={{
+            pageSize: 5, // Show 5 entries per page
+            showSizeChanger: false, // Optional: Hide page size changer if you want
+          }}
           style={{ width: "1200px", margin: "0 auto" }}
-          showSizeChanger={false}
         />
       </main>
     </div>
