@@ -128,7 +128,7 @@ const NotificationsList = () => {
               ID: item.id || item.ID,
               DriverID: item.driverID || item.DriverID,
               Type: type,
-              Status: details?.Status || "Pending", // Shows actual status (Pending, Accepted, etc.)
+              Status: details?.Status || "Pending", 
               FilterStatus: filterStatus, // Used for filtering (Read or Unread)
               ViolationID: details?.violationID || null,
               CrashID: details?.crashID || null,
@@ -164,28 +164,29 @@ const NotificationsList = () => {
   
   const filteredData = useMemo(() => {
     let filteredNotifications = notifications;
-
-    // Apply status filter
+  
+    // Apply status filter (Read/Unread)
     if (statusFilter !== "All") {
-      filteredNotifications = notifications.filter((item) => {
+      filteredNotifications = filteredNotifications.filter((item) => {
         if (statusFilter === "Read") {
-          return item.Status === "Read";
+          return item.FilterStatus === "Read"; 
         } else if (statusFilter === "Unread") {
-          return item.Status === "Unread";
+          return item.FilterStatus === "Unread"; 
         }
         return true;
       });
     }
-
-    // Apply type filter
+  
+    // Apply type filter (Violation, Crash, Complaint)
     if (filterType !== "All") {
       filteredNotifications = filteredNotifications.filter(
         (item) => item.Type === filterType
       );
     }
-
+  
     return filteredNotifications;
   }, [notifications, filterType, statusFilter]);
+  
 
   const columns = [
     {
