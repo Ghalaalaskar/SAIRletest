@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
@@ -99,7 +99,6 @@ const NotificationsList = () => {
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
-
   const handleDetailsClick = (record) => {
     let notReadKey, readKey;
   
