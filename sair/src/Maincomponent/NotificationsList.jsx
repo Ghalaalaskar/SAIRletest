@@ -76,10 +76,7 @@ const NotificationsList = () => {
       return [];
     }
   };
-  const convertToUnixTimestamp = (dateString) => {
-    const date = new Date(dateString);
-    return Math.floor(date.getTime() / 1000); // Convert milliseconds to seconds
-  };
+
   const isWithinLastMonth = (time) => {
     const now = new Date();
     const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
@@ -103,7 +100,71 @@ const NotificationsList = () => {
     return `${month}/${day}/${year}`;
   };
 
-
+  const handleDetailsClick = (record) => {
+    let notReadKey, readKey;
+  
+    switch (record.Type) {
+      case "Violation":
+        notReadKey = "notReadViolations22";
+        readKey = "readViolations";
+        break;
+      case "Crash":
+        notReadKey = "notReadCrashes22";
+        readKey = "readCrashes";
+        break;
+      case "Complaint":
+        notReadKey = "notReadComplaints22";
+        readKey = "readComplaints";
+        break;
+      default:
+        return;
+    }
+  
+    // Get existing data
+    const notReadData = safeParse(notReadKey);
+    const readData = safeParse(readKey);
+  
+    console.log("Not Read Data Before:", notReadData);
+    console.log("Record ID to Remove:", record.ID);
+  
+    // Find and remove the notification from the unread list
+    const updatedNotReadData = notReadData.filter(item => item.ID !== record.ID);
+  
+    console.log("Updated Not Read Data:", updatedNotReadData);
+  
+    // Add the notification to the read list
+    const updatedReadData = [...readData, record];
+  
+    // Update localStorage
+    localStorage.setItem(notReadKey, JSON.stringify(updatedNotReadData));
+    localStorage.setItem(readKey, JSON.stringify(updatedReadData));
+  
+    // Force re-render by updating state
+    setNotifications(prev =>
+      prev.map(item =>
+        item.ID === record.ID ? { ...item, FilterStatus: "Read" } : item
+      )
+    );
+  
+    // Navigate to the details page
+    let route = "";
+    switch (record.Type) {
+      case "Violation":
+        route = `/violation/general/${record.ID}`;
+        break;
+      case "Crash":
+        route = `/crash/general/${record.ID}`;
+        break;
+      case "Complaint":
+        route = `/complaint/general/${record.ID}`;
+        break;
+      default:
+        route = "#";
+    }
+  
+    navigate(route);
+  };
+  
   const fetchData = useCallback(async () => {
     const types = [
       { key: "notReadComplaints22", type: "Complaint", filterStatus: "Unread" },
@@ -275,31 +336,14 @@ const NotificationsList = () => {
       title: "Details",
       key: "Details",
       align: "center",
-      render: (text, record) => {
-        let route = "";
-        switch (record.Type) {
-          case "Violation":
-            route = `/violation/general/${record.ID}`;
-            break;
-          case "Crash":
-            route = `/crash/general/${record.ID}`;
-            break;
-          case "Complaint":
-            route = `/complaint/general/${record.ID}`;
-            break;
-          default:
-            route = "#";
-        }
-
-        return (
-          <img
-            style={{ cursor: "pointer" }}
-            src={EyeIcon}
-            alt="Details"
-            onClick={() => navigate(route)}
-          />
-        );
-      },
+      render: (text, record) => (
+        <img
+          style={{ cursor: "pointer" }}
+          src={EyeIcon}
+          alt="Details"
+          onClick={() => handleDetailsClick(record)}
+        />
+      ),
     },
   ];
 
