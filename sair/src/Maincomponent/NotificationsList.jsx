@@ -15,7 +15,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { FaFilter } from "react-icons/fa";
-
+import { useCallback } from "react";
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
@@ -103,78 +103,83 @@ const NotificationsList = () => {
     return `${month}/${day}/${year}`;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const types = [
-        {
-          key: "notReadComplaints22",
-          type: "Complaint",
-          filterStatus: "Unread",
-        },
-        { key: "readComplaints", type: "Complaint", filterStatus: "Read" },
-        {
-          key: "notReadViolations22",
-          type: "Violation",
-          filterStatus: "Unread",
-        },
-        { key: "readViolations", type: "Violation", filterStatus: "Read" },
-        { key: "notReadCrashes22", type: "Crash", filterStatus: "Unread" },
-        { key: "readCrashes", type: "Crash", filterStatus: "Read" },
-      ];
 
-      let allNotifications = [];
-
-      for (const { key, type, filterStatus } of types) {
-        const parsedData = safeParse(key) || []; // Ensure it's an array
-
-        const formattedData = await Promise.all(
-          parsedData.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(
-              type,
-              item.id || item.ID
-            );
-            const driverDetails = await fetchDriverDetails(
-              item.driverID || item.DriverID
-            );
-
-            return {
-              ID: item.id || item.ID,
-              DriverID: item.driverID || item.DriverID,
-              Type: type,
-              Status: details?.Status || "Pending",
-              FilterStatus: filterStatus, // Used for filtering (Read or Unread)
-              ViolationID: details?.violationID || null,
-              CrashID: details?.crashID || null,
-              ComplaintID: details?.ComplaintID || null,
-              Fname: driverDetails?.Fname || "Unknown",
-              Lname: driverDetails?.Lname || "Unknown",
-              Time: details?.time || details?.DateTime || null,
-            };
-          })
-        );
-
-        allNotifications = [...allNotifications, ...formattedData];
-      }
-
-      // Apply status filter
-      const filteredNotifications =
-        statusFilter === "All"
-          ? allNotifications
-          : allNotifications.filter((n) => n.FilterStatus === statusFilter);
-
-      // Sort by time (latest first)
-      filteredNotifications.sort((a, b) => {
-        const timeA = a.Time ? new Date(a.Time).getTime() : 0;
-        const timeB = b.Time ? new Date(b.Time).getTime() : 0;
-        return timeB - timeA;
+  const fetchData = useCallback(async () => {
+    const types = [
+      { key: "notReadComplaints22", type: "Complaint", filterStatus: "Unread" },
+      { key: "readComplaints", type: "Complaint", filterStatus: "Read" },
+      { key: "notReadViolations22", type: "Violation", filterStatus: "Unread" },
+      { key: "readViolations", type: "Violation", filterStatus: "Read" },
+      { key: "notReadCrashes22", type: "Crash", filterStatus: "Unread" },
+      { key: "readCrashes", type: "Crash", filterStatus: "Read" },
+    ];
+  
+    let allNotifications = [];
+    let driverIDs = new Set();
+  
+    for (const { key, type, filterStatus } of types) {
+      const parsedData = safeParse(key) || [];
+  
+      parsedData.forEach((item) => {
+        driverIDs.add(item.driverID || item.DriverID);
       });
-
-      setNotifications(filteredNotifications);
-    };
-
+  
+      const ids = parsedData.map((item) => item.id || item.ID);
+      
+      // Batch fetch all documents of this type
+      const docRefs = ids.map((id) => doc(db, type, id));
+      const docSnapshots = await Promise.all(docRefs.map((ref) => getDoc(ref)));
+  
+      const formattedData = parsedData.map((item, index) => {
+        const details = docSnapshots[index]?.data() || {};
+        return {
+          ID: item.id || item.ID,
+          DriverID: item.driverID || item.DriverID,
+          Type: type,
+          Status: details.Status || "Pending",
+          FilterStatus: filterStatus,
+          ViolationID: details.violationID || null,
+          CrashID: details.crashID || null,
+          ComplaintID: details.ComplaintID || null,
+          Time: details.time || details.DateTime || null,
+        };
+      });
+  
+      allNotifications = [...allNotifications, ...formattedData];
+    }
+  
+    // Batch fetch drivers
+    const driverQuery = query(
+      collection(db, "Driver"),
+      where("DriverID", "in", Array.from(driverIDs))
+    );
+  
+    const driverDocs = await getDocs(driverQuery);
+    const driverMap = {};
+    driverDocs.forEach((doc) => {
+      driverMap[doc.data().DriverID] = doc.data();
+    });
+  
+    // Attach driver details to notifications
+    const finalData = allNotifications.map((notification) => ({
+      ...notification,
+      Fname: driverMap[notification.DriverID]?.Fname || "Unknown",
+      Lname: driverMap[notification.DriverID]?.Lname || "Unknown",
+    }));
+  
+    // Sort by time (latest first)
+    finalData.sort((a, b) => {
+      const timeA = a.Time ? new Date(a.Time).getTime() : 0;
+      const timeB = b.Time ? new Date(b.Time).getTime() : 0;
+      return timeB - timeA;
+    });
+  
+    setNotifications(finalData);
+  }, [statusFilter]);
+  
+  useEffect(() => {
     fetchData();
-  }, [statusFilter]); // Runs when the status filter changes
-
+  }, [fetchData]);
   const filteredData = useMemo(() => {
     let filteredNotifications = notifications;
 
@@ -354,12 +359,12 @@ const NotificationsList = () => {
           </div>
         </div>
         <style>
-  {`
+          {`
     .unread-row {
       background-color: #d4edda !important;
     }
   `}
-</style>
+        </style>
 
         <br />
         <Table
