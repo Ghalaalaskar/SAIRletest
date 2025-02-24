@@ -352,19 +352,12 @@ const NotificationsList = () => {
   };
 
   const formatDate = (time) => {
-    if (!time) return "N/A";
-    let date;
-    if (typeof time === "number") {
-      date = new Date(time * 1000);
-    } else if (time.toDate) {
-      date = time.toDate();
-    } else {
-      return "N/A";
-    }
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const date = new Date(time * 1000);
     const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
   // const handleDetailsClick = (record) => {
   //   let notReadKey, readKey;
@@ -576,7 +569,7 @@ const NotificationsList = () => {
       dataIndex: "Time",
       key: "Time",
       align: "center",
-      render: (text, record) => formatDate(record.Time),
+      render: (text, record) => formatDate(record.time),
     },
     {
       title: "Status",
