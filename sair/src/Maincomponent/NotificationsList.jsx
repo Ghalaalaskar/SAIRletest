@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table, Select } from "antd"; // Import Select from antd
+import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
-import f from "../css/ComplaintList.module.css"; // CSS module for ComplaintList
-
+import f from "../css/ComplaintList.module.css";
 import { db } from "../firebase";
-import Header from './Header';
-
+import Header from "./Header";
 import {
   doc,
   getDoc,
@@ -16,31 +14,16 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { FaFilter } from "react-icons/fa"; // Import FaFilter icon
-const { Option } = Select; // Destructure Option from Select
-
+import { FaFilter } from "react-icons/fa";
+import { useCallback } from "react";
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filterType, setFilterType] = useState("All"); // State for filter type
+  const [filterType, setFilterType] = useState("All");
   const navigate = useNavigate();
-
+  const [statusFilter, setStatusFilter] = useState("All");
   const fetchDetailsFromDatabase = async (type, id) => {
     try {
-      let collectionName;
-      switch (type) {
-        case "Violation":
-          collectionName = "Violation";
-          break;
-        case "Complaint":
-          collectionName = "Complaint";
-          break;
-        case "Crash":
-          collectionName = "Crash";
-          break;
-        default:
-          throw new Error("Invalid type");
-      }
-
+      const collectionName = type;
       const docRef = doc(db, collectionName, id);
       const docSnap = await getDoc(docRef);
 
@@ -65,8 +48,7 @@ const NotificationsList = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        const docData = querySnapshot.docs[0].data();
-        return docData;
+        return querySnapshot.docs[0].data();
       } else {
         console.log(`No driver found with ID ${driverID}`);
         return null;
@@ -95,6 +77,13 @@ const NotificationsList = () => {
     }
   };
 
+  const isWithinLastMonth = (time) => {
+    const now = new Date();
+    const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1));
+    const notificationDate = new Date(time);
+    return notificationDate >= oneMonthAgo;
+  };
+
   const formatDate = (time) => {
     if (!time) return "N/A";
     let date;
@@ -110,102 +99,171 @@ const NotificationsList = () => {
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const types = [
-        {
-          key: "notReadComplaints22",
-          readKey: "readComplaints",
-          type: "Complaint",
-        },
-        {
-          key: "notReadViolations22",
-          readKey: "readViolations",
-          type: "Violation",
-        },
-        { key: "notReadCrashes22", readKey: "readCrashes", type: "Crash" },
-      ];
-
-      let allNotifications = [];
-
-      for (const { key, readKey, type } of types) {
-        const unread = safeParse(key);
-        const read = safeParse(readKey);
-
-        const formattedUnread = await Promise.all(
-          unread.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(
-              type,
-              item.id || item.ID
-            );
-            const driverDetails = await fetchDriverDetails(
-              item.driverID || item.DriverID
-            );
-            return {
-              ID: item.id || item.ID,
-              DriverID: item.driverID || item.DriverID,
-              Type: type,
-              Status: details?.Status || "Unread",
-              ViolationID: details?.violationID || null,
-              CrashID: details?.crashID || null,
-              ComplaintID: details?.ComplaintID || null,
-              Fname: driverDetails?.Fname || "Unknown",
-              Lname: driverDetails?.Lname || "Unknown",
-              Time: details?.time || details?.DateTime || null,
-            };
-          })
-        );
-
-        const formattedRead = await Promise.all(
-          read.map(async (item) => {
-            const details = await fetchDetailsFromDatabase(
-              type,
-              item.id || item.ID
-            );
-            const driverDetails = await fetchDriverDetails(
-              item.driverID || item.DriverID
-            );
-            return {
-              ID: item.id || item.ID,
-              DriverID: item.driverID || item.DriverID,
-              Type: type,
-              Status: details?.Status || item.Status || "Read",
-              ViolationID: details?.violationID || null,
-              CrashID: details?.crashID || null,
-              ComplaintID: details?.ComplaintID || null,
-              Fname: driverDetails?.Fname || "Unknown",
-              Lname: driverDetails?.Lname || "Unknown",
-              Time: details?.time || details?.DateTime || null,
-            };
-          })
-        );
-
-        allNotifications = [
-          ...allNotifications,
-          ...formattedUnread,
-          ...formattedRead,
-        ];
-      }
-
-      allNotifications.sort((a, b) => {
-        const timeA = a.Time?.toDate ? a.Time.toDate().getTime() : a.Time || 0;
-        const timeB = b.Time?.toDate ? b.Time.toDate().getTime() : b.Time || 0;
-        return timeB - timeA;
-      });
-
-      setNotifications(allNotifications);
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredData = useMemo(() => {
-    if (filterType === "All") {
-      return notifications; // Return all notifications if "All" is selected
+  const handleDetailsClick = (record) => {
+    let notReadKey, readKey;
+  
+    switch (record.Type) {
+      case "Violation":
+        notReadKey = "notReadViolations22";
+        readKey = "readViolations";
+        break;
+      case "Crash":
+        notReadKey = "notReadCrashes22";
+        readKey = "readCrashes";
+        break;
+      case "Complaint":
+        notReadKey = "notReadComplaints22";
+        readKey = "readComplaints";
+        break;
+      default:
+        return;
     }
-    return notifications.filter((item) => item.Type === filterType); // Filter by type
-  }, [notifications, filterType]);
+  
+    // Get existing data
+    const notReadData = safeParse(notReadKey);
+    const readData = safeParse(readKey);
+  
+    console.log("Not Read Data Before:", notReadData);
+    console.log("Record ID to Remove:", record.ID);
+  
+    // Find and remove the notification from the unread list
+    const updatedNotReadData = notReadData.filter(item => item.ID !== record.ID);
+  
+    console.log("Updated Not Read Data:", updatedNotReadData);
+  
+    // Add the notification to the read list
+    const updatedReadData = [...readData, record];
+  
+    // Update localStorage
+    localStorage.setItem(notReadKey, JSON.stringify(updatedNotReadData));
+    localStorage.setItem(readKey, JSON.stringify(updatedReadData));
+  
+    // Force re-render by updating state
+    setNotifications(prev =>
+      prev.map(item =>
+        item.ID === record.ID ? { ...item, FilterStatus: "Read" } : item
+      )
+    );
+  
+    // Navigate to the details page
+    let route = "";
+    switch (record.Type) {
+      case "Violation":
+        route = `/violation/general/${record.ID}`;
+        break;
+      case "Crash":
+        route = `/crash/general/${record.ID}`;
+        break;
+      case "Complaint":
+        route = `/complaint/general/${record.ID}`;
+        break;
+      default:
+        route = "#";
+    }
+  
+    navigate(route);
+  };
+  
+  const fetchData = useCallback(async () => {
+    const types = [
+      { key: "notReadComplaints22", type: "Complaint", filterStatus: "Unread" },
+      { key: "readComplaints", type: "Complaint", filterStatus: "Read" },
+      { key: "notReadViolations22", type: "Violation", filterStatus: "Unread" },
+      { key: "readViolations", type: "Violation", filterStatus: "Read" },
+      { key: "notReadCrashes22", type: "Crash", filterStatus: "Unread" },
+      { key: "readCrashes", type: "Crash", filterStatus: "Read" },
+    ];
+  
+    let allNotifications = [];
+    let driverIDs = new Set();
+  
+    for (const { key, type, filterStatus } of types) {
+      const parsedData = safeParse(key) || [];
+  
+      parsedData.forEach((item) => {
+        driverIDs.add(item.driverID || item.DriverID);
+      });
+  
+      const ids = parsedData.map((item) => item.id || item.ID);
+      
+      // Batch fetch all documents of this type
+      const docRefs = ids.map((id) => doc(db, type, id));
+      const docSnapshots = await Promise.all(docRefs.map((ref) => getDoc(ref)));
+  
+      const formattedData = parsedData.map((item, index) => {
+        const details = docSnapshots[index]?.data() || {};
+        return {
+          ID: item.id || item.ID,
+          DriverID: item.driverID || item.DriverID,
+          Type: type,
+          Status: details.Status || "Pending",
+          FilterStatus: filterStatus,
+          ViolationID: details.violationID || null,
+          CrashID: details.crashID || null,
+          ComplaintID: details.ComplaintID || null,
+          Time: details.time || details.DateTime || null,
+        };
+      });
+  
+      allNotifications = [...allNotifications, ...formattedData];
+    }
+  
+    // Batch fetch drivers
+    const driverQuery = query(
+      collection(db, "Driver"),
+      where("DriverID", "in", Array.from(driverIDs))
+    );
+  
+    const driverDocs = await getDocs(driverQuery);
+    const driverMap = {};
+    driverDocs.forEach((doc) => {
+      driverMap[doc.data().DriverID] = doc.data();
+    });
+  
+    // Attach driver details to notifications
+    const finalData = allNotifications.map((notification) => ({
+      ...notification,
+      Fname: driverMap[notification.DriverID]?.Fname || "Unknown",
+      Lname: driverMap[notification.DriverID]?.Lname || "Unknown",
+    }));
+  
+    // Sort by time (latest first)
+    finalData.sort((a, b) => {
+      const timeA = a.Time ? new Date(a.Time).getTime() : 0;
+      const timeB = b.Time ? new Date(b.Time).getTime() : 0;
+      return timeB - timeA;
+    });
+  
+    setNotifications(finalData);
+  }, [statusFilter]);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  const filteredData = useMemo(() => {
+    let filteredNotifications = notifications;
+
+    // Apply status filter (Read/Unread)
+    if (statusFilter !== "All") {
+      filteredNotifications = filteredNotifications.filter((item) => {
+        if (statusFilter === "Read") {
+          return item.FilterStatus === "Read";
+        } else if (statusFilter === "Unread") {
+          return item.FilterStatus === "Unread";
+        }
+        return true;
+      });
+    }
+
+    // Apply type filter (Violation, Crash, Complaint)
+    if (filterType !== "All") {
+      filteredNotifications = filteredNotifications.filter(
+        (item) => item.Type === filterType
+      );
+    }
+
+    return filteredNotifications;
+  }, [notifications, filterType, statusFilter]);
 
   const columns = [
     {
@@ -260,7 +318,7 @@ const NotificationsList = () => {
             color = "green";
             break;
           case "Pending":
-            color = "yellow";
+            color = "orange";
             break;
           case "Rejected":
           case "Revoked":
@@ -277,39 +335,20 @@ const NotificationsList = () => {
       title: "Details",
       key: "Details",
       align: "center",
-      render: (text, record) => {
-        let route = "";
-        switch (record.Type) {
-          case "Violation":
-            route = `/violation/general/${record.ID}`;
-            break;
-          case "Crash":
-            route = `/crash/general/${record.ID}`;
-            break;
-          case "Complaint":
-            route = `/complaint/general/${record.ID}`;
-            break;
-          default:
-            route = "#";
-        }
-
-        return (
-          <img
-            style={{ cursor: "pointer" }}
-            src={EyeIcon}
-            alt="Details"
-            onClick={() => navigate(route)}
-          />
-        );
-      },
+      render: (text, record) => (
+        <img
+          style={{ cursor: "pointer" }}
+          src={EyeIcon}
+          alt="Details"
+          onClick={() => handleDetailsClick(record)}
+        />
+      ),
     },
   ];
 
   return (
-
     <div>
-     <Header active="notificationslist" /> 
-
+      <Header active="notificationslist" />
       <div className="breadcrumb" style={{ marginRight: "100px" }}>
         <a onClick={() => navigate("/employer-home")}>Home</a>
         <span> / </span>
@@ -318,55 +357,76 @@ const NotificationsList = () => {
       <main>
         <div className={s.container}>
           <h2 className={s.title}>Notification List</h2>
-          <div className={s.searchInputs}>
+          <div
+            className={s.searchInputs}
+            style={{ display: "flex", gap: "20px" }}
+          >
+            {/* Type Filter */}
             <div className={s.searchContainer}>
-                <div className={f.selectWrapper}>
-              {/* Add FaFilter with inline style for green color */}
-              <FaFilter className={f.filterIcon} 
-                // style={{
-                //   color: "green",
-                //   fontSize: "18px",
-                //   marginRight: "10px",
-                // }}
-              />
-              {/* Replace Select with a standard <select> element */}
-              <select
-                // style={{
-                //   flexGrow: 1,
-                //   border: "none",
-                //   backgroundColor: "transparent",
-                //   fontSize: "16px",
-                //   WebkitAppearance: "none", // For Safari/Chrome
-                //   MozAppearance: "none", // For Firefox
-                //   appearance: "none", // Standard property
-                //   padding: "8px",
-                //   outline: "none",
-                // }}
-                
-                className={f.customSelect}
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-              >
-                <option value="All" disabled>
-                  Filter by Type
-                </option>
-                <option value="All">All</option>
-                <option value="Violation">Violation</option>
-                <option value="Crash">Crash</option>
-                <option value="Complaint">Complaint</option>
-              </select>
+              <div className={f.selectWrapper}>
+                <FaFilter className={f.filterIcon} />
+                <select
+                  className={f.customSelect}
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <option value="All" disabled>
+                    Filter by Type
+                  </option>
+                  <option value="All">All</option>
+                  <option value="Violation">Violation</option>
+                  <option value="Crash">Crash</option>
+                  <option value="Complaint">Complaint</option>
+                </select>
+              </div>
             </div>
+
+            {/* Status Filter */}
+            <div className={s.searchContainer}>
+              <div className={f.selectWrapper}>
+                <FaFilter className={f.filterIcon} />
+                <select
+                  className={f.customSelect}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="All" disabled>
+                    Filter by Status
+                  </option>
+                  <option value="All">All</option>
+                  <option value="Read">Read</option>
+                  <option value="Unread">Unread</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
+        <style>
+          {`
+    .unread-row {
+      background-color: #d4edda !important;
+    }
+  `}
+        </style>
+
         <br />
         <Table
           columns={columns}
           dataSource={filteredData}
           rowKey="ID"
-          pagination={{ pageSize: 5 }}
+          pagination={{
+            pageSize: 5,
+            showSizeChanger: false,
+          }}
           style={{ width: "1200px", margin: "0 auto" }}
-          showSizeChanger={false}
+          rowClassName={(record) =>
+            record.FilterStatus === "Unread" ? "unread-row" : ""
+          }
+          rowStyle={(record) =>
+            record.FilterStatus === "Unread"
+              ? { backgroundColor: "#d4edda" }
+              : {}
+          }
         />
       </main>
     </div>
