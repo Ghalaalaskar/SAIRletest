@@ -229,13 +229,7 @@ const Header = ({ active }) => {
           id: doc.id,
           ...doc.data(),
         }));
-        
-        // setCrashes(crashList);
-        // const newCrashIds = crashList.map((crash) => crash.id);
-        // console.log("Fetched new crash IDs:", newCrashIds);
-        // console.log('old',storedCrashIds);
-       
-
+      
         const newCrashes = crashList.filter(crash => !storedReadCrashes[crash.id]);
 
 const updatedReadCrashes = { ...notReadCrashes22};
