@@ -27,6 +27,14 @@ const NotificationsList = () => {
     const readViolations = JSON.parse(localStorage.getItem("readViolations")) || {};
     const readComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {};
   
+    // Get current date and one month ago date
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  
+    // Function to filter old notifications
+    const filterRecent = (notifications) =>
+      Object.values(notifications).filter((notif) => new Date(notif.time) >= oneMonthAgo);
+  
     const mergedNotifications = [
       ...notReadCrashes.map((crash) => ({
         ...crash,
@@ -43,17 +51,17 @@ const NotificationsList = () => {
         Type: "Complaint",
         FilterStatus: "Unread",
       })),
-      ...Object.values(readCrashes).map((crash) => ({
+      ...filterRecent(readCrashes).map((crash) => ({
         ...crash,
         Type: "Crash",
         FilterStatus: "Read",
       })),
-      ...Object.values(readViolations).map((violation) => ({
+      ...filterRecent(readViolations).map((violation) => ({
         ...violation,
         Type: "Violation",
         FilterStatus: "Read",
       })),
-      ...Object.values(readComplaints).map((complaint) => ({
+      ...filterRecent(readComplaints).map((complaint) => ({
         ...complaint,
         Type: "Complaint",
         FilterStatus: "Read",
