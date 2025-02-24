@@ -352,11 +352,26 @@ const NotificationsList = () => {
   };
 
   const formatDate = (time) => {
-    const date = new Date(time * 1000);
+    let date;
+  
+    // Check if the time is a Unix timestamp (number in seconds)
+    if (typeof time === 'number' || (typeof time === 'string' && !isNaN(time))) {
+      date = new Date(time * 1000); // Convert to milliseconds
+    } else if (time?.seconds) {
+      // Handle Firestore Timestamp
+      date = new Date(time.seconds * 1000);
+    } else if (time instanceof Date) {
+      // Handle JavaScript Date object
+      date = time;
+    } else {
+      // Handle other cases (e.g., invalid date)
+      return 'Invalid Date';
+    }
+  
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-
+  
     return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
   // const handleDetailsClick = (record) => {
@@ -569,7 +584,7 @@ const NotificationsList = () => {
       dataIndex: "Time",
       key: "Time",
       align: "center",
-      render: (text, record) => formatDate(record.time),
+      render: (text, record) => formatDate(record.time || record.DateTime),
     },
     {
       title: "Status",
