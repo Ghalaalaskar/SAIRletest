@@ -569,7 +569,7 @@ const NotificationsList = () => {
       dataIndex: "DriverName",
       key: "DriverName",
       align: "center",
-      render: (text, record) => `${record.Fname || ""} ${record.Lname || ""}`,
+      render: (text, record) => `${drivers[record.driverID] || 'Unknown Driver'}`,
     },
     {
       title: "Date",
