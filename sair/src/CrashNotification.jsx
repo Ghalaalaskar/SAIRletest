@@ -180,6 +180,8 @@ const cleanupcomplaintListeners = () => {
         collection(db, 'Crash'),
         where('driverID', 'in', chunk),
         where('Status', '==', 'Emergency SOS'),
+        // where('RespondedBy', '==', null),
+
       );
       console.log('hfhfhfhfh');
 
@@ -263,7 +265,8 @@ localStorage.setItem("notifiedCrashesEmployer", JSON.stringify(notifiedCrashesEm
       const chunk = driverIds.slice(i, i + chunkSize);
       const violationQuery = query(
         collection(db, "Violation"),
-        where("driverID", "in", chunk)
+        where("driverID", "in", chunk),
+        where('Status','==','Active')
       );
 
       const unsubscribeViolation = onSnapshot(violationQuery, (snapshot) => {
@@ -366,7 +369,7 @@ localStorage.setItem("notifiedViolationEmployer", JSON.stringify(notifiedViolati
             if (showNotifications && employerUID) {
               notification.open({
                 message: <strong>Complaint Alert</strong>,
-                description: `Complaint detected for driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.`,
+                description: `Complaint raised by driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.`,
                 placement: "topRight",
                 closeIcon: null,
                 duration: 20,

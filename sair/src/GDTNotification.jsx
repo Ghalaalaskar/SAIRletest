@@ -96,9 +96,12 @@ export const GDTNotification = () => {
       if (gdtUID) {
         setupCrashListeners(updatedDrivers, true);
         setupViolationListeners(updatedDrivers, true);
+        setupComplaintListeners(updatedDrivers, true);
       } else {
         setupCrashListeners(updatedDrivers, false);
         setupViolationListeners(updatedDrivers, false);
+        setupComplaintListeners(updatedDrivers, false);
+
       }
     });
 
@@ -119,7 +122,8 @@ export const GDTNotification = () => {
       const crashQuery = query(
         collection(db, "Crash"),
         where("driverID", "in", chunk),
-        where("Status", "==", "Emergency SOS")
+        where("Status", "==", "Emergency SOS"),
+        // where('RespondedBy', '==', null),
       );
 
       const unsubscribeCrash = onSnapshot(crashQuery, (snapshot) => {
@@ -180,7 +184,8 @@ console.log('in gdt local storage',notifiedCrashes);
       const chunk = driverIds.slice(i, i + chunkSize);
       const ViolationQuery = query(
         collection(db, "Violation"),
-        where("driverID", "in", chunk)
+        where("driverID", "in", chunk),
+        where('Status','==','Active')
       );
 
       const unsubscribeViolation = onSnapshot(ViolationQuery, (snapshot) => {
@@ -218,6 +223,56 @@ console.log('in gdt local storage',notifiedCrashes);
     }
   };
 
+   // Setup complaint listeners
+   const setupComplaintListeners = (drivers, showNotifications) => {
+    if (!drivers || Object.keys(drivers).length === 0) return;
+
+    const driverIds = Object.keys(drivers);
+    const chunkSize = 10;
+
+    for (let i = 0; i < driverIds.length; i += chunkSize) {
+      const chunk = driverIds.slice(i, i + chunkSize);
+      const ComplaintQuery = query(
+        collection(db, "Complaint"),
+        where("driverID", "in", chunk),
+        where('RespondedBy', '==', null),
+      );
+
+      const unsubscribeComplaint = onSnapshot(ComplaintQuery, (snapshot) => {
+        snapshot.docs.forEach(async (complaintDoc) => {
+          const complaint = { id: complaintDoc.id, ...complaintDoc.data() };
+          const driver = drivers[complaint.driverID] || { name: "Unknown", phoneNumber: "Unavailable" };
+          const dateTime = new Date(complaint.DateTime.seconds * 1000); // Convert seconds to milliseconds
+          const date = dateTime.toLocaleDateString();
+          const time = dateTime.toLocaleTimeString();
+
+          const notifiedComplaint = JSON.parse(localStorage.getItem("notifiedComplaint")) || {};
+          if (notifiedComplaint[complaint.id]) return; // Skip if already notified
+
+          notifiedComplaint[complaint.id] = true;
+          localStorage.setItem("notifiedComplaint", JSON.stringify(notifiedComplaint));
+
+          if (showNotifications && gdtUID) {
+            notification.open({
+              message: <strong>Complaint Alert</strong>,
+              description: `Complaint raised by driver ${driver.name} on ${date} at ${time} Phone: ${driver.PhoneNumber}.`,
+              placement: "topRight",
+              closeIcon: null,
+              duration: 20,
+              className: "custom-notification",
+              style: {
+                width: 450,
+                backgroundColor: "rgba(75, 75, 75,0.25)",
+                color: "#ffffff",
+                borderRadius: "10px",
+              },
+            });
+          }
+        });
+      });
+      cleanupListeners.current.push(unsubscribeComplaint);
+    }
+  };
 
 
   const formatDate = (time) => {

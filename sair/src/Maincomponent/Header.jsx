@@ -48,7 +48,20 @@ const Header = ({ active }) => {
   const [notReadComplaints22, setnotReadComplaints22] = useState(
     JSON.parse(localStorage.getItem("notReadComplaints22")) || {}
   );
-  const [hasNewCrashes, setHasNewCrashes] = useState(Object.keys(notReadCrashes22).length > 0|| Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0);
+  // const [hasNewCrashes, setHasNewCrashes] = useState(Object.keys(notReadCrashes22).length > 0|| Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0);
+  // const [hasNewCrashes, setHasNewCrashes] = useState(() => {
+  //   return JSON.parse(localStorage.getItem('hasNewCrashes')) || false;
+  // });
+  const [hasNewCrashes, setHasNewCrashes] = useState(() => {
+    // Move complex initialization logic into useState callback
+    return (
+      Object.keys(notReadCrashes).length > 0 ||
+      Object.keys(notReadViolations).length > 0 ||
+      Object.keys(notReadComplaints).length > 0
+    );
+  });
+
+  const employerUID = sessionStorage.getItem('employerUID');
 
 
   useEffect(() => {
@@ -74,6 +87,32 @@ const Header = ({ active }) => {
 
     fetchShortCompanyName();
   }, [shortCompanyName, setShortCompanyName]);
+
+  useEffect(() => {
+    const hasNew = 
+    Object.keys(notReadCrashes).length > 0 ||
+    Object.keys(notReadViolations).length > 0 ||
+    Object.keys(notReadComplaints).length > 0
+
+    localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+    setHasNewCrashes(hasNew);
+    console.log('hellohereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+   
+
+  }, [notReadCrashes, notReadViolations, notReadComplaints]);
+
+  // Effect to handle storage events
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === 'hasNewCrashes') {
+        setHasNewCrashes(JSON.parse(event.newValue));
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [employerUID]);
+
 
   // useEffect(() => {
   //   const rr = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
@@ -125,6 +164,10 @@ const Header = ({ active }) => {
   useEffect(() => {
     fetchDrivers();
   }, [notReadCrashes,notReadCrashes22,notReadViolations,notReadViolations22,notReadComplaints,notReadComplaints22]);
+
+
+  
+
 
   const fetchDrivers = useCallback(async () => {
     const employerUID = sessionStorage.getItem('employerUID');
@@ -179,8 +222,7 @@ const Header = ({ active }) => {
         // where('RespondedBy', '==', null),
         orderBy('time', 'desc') // Order crashes by time in descending order
       );
-      const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
-        
+        const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
         const storedReadCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage
 
         const crashList = snapshot.docs.map((doc) => ({
@@ -196,12 +238,13 @@ const Header = ({ active }) => {
 
         const newCrashes = crashList.filter(crash => !storedReadCrashes[crash.id]);
 
-
+const updatedReadCrashes = { ...notReadCrashes22};
         newCrashes.forEach(crash => {
-          const updatedReadCrashes = { ...notReadCrashes22, [crash.id]: crash };
-          localStorage.setItem("notReadCrashes22", JSON.stringify(updatedReadCrashes));///for the red circul
-          setnotReadCrashes22(updatedReadCrashes);
+         updatedReadCrashes[crash.id]=crash ;
         })
+        localStorage.setItem("notReadCrashes22", JSON.stringify(updatedReadCrashes));///for the red circul
+        console.log('44444444444444444444444444444444444444444');
+        console.log(notReadCrashes22);
 
         const r= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
         if(Object.keys(r).length > 0|| Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0 ){
@@ -214,7 +257,7 @@ const Header = ({ active }) => {
                 localStorage.setItem("hasNewCrashes", JSON.stringify(false));
               }
 
-console.log('notReadCrashes222222:',notReadCrashes22);
+        console.log('notReadCrashes222222:',notReadCrashes22);
         setNotReadCrashes(newCrashes);
       });
       
@@ -227,6 +270,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   // Update crash as read and navigate to details page
   const handleNotificationClick = async (crash) => {
     try {
+     
       console.log('id:',crash.id);
       const updatedReadCrashes = { ...readCrashes, [crash.id]: crash };
       console.log('updated',updatedReadCrashes);
@@ -253,6 +297,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
               setHasNewCrashes(false);
         localStorage.setItem("hasNewCrashes", JSON.stringify(false));
             }
+
 
 
       console.log('after remove:',notReadCrashes22);
@@ -292,12 +337,12 @@ console.log('notReadCrashes222222:',notReadCrashes22);
 
         const newViolation = violationList.filter(violation => !storedReadViolations[violation.id]);
 
+        const updatedReadViolations = { ...notReadViolations22};
 
         newViolation.forEach(violation => {
-          const updatedReadViolations = { ...notReadViolations22, [violation.id]: violation };
-          localStorage.setItem("notReadViolations22", JSON.stringify(updatedReadViolations));///for the red circul
-          setnotReadViolations22(updatedReadViolations);
+           updatedReadViolations[violation.id]= violation;
         })
+        localStorage.setItem("notReadViolations22", JSON.stringify(updatedReadViolations));///for the red circul
 
         const r= JSON.parse(localStorage.getItem("notReadViolations22")) || {};
         if(Object.keys(r).length > 0|| Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadComplaints22).length > 0){
@@ -324,6 +369,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
   // Update crash as read and navigate to details page
   const handleviolationNotificationClick = async (violation) => {
     try {
+     
       console.log('id:',violation.id);
       const updatedReadViolations = { ...readViolations, [violation.id]: violation };
       console.log('updated',updatedReadViolations);
@@ -364,7 +410,7 @@ console.log('notReadCrashes222222:',notReadCrashes22);
 
 
 
-  // Fetch violation data
+  // Fetch complaint data
   const fetchComplaints = useCallback((driverIds) => {
     console.log('jfjfjfjf');
     const chunkSize = 10; // Customize as needed
@@ -387,12 +433,12 @@ console.log('storedReadComplaints',storedReadComplaints);
 
         const newComplaint = complaintList.filter(complaint => !storedReadComplaints[complaint.id]);
 
+        const updatedReadComplaints = { ...notReadComplaints22};
 
         newComplaint.forEach(complaint => {
-          const updatedReadComplaints = { ...notReadComplaints22, [complaint.id]: complaint };
-          localStorage.setItem("notReadComplaints22", JSON.stringify(updatedReadComplaints));///for the red circul
-          setnotReadComplaints22(updatedReadComplaints);
+           updatedReadComplaints[complaint.id]=complaint;
         })
+        localStorage.setItem("notReadComplaints22", JSON.stringify(updatedReadComplaints));///for the red circul
 
         const r= JSON.parse(localStorage.getItem("notReadComplaints22")) || {};
         if(Object.keys(r).length > 0 || Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadViolations22).length > 0){
@@ -465,35 +511,6 @@ console.log('storedReadComplaints',storedReadComplaints);
     // Create a new object for updated read crashes
     let updatedReadCrashes = { ...readCrashes};
     let notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-
-    
-    // for (let i = 0; i < notReadCrashes.length; i++) {
-    //   const crash = notReadCrashes[i];     
-    //   updatedReadCrashes = {  [crash.id]: crash };
-    //   console.log('updated',updatedReadCrashes);
-    //   localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
-    //   const r= JSON.parse(localStorage.getItem("readCrashes")) || {};
-    //   console.log('readCrashes:',r);
-    //   setReadCrashes(readCrashes);
-    //   // Move crash to read notifications
-    //   setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
-
-    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-    //   delete notReadCrashes22[crash.id];
-    //   localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
-    //   notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-
-    //   console.log('notReadCrashes22:',notReadCrashes22);
-    // }
-  
-    
-    // // setNotReadCrashes([]);  
-    // // setnotReadCrashes22({});
-
-   
-    // // Set the 'hasNewCrashes' flag to false in localStorage and state
-    // setHasNewCrashes(false);
-    // localStorage.setItem("hasNewCrashes", JSON.stringify(false));
 
     notReadCrashes.forEach(crash => {
       updatedReadCrashes = { ...updatedReadCrashes, [crash.id]: crash };
