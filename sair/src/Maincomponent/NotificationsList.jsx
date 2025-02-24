@@ -541,9 +541,9 @@ const NotificationsList = () => {
       render: (text, record) => {
         switch (record.Type) {
           case "Violation":
-            return record.ViolationID || "N/A";
+            return record.violationID || "N/A";
           case "Crash":
-            return record.CrashID || "N/A";
+            return record.crashID || "N/A";
           case "Complaint":
             return record.ComplaintID || "N/A";
           default:
