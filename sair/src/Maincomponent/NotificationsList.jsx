@@ -25,11 +25,38 @@ const NotificationsList = () => {
 
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
-    const readViolations =
-      JSON.parse(localStorage.getItem("readViolations")) || {};
-    const readComplaints =
-      JSON.parse(localStorage.getItem("readComplaints")) || {};
-
+    const readViolations = JSON.parse(localStorage.getItem("readViolations")) || {};
+    const readComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {};
+  
+    // Function to convert timestamp to a Date object
+    const normalizeTimestamp = (notification) => {
+      if (notification.DateTime) {
+        // For complaints with DateTime string
+        return new Date(notification.DateTime);
+      } else if (notification.time) {
+        // For crashes and violations with Unix timestamp (in seconds)
+        return new Date(notification.time * 1000); // Convert to milliseconds
+      }
+      return new Date(0); // Fallback for invalid or missing timestamps
+    };
+  
+    // Function to filter out notifications older than a month
+    const filterOldNotifications = (notifications) => {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  
+      return notifications.filter((notification) => {
+        const notificationDate = normalizeTimestamp(notification);
+        return notificationDate > oneMonthAgo;
+      });
+    };
+  
+    // Filter read notifications
+    const filteredReadCrashes = filterOldNotifications(Object.values(readCrashes));
+    const filteredReadViolations = filterOldNotifications(Object.values(readViolations));
+    const filteredReadComplaints = filterOldNotifications(Object.values(readComplaints));
+  
+    // Merge notifications
     const mergedNotifications = [
       ...notReadCrashes.map((crash) => ({
         ...crash,
@@ -46,23 +73,23 @@ const NotificationsList = () => {
         Type: "Complaint",
         FilterStatus: "Unread",
       })),
-      ...Object.values(readCrashes).map((crash) => ({
+      ...filteredReadCrashes.map((crash) => ({
         ...crash,
         Type: "Crash",
         FilterStatus: "Read",
       })),
-      ...Object.values(readViolations).map((violation) => ({
+      ...filteredReadViolations.map((violation) => ({
         ...violation,
         Type: "Violation",
         FilterStatus: "Read",
       })),
-      ...Object.values(readComplaints).map((complaint) => ({
+      ...filteredReadComplaints.map((complaint) => ({
         ...complaint,
         Type: "Complaint",
         FilterStatus: "Read",
       })),
     ];
-
+  
     setNotificationsList(mergedNotifications);
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
