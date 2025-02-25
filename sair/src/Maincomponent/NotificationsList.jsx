@@ -1,4 +1,4 @@
- import React, { useEffect, useState,useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
@@ -6,15 +6,10 @@ import s from "../css/DriverList.module.css";
 import f from "../css/ComplaintList.module.css";
 import { db } from "../firebase";
 import Header from "./Header";
-import { doc, getDoc } from 'firebase/firestore';
-import '../css/CustomModal.css';
-import { onSnapshot,orderBy } from 'firebase/firestore';
-import {
-  getDocs,
-  collection,
-  query,
-  where,
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import "../css/CustomModal.css";
+import { onSnapshot, orderBy } from "firebase/firestore";
+import { getDocs, collection, query, where } from "firebase/firestore";
 import { FaFilter } from "react-icons/fa";
 import { useCallback } from "react";
 const NotificationsList = () => {
@@ -27,266 +22,295 @@ const NotificationsList = () => {
   const [notReadComplaints, setnotReadComplaints] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [notificationsList, setNotificationsList] = useState([]); //merged list
-
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
     const readViolations = JSON.parse(localStorage.getItem("readViolations")) || {};
     const readComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {};
-
+  
+    // Get current date and one month ago date
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  
+    // Function to filter old notifications
+    const filterRecent = (notifications) =>
+      Object.values(notifications).filter((notif) => new Date(notif.time) >= oneMonthAgo);
+  
     const mergedNotifications = [
-        ...notReadCrashes.map(crash => ({ ...crash, Type: "Crash", FilterStatus: "Unread" })),
-        ...notReadViolations.map(violation => ({ ...violation, Type: "Violation", FilterStatus: "Unread" })),
-        ...notReadComplaints.map(complaint => ({ ...complaint, Type: "Complaint", FilterStatus: "Unread" })),
-        ...Object.values(readCrashes).map(crash => ({ ...crash, Type: "Crash", FilterStatus: "Read" })),
-        ...Object.values(readViolations).map(violation => ({ ...violation, Type: "Violation", FilterStatus: "Read" })),
-        ...Object.values(readComplaints).map(complaint => ({ ...complaint, Type: "Complaint", FilterStatus: "Read" }))
+      ...notReadCrashes.map((crash) => ({
+        ...crash,
+        Type: "Crash",
+        FilterStatus: "Unread",
+      })),
+      ...notReadViolations.map((violation) => ({
+        ...violation,
+        Type: "Violation",
+        FilterStatus: "Unread",
+      })),
+      ...notReadComplaints.map((complaint) => ({
+        ...complaint,
+        Type: "Complaint",
+        FilterStatus: "Unread",
+      })),
+      ...filterRecent(readCrashes).map((crash) => ({
+        ...crash,
+        Type: "Crash",
+        FilterStatus: "Read",
+      })),
+      ...filterRecent(readViolations).map((violation) => ({
+        ...violation,
+        Type: "Violation",
+        FilterStatus: "Read",
+      })),
+      ...filterRecent(readComplaints).map((complaint) => ({
+        ...complaint,
+        Type: "Complaint",
+        FilterStatus: "Read",
+      })),
     ];
-
+  
+    // Ensure sorting by time in descending order
+    mergedNotifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+  
     setNotificationsList(mergedNotifications);
-}, [notReadCrashes, notReadViolations, notReadComplaints]); 
+  }, [notReadCrashes, notReadViolations, notReadComplaints]);
+  
 
+  useEffect(() => {
+    fetchDrivers();
+  }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
-   useEffect(() => {
-      fetchDrivers();
-    }, [notReadCrashes,notReadViolations,notReadComplaints]);
-  
-  
-    
-  
-  
-    const fetchDrivers = useCallback(async () => {
-      const employerUID = sessionStorage.getItem('employerUID');
-      if (employerUID) {
-        const userDocRef = doc(db, 'Employer', employerUID);
-        const docSnap = await getDoc(userDocRef);
-        const companyName = docSnap.data().CompanyName;
-  
-        // Fetch drivers
-        const driverCollection = query(
-          collection(db, 'Driver'),
-          where('CompanyName', '==', companyName)
-        );
-  
-        const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
-          const driverIds = [];
-          const driverMap = {};
-  
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.DriverID) {
-              driverIds.push(data.DriverID);
-              driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
-            }
-          });
-  
-          if (driverIds.length === 0) {
-            console.error("No valid Driver IDs found.");
-            return;
+  const fetchDrivers = useCallback(async () => {
+    const employerUID = sessionStorage.getItem("employerUID");
+    if (employerUID) {
+      const userDocRef = doc(db, "Employer", employerUID);
+      const docSnap = await getDoc(userDocRef);
+      const companyName = docSnap.data().CompanyName;
+
+      // Fetch drivers
+      const driverCollection = query(
+        collection(db, "Driver"),
+        where("CompanyName", "==", companyName)
+      );
+
+      const unsubscribeDrivers = onSnapshot(driverCollection, (snapshot) => {
+        const driverIds = [];
+        const driverMap = {};
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.DriverID) {
+            driverIds.push(data.DriverID);
+            driverMap[data.DriverID] = `${data.Fname} ${data.Lname}`;
           }
-  
-          setDrivers(driverMap);
-          fetchCrashes(driverIds);
-          fetchViolations(driverIds);
-          fetchComplaints(driverIds);
-  
         });
-  
-        return () => unsubscribeDrivers();
+
+        if (driverIds.length === 0) {
+          console.error("No valid Driver IDs found.");
+          return;
+        }
+
+        setDrivers(driverMap);
+        fetchCrashes(driverIds);
+        fetchViolations(driverIds);
+        fetchComplaints(driverIds);
+      });
+
+      return () => unsubscribeDrivers();
+    }
+  }, []);
+
+  // Fetch crash data
+  const fetchCrashes = useCallback((driverIds) => {
+    const chunkSize = 10; // Customize as needed
+    for (let i = 0; i < driverIds.length; i += chunkSize) {
+      const chunk = driverIds.slice(i, i + chunkSize);
+      const crashCollection = query(
+        collection(db, "Crash"),
+        where("driverID", "in", chunk),
+        where("Status", "==", "Emergency SOS"),
+        // where('RespondedBy', '==', null),
+        orderBy("time", "desc") // Order crashes by time in descending order
+      );
+      const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
+        const storedReadCrashes =
+          JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage
+
+        const crashList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const newCrashes = crashList.filter(
+          (crash) => !storedReadCrashes[crash.id]
+        );
+
+        setNotReadCrashes(newCrashes);
+      });
+
+      return () => unsubscribeCrashes();
+    }
+  }); //not sure
+
+  // Update crash as read and navigate to details page
+  const handleNotificationClick1 = async (crash) => {
+    try {
+      console.log("id:", crash.id);
+      const r = JSON.parse(localStorage.getItem("readCrashes")) || {};
+      const updatedReadCrashes = { ...r, [crash.id]: crash };
+
+      localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
+
+      // setReadCrashes(updatedReadCrashes);
+
+      setNotReadCrashes((prev) => prev.filter((c) => c.id !== crash.id));
+
+      navigate(`/crash/general/${crash.id}`);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Fetch violation data
+  const fetchViolations = useCallback((driverIds) => {
+    const chunkSize = 10; // Customize as needed
+    for (let i = 0; i < driverIds.length; i += chunkSize) {
+      const chunk = driverIds.slice(i, i + chunkSize);
+      const violationCollection = query(
+        collection(db, "Violation"),
+        where("driverID", "in", chunk),
+        where("Status", "==", "Active"),
+        orderBy("time", "desc")
+      );
+      const unsubscribeViolations = onSnapshot(
+        violationCollection,
+        (snapshot) => {
+          const storedReadViolations =
+            JSON.parse(localStorage.getItem("readViolations")) || {}; // Get read crashes from localStorage
+
+          const violationList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          const newViolation = violationList.filter(
+            (violation) => !storedReadViolations[violation.id]
+          );
+
+          setnotReadViolations(newViolation);
+        }
+      );
+
+      ///ABOUT RED CIRCULE VISIBILITY
+      return () => unsubscribeViolations();
+    }
+  }); //not sure
+
+  // Update crash as read and navigate to details page
+  const handleviolationNotificationClick = async (violation) => {
+    try {
+      console.log("id:", violation.id);
+      const rr = JSON.parse(localStorage.getItem("notReadViolations22")) || {};
+      const updatedReadViolations = { ...rr, [violation.id]: violation };
+
+      localStorage.setItem(
+        "readViolations",
+        JSON.stringify(updatedReadViolations)
+      );
+
+      // setReadViolations(updatedReadViolations);
+      setnotReadViolations((prev) => prev.filter((c) => c.id !== violation.id));
+
+      navigate(`/violation/general/${violation.id}`);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Fetch complaint data
+  const fetchComplaints = useCallback((driverIds) => {
+    const chunkSize = 10; // Customize as needed
+    for (let i = 0; i < driverIds.length; i += chunkSize) {
+      const chunk = driverIds.slice(i, i + chunkSize);
+      const complaintCollection = query(
+        collection(db, "Complaint"),
+        where("driverID", "in", chunk),
+        where("RespondedBy", "==", null),
+        orderBy("DateTime", "desc")
+      );
+      const unsubscribeComplaint = onSnapshot(
+        complaintCollection,
+        (snapshot) => {
+          const storedReadComplaints =
+            JSON.parse(localStorage.getItem("readComplaints")) || {}; // Get read crashes from localStorage
+          const complaintList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          const newComplaint = complaintList.filter(
+            (complaint) => !storedReadComplaints[complaint.id]
+          );
+
+          setnotReadComplaints(newComplaint);
+        }
+      );
+
+      ///ABOUT RED CIRCULE VISIBILITY
+      return () => unsubscribeComplaint();
+    }
+  }); //not sure
+
+  // Update crash as read and navigate to details page
+  const handlecomplaintNotificationClick = async (complaint) => {
+    try {
+      console.log("id:", complaint.id);
+      const r = JSON.parse(localStorage.getItem("readComplaints")) || {};
+      const updatedReadComplaint = { ...r, [complaint.id]: complaint };
+
+      localStorage.setItem(
+        "readComplaints",
+        JSON.stringify(updatedReadComplaint)
+      );
+      // setReadComplaints(updatedReadComplaint);
+      setnotReadComplaints((prev) => prev.filter((c) => c.id !== complaint.id));
+
+      navigate(`/complaint/general/${complaint.id}`);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      console.log("id:", notification.id);
+      let readKey, notReadSetter;
+
+      if (notification.Type === "Crash") {
+        readKey = "readCrashes";
+        notReadSetter = setNotReadCrashes;
+      } else if (notification.Type === "Violation") {
+        readKey = "readViolations";
+        notReadSetter = setnotReadViolations;
+      } else if (notification.Type === "Complaint") {
+        readKey = "readComplaints";
+        notReadSetter = setnotReadComplaints;
       }
-    }, []);
 
+      const readData = JSON.parse(localStorage.getItem(readKey)) || {};
+      const updatedReadData = { ...readData, [notification.id]: notification };
+      localStorage.setItem(readKey, JSON.stringify(updatedReadData));
 
+      notReadSetter((prev) =>
+        prev.filter((item) => item.id !== notification.id)
+      );
 
-     // Fetch crash data
-      const fetchCrashes = useCallback((driverIds) => {
-        const chunkSize = 10; // Customize as needed
-        for (let i = 0; i < driverIds.length; i += chunkSize) {
-          const chunk = driverIds.slice(i, i + chunkSize);
-          const crashCollection = query(
-            collection(db, 'Crash'),
-            where('driverID', 'in', chunk),
-            where('Status', '==', 'Emergency SOS'),
-            // where('RespondedBy', '==', null),
-            orderBy('time', 'desc') // Order crashes by time in descending order
-          );
-            const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
-            const storedReadCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage
-    
-            const crashList = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-          
-            const newCrashes = crashList.filter(crash => !storedReadCrashes[crash.id]);
-
-            setNotReadCrashes(newCrashes);
-          });
-          
-          return () => unsubscribeCrashes();
-        }
-      });//not sure
-    
-      
-    
-      // Update crash as read and navigate to details page
-      const handleNotificationClick1 = async (crash) => {
-        try {
-         
-          console.log('id:',crash.id);
-          const r= JSON.parse(localStorage.getItem("readCrashes")) || {};
-          const updatedReadCrashes = { ...r, [crash.id]: crash };
-
-          localStorage.setItem("readCrashes", JSON.stringify(updatedReadCrashes));
-        
-          // setReadCrashes(updatedReadCrashes);
-
-          setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
-    
-    
-          navigate(`/crash/general/${crash.id}`);
-        } catch (error) {
-          console.error("Error marking notification as read:", error);
-        }
-      };
-    
-    
-      // Fetch violation data
-      const fetchViolations = useCallback((driverIds) => {
-        const chunkSize = 10; // Customize as needed
-        for (let i = 0; i < driverIds.length; i += chunkSize) {
-          const chunk = driverIds.slice(i, i + chunkSize);
-          const violationCollection = query(
-            collection(db, 'Violation'),
-            where('driverID', 'in', chunk),
-            where('Status','==','Active'),
-            orderBy('time', 'desc') 
-          );
-          const unsubscribeViolations = onSnapshot(violationCollection, (snapshot) => {
-            
-            const storedReadViolations = JSON.parse(localStorage.getItem("readViolations")) || {}; // Get read crashes from localStorage
-    
-            const violationList = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-    
-            const newViolation = violationList.filter(violation => !storedReadViolations[violation.id]);
-    
-          
-            setnotReadViolations(newViolation);
-          });
-          
-            ///ABOUT RED CIRCULE VISIBILITY
-          return () => unsubscribeViolations();
-        }
-      });//not sure
-    
-      
-    
-      // Update crash as read and navigate to details page
-      const handleviolationNotificationClick = async (violation) => {
-        try {
-         
-          console.log('id:',violation.id);
-          const rr= JSON.parse(localStorage.getItem("notReadViolations22")) || {};
-          const updatedReadViolations = { ...rr, [violation.id]: violation };
-
-          localStorage.setItem("readViolations", JSON.stringify(updatedReadViolations));
-        
-        // setReadViolations(updatedReadViolations);
-          setnotReadViolations(prev => prev.filter(c => c.id !== violation.id));
-    
-    
-          navigate(`/violation/general/${violation.id}`);
-        } catch (error) {
-          console.error("Error marking notification as read:", error);
-        }
-      };
-    
-    
-    
-    
-    
-      // Fetch complaint data
-      const fetchComplaints = useCallback((driverIds) => {
-        const chunkSize = 10; // Customize as needed
-        for (let i = 0; i < driverIds.length; i += chunkSize) {
-          const chunk = driverIds.slice(i, i + chunkSize);
-          const complaintCollection = query(
-            collection(db, 'Complaint'),
-            where('driverID', 'in', chunk),
-            where('RespondedBy', '==', null),
-            orderBy('DateTime', 'desc') 
-          );
-          const unsubscribeComplaint = onSnapshot(complaintCollection, (snapshot) => {
-            
-            const storedReadComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {}; // Get read crashes from localStorage
-            const complaintList = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-    
-            const newComplaint = complaintList.filter(complaint => !storedReadComplaints[complaint.id]);
-
-            setnotReadComplaints(newComplaint);
-          });
-          
-            ///ABOUT RED CIRCULE VISIBILITY
-          return () => unsubscribeComplaint();
-        }
-      });//not sure
-    
-      
-    
-      // Update crash as read and navigate to details page
-      const handlecomplaintNotificationClick = async (complaint) => {
-        try {
-          console.log('id:',complaint.id);
-          const r= JSON.parse(localStorage.getItem("readComplaints")) || {};
-          const updatedReadComplaint = { ...r, [complaint.id]: complaint };
-
-          localStorage.setItem("readComplaints", JSON.stringify(updatedReadComplaint));
-        // setReadComplaints(updatedReadComplaint);
-          setnotReadComplaints(prev => prev.filter(c => c.id !== complaint.id));
-    
-          navigate(`/complaint/general/${complaint.id}`);
-        } catch (error) {
-          console.error("Error marking notification as read:", error);
-        }
-      };
-    
-
-
-      const handleNotificationClick = async (notification) => {
-        try {
-            console.log('id:', notification.id);
-            let readKey, notReadSetter;
-    
-            if (notification.Type === "Crash") {
-                readKey = "readCrashes";
-                notReadSetter = setNotReadCrashes;
-            } else if (notification.Type === "Violation") {
-                readKey = "readViolations";
-                notReadSetter = setnotReadViolations;
-            } else if (notification.Type === "Complaint") {
-                readKey = "readComplaints";
-                notReadSetter = setnotReadComplaints;
-            }
-    
-            const readData = JSON.parse(localStorage.getItem(readKey)) || {};
-            const updatedReadData = { ...readData, [notification.id]: notification };
-            localStorage.setItem(readKey, JSON.stringify(updatedReadData));
-    
-            notReadSetter(prev => prev.filter(item => item.id !== notification.id));
-    
-            navigate(`/${notification.Type.toLowerCase()}/general/${notification.id}`);
-        } catch (error) {
-            console.error("Error marking notification as read:", error);
-        }
-    };
-    
-
-
+      navigate(
+        `/${notification.Type.toLowerCase()}/general/${notification.id}`
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   const fetchDetailsFromDatabase = async (type, id) => {
     try {
@@ -352,23 +376,34 @@ const NotificationsList = () => {
   };
 
   const formatDate = (time) => {
-    if (!time) return "N/A";
     let date;
-    if (typeof time === "number") {
-      date = new Date(time * 1000);
-    } else if (time.toDate) {
-      date = time.toDate();
+
+    // Check if the time is a Unix timestamp (number in seconds)
+    if (
+      typeof time === "number" ||
+      (typeof time === "string" && !isNaN(time))
+    ) {
+      date = new Date(time * 1000); // Convert to milliseconds
+    } else if (time?.seconds) {
+      // Handle Firestore Timestamp
+      date = new Date(time.seconds * 1000);
+    } else if (time instanceof Date) {
+      // Handle JavaScript Date object
+      date = time;
     } else {
-      return "N/A";
+      // Handle other cases (e.g., invalid date)
+      return "Invalid Date";
     }
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+
     const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+
+    return `${month}/${day}/${year}`; // Format as MM/DD/YYYY
   };
   // const handleDetailsClick = (record) => {
   //   let notReadKey, readKey;
-  
+
   //   switch (record.Type) {
   //     case "Violation":
   //       notReadKey = "notReadViolations22";
@@ -385,33 +420,33 @@ const NotificationsList = () => {
   //     default:
   //       return;
   //   }
-  
+
   //   // Get existing data
   //   const notReadData = safeParse(notReadKey);
   //   const readData = safeParse(readKey);
-  
+
   //   console.log("Not Read Data Before:", notReadData);
   //   console.log("Record ID to Remove:", record.ID);
-  
+
   //   // Find and remove the notification from the unread list
   //   const updatedNotReadData = notReadData.filter(item => item.ID !== record.ID);
-  
+
   //   console.log("Updated Not Read Data:", updatedNotReadData);
-  
+
   //   // Add the notification to the read list
   //   const updatedReadData = [...readData, record];
-  
+
   //   // Update localStorage
   //   localStorage.setItem(notReadKey, JSON.stringify(updatedNotReadData));
   //   localStorage.setItem(readKey, JSON.stringify(updatedReadData));
-  
+
   //   // Force re-render by updating state
   //   setNotifications(prev =>
   //     prev.map(item =>
   //       item.ID === record.ID ? { ...item, FilterStatus: "Read" } : item
   //     )
   //   );
-  
+
   //   // Navigate to the details page
   //   let route = "";
   //   switch (record.Type) {
@@ -427,14 +462,9 @@ const NotificationsList = () => {
   //     default:
   //       route = "#";
   //   }
-  
+
   //   navigate(route);
   // };
-  
-
-
-
-
 
   const fetchData = useCallback(async () => {
     const types = [
@@ -442,23 +472,23 @@ const NotificationsList = () => {
       { key: "readViolations", type: "Violation", filterStatus: "Read" },
       { key: "readCrashes", type: "Crash", filterStatus: "Read" },
     ];
-  
+
     let allNotifications = [];
     let driverIDs = new Set();
-  
+
     for (const { key, type, filterStatus } of types) {
       const parsedData = safeParse(key) || [];
-  
+
       parsedData.forEach((item) => {
         driverIDs.add(item.driverID || item.DriverID);
       });
-  
+
       const ids = parsedData.map((item) => item.id || item.ID);
-      
+
       // Batch fetch all documents of this type
       const docRefs = ids.map((id) => doc(db, type, id));
       const docSnapshots = await Promise.all(docRefs.map((ref) => getDoc(ref)));
-  
+
       const formattedData = parsedData.map((item, index) => {
         const details = docSnapshots[index]?.data() || {};
         return {
@@ -473,46 +503,42 @@ const NotificationsList = () => {
           Time: details.time || details.DateTime || null,
         };
       });
-  
+
       allNotifications = [...allNotifications, ...formattedData];
     }
-  
+
     // Batch fetch drivers
     const driverQuery = query(
       collection(db, "Driver"),
       where("DriverID", "in", Array.from(driverIDs))
     );
-  
+
     const driverDocs = await getDocs(driverQuery);
     const driverMap = {};
     driverDocs.forEach((doc) => {
       driverMap[doc.data().DriverID] = doc.data();
     });
-  
+
     // Attach driver details to notifications
     const finalData = allNotifications.map((notification) => ({
       ...notification,
       Fname: driverMap[notification.DriverID]?.Fname || "Unknown",
       Lname: driverMap[notification.DriverID]?.Lname || "Unknown",
     }));
-  
+
     // Sort by time (latest first)
     finalData.sort((a, b) => {
       const timeA = a.Time ? new Date(a.Time).getTime() : 0;
       const timeB = b.Time ? new Date(b.Time).getTime() : 0;
       return timeB - timeA;
     });
-  
+
     setNotifications(finalData);
   }, [statusFilter]);
-  
-
-
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
 
   const filteredData = useMemo(() => {
     let filteredNotifications = notifications;
@@ -548,9 +574,9 @@ const NotificationsList = () => {
       render: (text, record) => {
         switch (record.Type) {
           case "Violation":
-            return record.ViolationID || "N/A";
+            return record.violationID || "N/A";
           case "Crash":
-            return record.CrashID || "N/A";
+            return record.crashID || "N/A";
           case "Complaint":
             return record.ComplaintID || "N/A";
           default:
@@ -569,14 +595,15 @@ const NotificationsList = () => {
       dataIndex: "DriverName",
       key: "DriverName",
       align: "center",
-      render: (text, record) => `${record.Fname || ""} ${record.Lname || ""}`,
+      render: (text, record) =>
+        `${drivers[record.driverID] || "Unknown Driver"}`,
     },
     {
       title: "Date",
       dataIndex: "Time",
       key: "Time",
       align: "center",
-      render: (text, record) => formatDate(record.Time),
+      render: (text, record) => formatDate(record.time || record.DateTime),
     },
     {
       title: "Status",
@@ -620,10 +647,11 @@ const NotificationsList = () => {
     },
   ];
 
-  const filteredNotifications = notificationsList.filter(record => {
-      if (filterType !== "All" && record.Type !== filterType) return false;
-      if (statusFilter !== "All" && record.FilterStatus !== statusFilter) return false;
-      return true;
+  const filteredNotifications = notificationsList.filter((record) => {
+    if (filterType !== "All" && record.Type !== filterType) return false;
+    if (statusFilter !== "All" && record.FilterStatus !== statusFilter)
+      return false;
+    return true;
   });
 
   return (
@@ -637,7 +665,10 @@ const NotificationsList = () => {
       <main>
         <div className={s.container}>
           <h2 className={s.title}>Notification List</h2>
-          <div className={s.searchInputs} style={{ display: "flex", gap: "20px" }}>
+          <div
+            className={s.searchInputs}
+            style={{ display: "flex", gap: "20px" }}
+          >
             {/* Type Filter */}
             <div className={s.searchContainer}>
               <div className={f.selectWrapper}>
@@ -647,7 +678,9 @@ const NotificationsList = () => {
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <option value="All" disabled>Filter by Type</option>
+                  <option value="All" disabled>
+                    Filter by Type
+                  </option>
                   <option value="All">All</option>
                   <option value="Violation">Violation</option>
                   <option value="Crash">Crash</option>
@@ -665,7 +698,9 @@ const NotificationsList = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <option value="All" disabled>Filter by Status</option>
+                  <option value="All" disabled>
+                    Filter by Status
+                  </option>
                   <option value="All">All</option>
                   <option value="Read">Read</option>
                   <option value="Unread">Unread</option>
@@ -685,7 +720,7 @@ const NotificationsList = () => {
         <br />
         <Table
           columns={columns}
-          dataSource={filteredNotifications} 
+          dataSource={filteredNotifications}
           rowKey={(record) => record.ID || record.id}
           pagination={{
             pageSize: 5,
@@ -693,13 +728,14 @@ const NotificationsList = () => {
           }}
           style={{ width: "1200px", margin: "0 auto" }}
           rowClassName={(record) =>
-            (record.FilterStatus || "").toLowerCase() === "unread" ? "unread-row" : ""
+            (record.FilterStatus || "").toLowerCase() === "unread"
+              ? "unread-row"
+              : ""
           }
         />
       </main>
     </div>
   );
 };
-
 
 export default NotificationsList;
