@@ -57,9 +57,9 @@ const GDTHeader = ({ active }) => {
   const [hasNewCrashesgdt, setHasNewCrashesgdt] = useState(() => {
     // Move complex initialization logic into useState callback
     return (
-      Object.keys(notReadCrashes22gdt).length > 0 ||
-      Object.keys(notReadViolations22gdt).length > 0 ||
-      Object.keys(notReadComplaints22gdt).length > 0
+      Object.keys(notReadCrashes).length > 0 ||
+      Object.keys(notReadViolations).length > 0 ||
+      Object.keys(notReadComplaints).length > 0
     );
   });
 
@@ -97,20 +97,19 @@ const GDTHeader = ({ active }) => {
 
   useEffect(() => {
     const hasNew = 
-      Object.keys(notReadCrashes22gdt).length > 0 ||
-      Object.keys(notReadViolations22gdt).length > 0 ||
-      Object.keys(notReadComplaints22gdt).length > 0;
+      Object.keys(notReadCrashes).length > 0 ||
+      Object.keys(notReadViolations).length > 0 ||
+      Object.keys(notReadComplaints).length > 0;
 
+      const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+      if (storedHasNew !== hasNew) {
+  
     localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
     setHasNewCrashesgdt(hasNew);
-    console.log('hellohereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
-    console.log('notReadCrashes22gdt',notReadCrashes22gdt);
-    console.log('notReadCrashes22gdt',notReadCrashes);
+      }
 
-    console.log('notReadViolations22gdt',notReadViolations22gdt);
-    console.log('notReadComplaints22gdt',notReadComplaints22gdt);
-
-  }, [notReadCrashes22gdt, notReadViolations22gdt, notReadComplaints22gdt, notReadComplaints22gdt===null, notReadViolations22gdt===null, notReadCrashes22gdt===null]);
+  }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
   // Effect to handle storage events
   useEffect(() => {
@@ -192,25 +191,27 @@ const fetchDrivers = useCallback(async () => {
 
         const newCrashes = crashList.filter(crash => !storedReadCrashes[crash.id]);
 
+        const updatedReadCrashes = { ...notReadCrashes22gdt};
 
         newCrashes.forEach(crash => {
-          const updatedReadCrashes = { ...notReadCrashes22gdt, [crash.id]: crash };
-          localStorage.setItem(`notReadCrashes22gdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
-          setnotReadCrashes22gdt(updatedReadCrashes);
+           updatedReadCrashes[crash.id]=crash ;
         })
 
-        const r= JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
-        if(Object.keys(r).length > 0|| Object.keys(notReadViolations22gdt).length > 0 || Object.keys(notReadComplaints22gdt).length > 0 ){
-          setHasNewCrashesgdt(true);
-          localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-          console.log('yees',hasNewCrashesgdt);
-              }
-              else{
-                setHasNewCrashesgdt(false);
-                localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-              }
-console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh');
-console.log('notReadCrashes22gdt',notReadCrashes22gdt);
+        localStorage.setItem(`notReadCrashes22gdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
+
+            //   const hasNew = 
+            //   Object.keys(notReadCrashes).length > 0 ||
+            //   Object.keys(notReadViolations).length > 0 ||
+            //   Object.keys(notReadComplaints).length > 0;
+        
+            //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+        
+            //   if (storedHasNew !== hasNew) {
+          
+            // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+            // setHasNewCrashesgdt(hasNew);
+            //   }
+
         setNotReadCrashes(newCrashes);
       });
       
@@ -238,21 +239,18 @@ console.log('notReadCrashes22gdt',notReadCrashes22gdt);
     delete notReadCrashes22[crash.id];
     localStorage.setItem(`notReadCrashes22gdt_${GDTUID}`, JSON.stringify(notReadCrashes22));
 
-    const rr= JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
-    console.log('check11',rr);
+    // const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
 
-    if(Object.keys(rr).length > 0|| Object.keys(notReadViolations22gdt).length > 0 || Object.keys(notReadComplaints22gdt).length > 0){
-      setHasNewCrashesgdt(true);
-      localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-      console.log('llllol',hasNewCrashesgdt);
-          }
-          else{
-            setHasNewCrashesgdt(false);
-      localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-          }
-    
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
 
-    console.log('after remove:',notReadCrashes22gdt);
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
 
     navigate(`/gdtcrash/general/${crash.id}`);
   } catch (error) {
@@ -282,23 +280,26 @@ console.log('notReadCrashes22gdt',notReadCrashes22gdt);
 
         const newViolation = violationList.filter(violation => !storedReadViolations[violation.id]);
 
+        const updatedReadViolations = { ...notReadViolations22gdt};
 
         newViolation.forEach(violation => {
-          const updatedReadViolations = { ...notReadViolations22gdt, [violation.id]: violation };
-          localStorage.setItem(`notReadViolations22gdt_${GDTUID}`, JSON.stringify(updatedReadViolations));///for the red circul
-          setnotReadViolations22gdt(updatedReadViolations);
+         updatedReadViolations[violation.id]=violation;
         })
 
-        const r= JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
-        if(Object.keys(r).length > 0|| Object.keys(notReadCrashes22gdt).length > 0 || Object.keys(notReadComplaints22gdt).length > 0){
-          setHasNewCrashesgdt(true);
-          localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-          console.log('yees',hasNewCrashesgdt);
-              }
-              else{
-                setHasNewCrashesgdt(false);
-          localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-              }
+        localStorage.setItem(`notReadViolations22gdt_${GDTUID}`, JSON.stringify(updatedReadViolations));///for the red circul
+        
+    //     const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
+
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
 
         setnotReadViolations(newViolation);
       });
@@ -329,22 +330,18 @@ console.log('notReadCrashes22gdt',notReadCrashes22gdt);
       localStorage.setItem(`notReadViolations22gdt_${GDTUID}`, JSON.stringify(notReadViolations22));
       
 
-      const rr= JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
-      console.log('check11',rr);
+    //   const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
 
-      if(Object.keys(rr).length > 0|| Object.keys(notReadCrashes22gdt).length > 0 || Object.keys(notReadComplaints22gdt).length > 0){
-        setHasNewCrashesgdt(true);
-        localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-        console.log('llllol',hasNewCrashesgdt);
-            }
-            else{
-              setHasNewCrashesgdt(false);
-        localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-            }
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
 
-     
-
-      console.log('after remove:',notReadViolations22gdt);
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
 
       navigate(`/gdtviolation/general/${violation.id}`);
     } catch (error) {
@@ -354,7 +351,6 @@ console.log('notReadCrashes22gdt',notReadCrashes22gdt);
 
  // Fetch complaint data
   const fetchComplaints = useCallback((driverIds) => {
-    console.log('jfjfjfjf');
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
@@ -375,23 +371,26 @@ console.log('storedReadComplaints',storedReadComplaints);
 
         const newComplaint = complaintList.filter(complaint => !storedReadComplaints[complaint.id]);
 
+        const updatedReadComplaints = { ...notReadComplaints22gdt};
 
         newComplaint.forEach(complaint => {
-          const updatedReadComplaints = { ...notReadComplaints22gdt, [complaint.id]: complaint };
-          localStorage.setItem(`notReadComplaints22gdt_${GDTUID}`, JSON.stringify(updatedReadComplaints));///for the red circul
-          setnotReadComplaints22gdt(updatedReadComplaints);
+           updatedReadComplaints[complaint.id]=complaint ;
         })
 
-        const r= JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
-        if(Object.keys(r).length > 0 || Object.keys(notReadCrashes22gdt).length > 0 || Object.keys(notReadViolations22gdt).length > 0){
-          setHasNewCrashesgdt(true);
-          localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-          console.log('yees',hasNewCrashesgdt);
-              }
-              else{
-                setHasNewCrashesgdt(false);
-          localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-              }
+        localStorage.setItem(`notReadComplaints22gdt_${GDTUID}`, JSON.stringify(updatedReadComplaints));///for the red circul
+
+    //     const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
+
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
 
         setnotReadComplaints(newComplaint);
       });
@@ -420,18 +419,18 @@ console.log('storedReadComplaints',storedReadComplaints);
       delete notReadComplaints22[complaint.id];
       localStorage.setItem(`notReadComplaints22gdt_${GDTUID}`, JSON.stringify(notReadComplaints22));
 
-      const rr= JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
-      console.log('check11',rr);
+    //   const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
 
-      if(Object.keys(rr).length > 0 || Object.keys(notReadCrashes22gdt).length > 0 || Object.keys(notReadViolations22gdt).length > 0){
-        setHasNewCrashesgdt(true);
-        localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(true));
-        console.log('llllol',hasNewCrashesgdt);
-            }
-            else{
-              setHasNewCrashesgdt(false);
-        localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(false));
-            }
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
 
 
       navigate(`/gdtcomplaints/general/${complaint.id}`);
@@ -447,76 +446,72 @@ console.log('storedReadComplaints',storedReadComplaints);
     console.log('check',notReadCrashes);
     // Create a new object for updated read crashes
     let updatedReadCrashes = { ...readCrashesgdt};
-    // let notReadCrashes22 = JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
+    let notReadCrashes22 = JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
 
     notReadCrashes.forEach(crash => {
       updatedReadCrashes[crash.id] = crash;
 
-      // updatedReadCrashes = { ...updatedReadCrashes, [crash.id]: crash };
-      // delete notReadCrashes22[crash.id];
+      delete notReadCrashes22[crash.id];
   
       // Update localStorage and state after the loop ends
-      // localStorage.setItem(`readCrashesgdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
+      localStorage.setItem(`readCrashesgdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
       });
   
-    // Update state after the loop
-    localStorage.setItem(`readCrashesgdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
-    localStorage.setItem(`notReadCrashes22gdt_${GDTUID}`, JSON.stringify({}));
+      setReadCrashesgdt(updatedReadCrashes);
+      setNotReadCrashes([]);
+      localStorage.setItem(`notReadCrashes22gdt_${GDTUID}`, JSON.stringify({}));
 
-    setReadCrashesgdt(updatedReadCrashes);
-    setNotReadCrashes([]);
-    const rr = JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
-  //   const hasUnread =  Object.keys(notReadViolations22gdt).length > 0 || Object.keys(notReadComplaints22gdt).length > 0;
-  // //Object.keys(rr).length > 0 ||
-  //   setHasNewCrashesgdt(hasUnread);
-  //   localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasUnread));
-  const hasUnread = 
-  Object.keys(notReadViolations22gdt).length > 0 || 
-  Object.keys(notReadComplaints22gdt).length > 0;
+  
+  //   const hasNew = 
+  //   Object.keys(notReadCrashes).length > 0 ||
+  //   Object.keys(notReadViolations).length > 0 ||
+  //   Object.keys(notReadComplaints).length > 0;
 
-// Update hasNewCrashesgdt state and localStorage
-setHasNewCrashesgdt(hasUnread);
-localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasUnread));
+  //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
 
-setnotReadCrashes22gdt({});
+  //   if (storedHasNew !== hasNew) {
 
-   
+  // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+  // setHasNewCrashesgdt(hasNew);
+  //   }
   };
+
 
   const handleallreadviolation = async (notReadViolations) => {
     // Retrieve 'notReadCrashes22' from localStorage once
     console.log('check',notReadViolations);
     // Create a new object for updated read crashes
     let updatedReadViolation = { ...readViolationsgdt};
-    // let notReadViolations22 = JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
+    let notReadViolations22 = JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
 
     notReadViolations.forEach(violation => {
       updatedReadViolation[violation.id] = violation;
 
-      // delete notReadViolations22[violation.id];
+      delete notReadViolations22[violation.id];
   
       // Update localStorage and state after the loop ends
-      // localStorage.setItem(`readViolationsgdt_${GDTUID}`, JSON.stringify(updatedReadViolation));
+      localStorage.setItem(`readViolationsgdt_${GDTUID}`, JSON.stringify(updatedReadViolation));
   
     });
-  
-    // Update state after the loop
-      localStorage.setItem(`readViolationsgdt_${GDTUID}`, JSON.stringify(updatedReadViolation));
-      localStorage.setItem(`notReadViolations22gdt_${GDTUID}`, JSON.stringify({}));
 
     setReadViolationsgdt(updatedReadViolation);
     setnotReadViolations([]);
-    const rr = JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
+    localStorage.setItem(`notReadViolations22gdt_${GDTUID}`, JSON.stringify({}));
 
-  const hasUnread = 
-  Object.keys(notReadCrashes22gdt).length > 0 || 
-  Object.keys(notReadComplaints22gdt).length > 0;
 
-// Update hasNewCrashesgdt state and localStorage
-setHasNewCrashesgdt(hasUnread);
-localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasUnread));
+    // const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
 
-setnotReadViolations22gdt({});
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+    //   if (storedHasNew !== hasNew) {
+  
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
+
   };
   
 
@@ -525,35 +520,37 @@ setnotReadViolations22gdt({});
     console.log('check',notReadComplaints);
     // Create a new object for updated read crashes
     let updatedReadComplaint = { ...readComplaintsgdt};
-    // let notReadComplaints22 = JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
+    let notReadComplaints22 = JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
 
     notReadComplaints.forEach(complaint => {
       updatedReadComplaint[complaint.id] = complaint;
 
-      // delete notReadComplaints22[complaint.id];
+      delete notReadComplaints22[complaint.id];
   
       // Update localStorage and state after the loop ends
-      // localStorage.setItem(`readComplaintsgdt_${GDTUID}`, JSON.stringify(updatedReadComplaint));
+      localStorage.setItem(`readComplaintsgdt_${GDTUID}`, JSON.stringify(updatedReadComplaint));
   
     });
   
-    // Update state after the loop
-    localStorage.setItem(`readComplaintsgdt_${GDTUID}`, JSON.stringify(updatedReadComplaint));
-    localStorage.setItem(`notReadComplaints22gdt_${GDTUID}`, JSON.stringify({}));
-
     setReadComplaintsgdt(updatedReadComplaint);
     setnotReadComplaints([]);
-    const rr = JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
+    localStorage.setItem(`notReadComplaints22gdt_${GDTUID}`, JSON.stringify({}));
+
+
+
+    // const hasNew = 
+    //   Object.keys(notReadCrashes).length > 0 ||
+    //   Object.keys(notReadViolations).length > 0 ||
+    //   Object.keys(notReadComplaints).length > 0;
+
+    //   const storedHasNew = JSON.parse(localStorage.getItem(`hasNewCrashesgdt_${GDTUID}`));
+
+    //   if (storedHasNew !== hasNew) {
   
-    const hasUnread = 
-    Object.keys(notReadCrashes22gdt).length > 0 || 
-    Object.keys(notReadViolations22gdt).length > 0;
-  
-  // Update hasNewCrashesgdt state and localStorage
-  setHasNewCrashesgdt(hasUnread);
-  localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasUnread));
-  
-  setnotReadComplaints22gdt({});
+    // localStorage.setItem(`hasNewCrashesgdt_${GDTUID}`, JSON.stringify(hasNew));
+    // setHasNewCrashesgdt(hasNew);
+    //   }
+
   };
   
   
@@ -1422,6 +1419,7 @@ if(crashDate >= oneMonthAgo){
                       onClick={() =>
                         handleNavigation(`/${item.path}${randomQuery}`)
                       }
+                      style={{ cursor: "pointer" }} 
                     >
                       {item.label}
                     </a>

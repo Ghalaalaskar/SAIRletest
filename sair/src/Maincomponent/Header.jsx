@@ -94,14 +94,17 @@ const Header = ({ active }) => {
     Object.keys(notReadViolations).length > 0 ||
     Object.keys(notReadComplaints).length > 0
 
+    const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+
+    if (storedHasNew !== hasNew) {
+
     localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
     setHasNewCrashes(hasNew);
-    console.log('hellohereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
-   
+    }
 
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
-  // Effect to handle storage events
+  // // Effect to handle storage events
   useEffect(() => {
     const handleStorageChange = (event) => {
       if (event.key === 'hasNewCrashes') {
@@ -113,41 +116,6 @@ const Header = ({ active }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [employerUID]);
 
-
-  // useEffect(() => {
-  //   const rr = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-  //   const hasUnread = Object.keys(rr).length > 0 || Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0;
-  
-  //   setHasNewCrashes(hasUnread);
-  // }, []); 
-  // useEffect(() => {
-  //   // Check if this is the first login
-  //   const savedCrashIds = localStorage.getItem("crashIds");
-
-  //   if (!savedCrashIds) {
-  //     // No crash IDs found in localStorage, mark as first login
-  //     console.log("First login detected: Initializing crash IDs");
-  //     setIsFirstLogin(true); // Mark first login
-  //     localStorage.setItem("crashIds", JSON.stringify([])); // Initialize crash IDs in localStorage
-  //   }
-  // }, []);
- 
-
-//   useEffect(() => {
-//     const notReadCrashes22 = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-// console.log('1',hasNewCrashes);
-// console.log('2',notReadCrashes22);
-
-//     if(Object.keys(notReadCrashes22).length > 0){
-// setHasNewCrashes(true);
-// localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-// console.log('yees',hasNewCrashes);
-//     }
-//     else{
-//       setHasNewCrashes(false);
-// localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-//     }
-//   }, []);
 
   useEffect(() => {
     // Update localStorage whenever storedCrashIds changes
@@ -240,18 +208,36 @@ const updatedReadCrashes = { ...notReadCrashes22};
         console.log('44444444444444444444444444444444444444444');
         console.log(notReadCrashes22);
 
-        const r= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-        if(Object.keys(r).length > 0|| Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0 ){
-          setHasNewCrashes(true);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-          console.log('yees',hasNewCrashes);
-              }
-              else{
-                setHasNewCrashes(false);
-                localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-              }
+        const r= JSON.parse(localStorage.getItem("notReadCrashes")) || {};
+       
 
-        console.log('notReadCrashes222222:',notReadCrashes22);
+        // if(Object.keys(r).length > 0|| Object.keys(notReadViolations).length > 0 || Object.keys(notReadComplaints).length > 0 ){
+
+        //   if (storedHasNew !== hasNew) {
+        //   setHasNewCrashes(true);
+        //   localStorage.setItem("hasNewCrashes", JSON.stringify(true));
+        //   console.log('yees',hasNewCrashes);}
+        //       }
+        //       else{
+        //         if (storedHasNew !== hasNew) {
+        //         setHasNewCrashes(false);
+        //         localStorage.setItem("hasNewCrashes", JSON.stringify(false));
+        //       }}
+
+        
+        // const hasNew = 
+        // Object.keys(notReadCrashes).length > 0 ||
+        // Object.keys(notReadViolations).length > 0 ||
+        // Object.keys(notReadComplaints).length > 0
+    
+        // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+    
+        // if (storedHasNew !== hasNew) {
+    
+        // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+        // setHasNewCrashes(hasNew);
+        // }
+
         setNotReadCrashes(newCrashes);
       });
       
@@ -279,18 +265,21 @@ const updatedReadCrashes = { ...notReadCrashes22};
       delete notReadCrashes22[crash.id];
       localStorage.setItem("notReadCrashes22", JSON.stringify(notReadCrashes22));
 
-      const rr= JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
+      const rr= JSON.parse(localStorage.getItem("notReadCrashes")) || {};
       console.log('check11',rr);
 
-      if(Object.keys(rr).length > 0|| Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0){
-        setHasNewCrashes(true);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-        console.log('llllol',hasNewCrashes);
-            }
-            else{
-              setHasNewCrashes(false);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-            }
+      // const hasNew = 
+      // Object.keys(notReadCrashes).length > 0 ||
+      // Object.keys(notReadViolations).length > 0 ||
+      // Object.keys(notReadComplaints).length > 0
+  
+      // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+  
+      // if (storedHasNew !== hasNew) {
+  
+      // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+      // setHasNewCrashes(hasNew);
+      // }
 
 
 
@@ -338,18 +327,20 @@ const updatedReadCrashes = { ...notReadCrashes22};
         })
         localStorage.setItem("notReadViolations22", JSON.stringify(updatedReadViolations));///for the red circul
 
-        const r= JSON.parse(localStorage.getItem("notReadViolations22")) || {};
-        if(Object.keys(r).length > 0|| Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadComplaints22).length > 0){
-          setHasNewCrashes(true);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-          console.log('yees',hasNewCrashes);
-              }
-              else{
-                setHasNewCrashes(false);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-              }
+        // const hasNew = 
+        // Object.keys(notReadCrashes).length > 0 ||
+        // Object.keys(notReadViolations).length > 0 ||
+        // Object.keys(notReadComplaints).length > 0
+    
+        // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+    
+        // if (storedHasNew !== hasNew) {
+    
+        // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+        // setHasNewCrashes(hasNew);
+        // }
 
-        console.log('notReadvio222222:',notReadViolations22);
+
         setnotReadViolations(newViolation);
       });
       
@@ -378,18 +369,21 @@ const updatedReadCrashes = { ...notReadCrashes22};
       delete notReadViolations22[violation.id];
       localStorage.setItem("notReadViolations22", JSON.stringify(notReadViolations22));
 
-      const rr= JSON.parse(localStorage.getItem("notReadViolations22")) || {};
+      const rr= JSON.parse(localStorage.getItem("notReadViolations")) || {};
       console.log('check11',rr);
 
-      if(Object.keys(rr).length > 0|| Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadComplaints22).length > 0){
-        setHasNewCrashes(true);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-        console.log('llllol',hasNewCrashes);
-            }
-            else{
-              setHasNewCrashes(false);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-            }
+      // const hasNew = 
+      // Object.keys(notReadCrashes).length > 0 ||
+      // Object.keys(notReadViolations).length > 0 ||
+      // Object.keys(notReadComplaints).length > 0
+  
+      // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+  
+      // if (storedHasNew !== hasNew) {
+  
+      // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+      // setHasNewCrashes(hasNew);
+      // }
 
 
       console.log('after remove:',notReadViolations22);
@@ -434,18 +428,20 @@ console.log('storedReadComplaints',storedReadComplaints);
         })
         localStorage.setItem("notReadComplaints22", JSON.stringify(updatedReadComplaints));///for the red circul
 
-        const r= JSON.parse(localStorage.getItem("notReadComplaints22")) || {};
-        if(Object.keys(r).length > 0 || Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadViolations22).length > 0){
-          setHasNewCrashes(true);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-          console.log('yees',hasNewCrashes);
-              }
-              else{
-                setHasNewCrashes(false);
-          localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-              }
+        // const hasNew = 
+        // Object.keys(notReadCrashes).length > 0 ||
+        // Object.keys(notReadViolations).length > 0 ||
+        // Object.keys(notReadComplaints).length > 0
+    
+        // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+    
+        // if (storedHasNew !== hasNew) {
+    
+        // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+        // setHasNewCrashes(hasNew);
+        // }
 
-        console.log('notReadComplaint222222:',notReadComplaints22);
+
         setnotReadComplaints(newComplaint);
       });
       
@@ -473,18 +469,21 @@ console.log('storedReadComplaints',storedReadComplaints);
       delete notReadComplaints22[complaint.id];
       localStorage.setItem("notReadComplaints22", JSON.stringify(notReadComplaints22));
 
-      const rr= JSON.parse(localStorage.getItem("notReadComplaints22")) || {};
+      const rr= JSON.parse(localStorage.getItem("notReadComplaints")) || {};
       console.log('check11',rr);
 
-      if(Object.keys(rr).length > 0 || Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadViolations22).length > 0){
-        setHasNewCrashes(true);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(true));
-        console.log('llllol',hasNewCrashes);
-            }
-            else{
-              setHasNewCrashes(false);
-        localStorage.setItem("hasNewCrashes", JSON.stringify(false));
-            }
+      // const hasNew = 
+      // Object.keys(notReadCrashes).length > 0 ||
+      // Object.keys(notReadViolations).length > 0 ||
+      // Object.keys(notReadComplaints).length > 0
+  
+      // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+  
+      // if (storedHasNew !== hasNew) {
+  
+      // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+      // setHasNewCrashes(hasNew);
+      // }
 
 
 
@@ -522,11 +521,19 @@ console.log('storedReadComplaints',storedReadComplaints);
     setReadCrashes(updatedReadCrashes);
     setNotReadCrashes([]);
     localStorage.setItem("notReadCrashes22", JSON.stringify({}));
-    const rr = JSON.parse(localStorage.getItem("notReadCrashes22")) || {};
-    const hasUnread = Object.keys(rr).length > 0 || Object.keys(notReadViolations22).length > 0 || Object.keys(notReadComplaints22).length > 0;
-  
-    setHasNewCrashes(hasUnread);
-    localStorage.setItem("hasNewCrashes", JSON.stringify(hasUnread));
+
+    // const hasNew = 
+    // Object.keys(notReadCrashes).length > 0 ||
+    // Object.keys(notReadViolations).length > 0 ||
+    // Object.keys(notReadComplaints).length > 0
+
+    // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+
+    // if (storedHasNew !== hasNew) {
+
+    // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+    // setHasNewCrashes(hasNew);
+    // }
   };
 
   const handleallreadviolation = async (notReadViolations) => {
@@ -552,11 +559,19 @@ console.log('storedReadComplaints',storedReadComplaints);
     setReadViolations(updatedReadViolation);
     setnotReadViolations([]);
     localStorage.setItem("notReadViolations22", JSON.stringify({}));
-    const rr = JSON.parse(localStorage.getItem("notReadViolations22")) || {};
-  const hasUnread = Object.keys(rr).length > 0 || Object.keys(notReadCrashes22).length > 0 || Object.keys(notReadComplaints22).length > 0;
 
-  setHasNewCrashes(hasUnread);
-  localStorage.setItem("hasNewCrashes", JSON.stringify(hasUnread));
+    // const hasNew = 
+    // Object.keys(notReadCrashes).length > 0 ||
+    // Object.keys(notReadViolations).length > 0 ||
+    // Object.keys(notReadComplaints).length > 0
+
+    // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+
+    // if (storedHasNew !== hasNew) {
+
+    // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+    // setHasNewCrashes(hasNew);
+    // }
   };
   
 
@@ -583,11 +598,19 @@ console.log('storedReadComplaints',storedReadComplaints);
     setReadComplaints(updatedReadComplaint);
     setnotReadComplaints([]);
     localStorage.setItem("notReadComplaints22", JSON.stringify({}));
-    const rr = JSON.parse(localStorage.getItem("notReadComplaints22")) || {};
-    const hasUnread = Object.keys(rr).length > 0 || Object.keys(notReadViolations22).length > 0 || Object.keys(notReadCrashes22).length > 0;
-  
-    setHasNewCrashes(hasUnread);
-    localStorage.setItem("hasNewCrashes", JSON.stringify(hasUnread));
+
+    // const hasNew = 
+    // Object.keys(notReadCrashes).length > 0 ||
+    // Object.keys(notReadViolations).length > 0 ||
+    // Object.keys(notReadComplaints).length > 0
+
+    // const storedHasNew = JSON.parse(localStorage.getItem('hasNewCrashes'));
+
+    // if (storedHasNew !== hasNew) {
+
+    // localStorage.setItem('hasNewCrashes', JSON.stringify(hasNew));
+    // setHasNewCrashes(hasNew);
+    // }
   };
   
   
