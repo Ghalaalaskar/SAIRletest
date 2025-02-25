@@ -56,36 +56,18 @@ const NotificationsList = () => {
         return new Date(0);
       }
     };
-
     const normalizeTimestamp = (notification) => {
-      let date;
-    
       if (notification.DateTime) {
         if (typeof notification.DateTime === "object" && notification.DateTime.seconds) {
-          // Firestore Timestamp -> Convert seconds to Date
-          date = new Date(notification.DateTime.seconds * 1000);
+          return new Date(notification.DateTime.seconds * 1000); // Firestore Timestamp
         } else if (typeof notification.DateTime === "string") {
-          // Custom string DateTime
-          date = parseCustomDateTime(notification.DateTime);
-        } else {
-          console.warn("Unknown DateTime format:", notification.DateTime);
-          date = new Date(0); // Fallback
+          return parseCustomDateTime(notification.DateTime); // Custom DateTime String
         }
       } else if (notification.time) {
-        // Crash & Violation timestamps (Unix time in seconds)
-        date = new Date(notification.time * 1000);
-      } else {
-        date = new Date(0);
+        return new Date(notification.time * 1000); // Unix timestamp
       }
-    
-      console.log(
-        `Notification ID: ${notification.id || "Unknown"}, Type: ${notification.Type || "Unknown"}, Parsed Date:`,
-        date
-      );
-    
-      return date;
+      return new Date(0); // Default fallback
     };
-    
     
     // Function to filter out notifications older than a month
     const filterOldNotifications = (notifications) => {
@@ -150,7 +132,12 @@ const NotificationsList = () => {
     console.log("Filtered Read Crashes:", filteredReadCrashes);
     console.log("Filtered Read Violations:", filteredReadViolations);
 
-    setNotificationsList(mergedNotifications);
+  // Sort notifications by date (newest first)
+  const sortedNotifications = [...mergedNotifications].sort(
+    (a, b) => normalizeTimestamp(b) - normalizeTimestamp(a)
+  );
+
+  setNotificationsList(sortedNotifications);
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
   useEffect(() => {
