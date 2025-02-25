@@ -186,9 +186,13 @@ const NotificationsList = () => {
 
   // Fetch crash data
   const fetchCrashes = useCallback((driverIds) => {
+    if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
+      if (chunk.length === 0) return; 
+
       const crashCollection = query(
         collection(db, "Crash"),
         where("driverID", "in", chunk),
@@ -237,9 +241,13 @@ const NotificationsList = () => {
 
   // Fetch violation data
   const fetchViolations = useCallback((driverIds) => {
+  if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
+      if (chunk.length === 0) return; 
+
       const violationCollection = query(
         collection(db, "Violation"),
         where("driverID", "in", chunk),
@@ -293,9 +301,13 @@ const NotificationsList = () => {
 
   // Fetch complaint data
   const fetchComplaints = useCallback((driverIds) => {
+  if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
+      if (chunk.length === 0) return; 
+
       const complaintCollection = query(
         collection(db, "Complaint"),
         where("driverID", "in", chunk),
@@ -571,8 +583,10 @@ const NotificationsList = () => {
 
       allNotifications = [...allNotifications, ...formattedData];
     }
+    
+    if (!driverIDs || !Array.isArray(driverIDs) || driverIDs.length === 0) return;
 
-    // Batch fetch drivers
+  // Batch fetch drivers
     const driverQuery = query(
       collection(db, "Driver"),
       where("DriverID", "in", Array.from(driverIDs))
