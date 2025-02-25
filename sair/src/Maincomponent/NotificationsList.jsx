@@ -22,19 +22,14 @@ const NotificationsList = () => {
   const [notReadComplaints, setnotReadComplaints] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [notificationsList, setNotificationsList] = useState([]); //merged list
+
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
-    const readViolations = JSON.parse(localStorage.getItem("readViolations")) || {};
-    const readComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {};
-  
-    // Get current date and one month ago date
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  
-    // Function to filter old notifications
-    const filterRecent = (notifications) =>
-      Object.values(notifications).filter((notif) => new Date(notif.time) >= oneMonthAgo);
-  
+    const readViolations =
+      JSON.parse(localStorage.getItem("readViolations")) || {};
+    const readComplaints =
+      JSON.parse(localStorage.getItem("readComplaints")) || {};
+
     const mergedNotifications = [
       ...notReadCrashes.map((crash) => ({
         ...crash,
@@ -51,29 +46,25 @@ const NotificationsList = () => {
         Type: "Complaint",
         FilterStatus: "Unread",
       })),
-      ...filterRecent(readCrashes).map((crash) => ({
+      ...Object.values(readCrashes).map((crash) => ({
         ...crash,
         Type: "Crash",
         FilterStatus: "Read",
       })),
-      ...filterRecent(readViolations).map((violation) => ({
+      ...Object.values(readViolations).map((violation) => ({
         ...violation,
         Type: "Violation",
         FilterStatus: "Read",
       })),
-      ...filterRecent(readComplaints).map((complaint) => ({
+      ...Object.values(readComplaints).map((complaint) => ({
         ...complaint,
         Type: "Complaint",
         FilterStatus: "Read",
       })),
     ];
-  
-    // Ensure sorting by time in descending order
-    mergedNotifications.sort((a, b) => new Date(b.time) - new Date(a.time));
-  
+
     setNotificationsList(mergedNotifications);
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
-  
 
   useEffect(() => {
     fetchDrivers();
