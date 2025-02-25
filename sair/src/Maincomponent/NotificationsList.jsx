@@ -25,37 +25,94 @@ const NotificationsList = () => {
 
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
-    const readViolations = JSON.parse(localStorage.getItem("readViolations")) || {};
-    const readComplaints = JSON.parse(localStorage.getItem("readComplaints")) || {};
-  
-    // Function to convert timestamp to a Date object
-    const normalizeTimestamp = (notification) => {
-      if (notification.DateTime) {
-        // For complaints with DateTime string
-        return new Date(notification.DateTime);
-      } else if (notification.time) {
-        // For crashes and violations with Unix timestamp (in seconds)
-        return new Date(notification.time * 1000); // Convert to milliseconds
+    const readViolations =
+      JSON.parse(localStorage.getItem("readViolations")) || {};
+    const readComplaints =
+      JSON.parse(localStorage.getItem("readComplaints")) || {};
+    // Function to convert the custom DateTime string to a Date object
+    const parseCustomDateTime = (dateTimeString) => {
+      if (typeof dateTimeString !== "string") {
+        console.warn("Invalid DateTime string:", dateTimeString);
+        return new Date(0);
       }
-      return new Date(0); // Fallback for invalid or missing timestamps
+    
+      try {
+        // Remove 'at', AM/PM, and trim
+        let cleanedString = dateTimeString.replace("at", "").replace(/\s?(AM|PM)/, "").trim();
+    
+        // Handle timezone (removes "UTC+3")
+        cleanedString = cleanedString.replace(/UTC[+-]\d+/, "").trim();
+    
+        const parsedDate = new Date(cleanedString);
+    
+        if (isNaN(parsedDate.getTime())) {
+          console.error("Invalid parsed date:", cleanedString);
+          return new Date(0);
+        }
+    
+        return parsedDate;
+      } catch (error) {
+        console.error("Error parsing DateTime:", error, dateTimeString);
+        return new Date(0);
+      }
     };
-  
+
+    const normalizeTimestamp = (notification) => {
+      let date;
+    
+      if (notification.DateTime) {
+        if (typeof notification.DateTime === "object" && notification.DateTime.seconds) {
+          // Firestore Timestamp -> Convert seconds to Date
+          date = new Date(notification.DateTime.seconds * 1000);
+        } else if (typeof notification.DateTime === "string") {
+          // Custom string DateTime
+          date = parseCustomDateTime(notification.DateTime);
+        } else {
+          console.warn("Unknown DateTime format:", notification.DateTime);
+          date = new Date(0); // Fallback
+        }
+      } else if (notification.time) {
+        // Crash & Violation timestamps (Unix time in seconds)
+        date = new Date(notification.time * 1000);
+      } else {
+        date = new Date(0);
+      }
+    
+      console.log(
+        `Notification ID: ${notification.id || "Unknown"}, Type: ${notification.Type || "Unknown"}, Parsed Date:`,
+        date
+      );
+    
+      return date;
+    };
+    
+    
     // Function to filter out notifications older than a month
     const filterOldNotifications = (notifications) => {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  
+    
       return notifications.filter((notification) => {
         const notificationDate = normalizeTimestamp(notification);
+        console.log(`Checking Notification: ${notification.id || "Unknown"}, Date: ${notificationDate}, One Month Ago: ${oneMonthAgo}`);
         return notificationDate > oneMonthAgo;
       });
     };
-  
+    
+    console.log("All Read Complaints Before Filtering:", Object.values(readComplaints));
+    console.log("Parsed Complaints Before Filtering:", Object.values(readComplaints).map(normalizeTimestamp));
+    
     // Filter read notifications
-    const filteredReadCrashes = filterOldNotifications(Object.values(readCrashes));
-    const filteredReadViolations = filterOldNotifications(Object.values(readViolations));
-    const filteredReadComplaints = filterOldNotifications(Object.values(readComplaints));
-  
+    const filteredReadCrashes = filterOldNotifications(
+      Object.values(readCrashes)
+    );
+    const filteredReadViolations = filterOldNotifications(
+      Object.values(readViolations)
+    );
+    const filteredReadComplaints = filterOldNotifications(
+      Object.values(readComplaints)
+    );
+
     // Merge notifications
     const mergedNotifications = [
       ...notReadCrashes.map((crash) => ({
@@ -89,7 +146,10 @@ const NotificationsList = () => {
         FilterStatus: "Read",
       })),
     ];
-  
+    console.log("Filtered Read Complaints:", filteredReadComplaints);
+    console.log("Filtered Read Crashes:", filteredReadCrashes);
+    console.log("Filtered Read Violations:", filteredReadViolations);
+
     setNotificationsList(mergedNotifications);
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
