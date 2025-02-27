@@ -80,15 +80,27 @@ const NotificationsList = () => {
         return notificationDate > oneMonthAgo;
       });
     };
+
+    const filterCrashesOneDay = (notifications) => {
+      const now = new Date(); 
+      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000); 
+      return notifications.filter((notification) => {
+        const notificationDate = normalizeTimestamp(notification);
+        console.log(
+          `Checking Notification: ${notification.id || "Unknown"}, Date: ${notificationDate}, 24 Hours Ago: ${twentyFourHoursAgo}`);
+        return notificationDate >= twentyFourHoursAgo; 
+      });
+    };
+    
     
     console.log("All Read Complaints Before Filtering:", Object.values(readComplaints));
     console.log("Parsed Complaints Before Filtering:", Object.values(readComplaints).map(normalizeTimestamp));
     
     // Filter read notifications
-    const filteredReadCrashes = filterOldNotifications(
+    const filteredReadCrashes = filterCrashesOneDay(
       Object.values(readCrashes)
     );
-    const filteredReadViolations = filterOldNotifications(
+    const filteredReadViolations = filterOldNotifications(  //need to changed 
       Object.values(readViolations)
     );
     const filteredReadComplaints = filterOldNotifications(
