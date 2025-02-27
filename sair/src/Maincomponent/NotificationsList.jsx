@@ -193,13 +193,16 @@ const NotificationsList = () => {
       const chunk = driverIds.slice(i, i + chunkSize);
       if (chunk.length === 0) return; 
 
-      const crashCollection = query(
-        collection(db, "Crash"),
-        where("driverID", "in", chunk),
-        where("Status", "==", "Emergency SOS"),
-        // where('RespondedBy', '==', null),
-        orderBy("time", "desc") // Order crashes by time in descending order
-      );
+     const now = Math.floor(Date.now() / 1000);
+     const twentyFourHoursAgo = now - 24 * 60 * 60;
+     const crashCollection = query(
+     collection(db, 'Crash'),
+     where('driverID', 'in', chunk),
+     where('Status', '==', 'Emergency SOS'),
+     where('RespondedBy', '==', null),
+     where("time", ">=", twentyFourHoursAgo), 
+     orderBy('time', 'desc') // Order crashes by time in descending order
+       );
       const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
         const storedReadCrashes =
           JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage

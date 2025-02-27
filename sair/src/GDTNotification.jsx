@@ -120,10 +120,11 @@ export const GDTNotification = () => {
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
       const crashQuery = query(
-        collection(db, "Crash"),
-        where("driverID", "in", chunk),
-        where("Status", "==", "Emergency SOS"),
-        // where('RespondedBy', '==', null),
+        collection(db, 'Crash'),
+        where('driverID', 'in', chunk),
+        where('Status', '==', 'Emergency SOS'),
+        where('RespondedBy', '==', null),
+
       );
 
       const unsubscribeCrash = onSnapshot(crashQuery, (snapshot) => {

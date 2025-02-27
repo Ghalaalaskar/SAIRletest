@@ -180,7 +180,7 @@ const cleanupcomplaintListeners = () => {
         collection(db, 'Crash'),
         where('driverID', 'in', chunk),
         where('Status', '==', 'Emergency SOS'),
-        // where('RespondedBy', '==', null),
+        where('RespondedBy', '==', null),
 
       );
       console.log('hfhfhfhfh');
