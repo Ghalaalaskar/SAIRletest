@@ -17,7 +17,7 @@ const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("");//j changes
   const [notReadCrashes, setNotReadCrashes] = useState([]);
   const [notReadViolations, setnotReadViolations] = useState([]);
   const [notReadComplaints, setnotReadComplaints] = useState([]);
@@ -764,6 +764,9 @@ const NotificationsList = () => {
   ];
 
   const filteredNotifications = notificationsList.filter((record) => {
+    if (statusFilter === "" || statusFilter === "Filter by Status") { //j changes
+      return true; 
+    }
     if (filterType !== "All" && record.Type !== filterType) return false;
     if (statusFilter !== "All" && record.FilterStatus !== statusFilter)
       return false;
@@ -842,15 +845,26 @@ const NotificationsList = () => {
                   onClick={toggleStatusDropdown}
                   style={{ width: "250px" }}
                 >
-                  {statusFilter === "All" ? (
+                  {/* {statusFilter === "All" ? (
                     <span>Filter by Status</span> // Placeholder styling
                   ) : (
                     statusFilter
-                  )}
+                  )} */}
+{/* j changes */}
+       <span>
+        {statusFilter ? statusFilter : "Filter by Status"}
+      </span>
                   <div className={f.customArrow}>▼</div>
                 </div>
                 {isStatusOpen && (
-                  <div className={f.dropdownMenu}>
+      <div className={f.dropdownMenu}>
+        <div 
+          className={f.dropdownOption} 
+          onClick={() => handleStatusOptionClick("Filter by Status")} 
+        >
+          Filter by Status
+        </div>
+{/* j changes */}
                     {statusOptions.map((option) => (
                       <div
                         key={option}
