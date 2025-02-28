@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
 import f from "../css/ComplaintList.module.css";
@@ -8,10 +7,12 @@ import { db } from "../firebase";
 import Header from "./Header";
 import { doc, getDoc } from "firebase/firestore";
 import "../css/CustomModal.css";
+import { Button, Table, Pagination } from "antd";
 import { onSnapshot, orderBy } from "firebase/firestore";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { FaFilter } from "react-icons/fa";
 import { useCallback } from "react";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
@@ -22,7 +23,7 @@ const NotificationsList = () => {
   const [notReadComplaints, setnotReadComplaints] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [notificationsList, setNotificationsList] = useState([]); //merged list
-
+  const goBack = () => navigate(-1); // Go back to the previous page
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
     const readViolations =
@@ -587,7 +588,7 @@ const NotificationsList = () => {
           ID: item.id || item.ID,
           DriverID: item.driverID || item.DriverID,
           Type: type,
-          Status: details.Status || "Pending",
+          Status: details.Status || null ,
           FilterStatus: filterStatus,
           ViolationID: details.violationID || null,
           CrashID: details.crashID || null,
@@ -747,7 +748,28 @@ const NotificationsList = () => {
       return false;
     return true;
   });
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
+  const statusOptions = ["All", "Read", "Unread"];
+  const typeOptions = ["All", "Violation", "Crash", "Complaint"];
 
+  const toggleStatusDropdown = () => {
+    setIsStatusOpen(!isStatusOpen);
+  };
+
+  const toggleTypeDropdown = () => {
+    setIsTypeOpen(!isTypeOpen);
+  };
+
+  const handleStatusOptionClick = (option) => {
+    setStatusFilter(option);
+    setIsStatusOpen(false);
+  };
+
+  const handleTypeOptionClick = (option) => {
+    setFilterType(option);
+    setIsTypeOpen(false);
+  };
   return (
     <div>
       <Header active="notificationslist" />
@@ -763,44 +785,60 @@ const NotificationsList = () => {
             className={s.searchInputs}
             style={{ display: "flex", gap: "20px" }}
           >
-            {/* Type Filter */}
-            <div className={s.searchContainer}>
-              <div className={f.selectWrapper}>
-                <FaFilter className={f.filterIcon} />
-                <select
-                  className={f.customSelect}
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                >
-                  <option value="All" disabled>
-                    Filter by Type
-                  </option>
-                  <option value="All">All</option>
-                  <option value="Violation">Violation</option>
-                  <option value="Crash">Crash</option>
-                  <option value="Complaint">Complaint</option>
-                </select>
+           {/* Type Filter */}
+           <div className={s.searchContainer}>
+      <div className={f.selectWrapper}>
+        <FaFilter className={f.filterIcon} />
+        <div className={f.customSelect} onClick={toggleTypeDropdown}>
+          {filterType === "All" ? (
+            <span >Filter by Type</span> // Placeholder styling
+          ) : (
+            filterType
+          )}
+          <div className={f.customArrow}>▼</div>
+        </div>
+        {isTypeOpen && (
+          <div className={f.dropdownMenu}>
+            {typeOptions.map(option => (
+              <div 
+                key={option} 
+                className={f.dropdownOption} 
+                onClick={() => handleTypeOptionClick(option)}
+              >
+                {option}
               </div>
-            </div>
-
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
             {/* Status Filter */}
             <div className={s.searchContainer}>
-              <div className={f.selectWrapper}>
-                <FaFilter className={f.filterIcon} />
-                <select
-                  className={f.customSelect}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="All" disabled>
-                    Filter by Status
-                  </option>
-                  <option value="All">All</option>
-                  <option value="Read">Read</option>
-                  <option value="Unread">Unread</option>
-                </select>
+      <div className={f.selectWrapper} style={{ width: '250px' }}>
+        <FaFilter className={f.filterIcon} />
+        <div className={f.customSelect} onClick={toggleStatusDropdown} style={{ width: '250px' }}>    
+                {statusFilter === "All" ? (
+            <span >Filter by Status</span> // Placeholder styling
+          ) : (
+            statusFilter
+          )}
+          <div className={f.customArrow}>▼</div>
+        </div>
+        {isStatusOpen && (
+          <div className={f.dropdownMenu}>
+            {statusOptions.map(option => (
+              <div 
+                key={option} 
+                className={f.dropdownOption} 
+                onClick={() => handleStatusOptionClick(option)}
+              >
+                {option}
               </div>
-            </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
           </div>
         </div>
         <style>
@@ -816,17 +854,42 @@ const NotificationsList = () => {
           columns={columns}
           dataSource={filteredNotifications}
           rowKey={(record) => record.ID || record.id}
-          pagination={{
-            pageSize: 5,
-            showSizeChanger: false,
-          }}
-          style={{ width: "1200px", margin: "0 auto" }}
+          pagination={false} // Disable default pagination
+          style={{ width: "1200px", margin: "0 auto", marginBottom: "20px" }}
           rowClassName={(record) =>
             (record.FilterStatus || "").toLowerCase() === "unread"
               ? "unread-row"
               : ""
           }
         />
+            {/* Flexbox container for button and pagination */}
+            <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <Button
+            onClick={goBack}
+            style={{
+              height: "60px",
+              fontSize: "15px",
+              color: "#059855",
+              borderColor: "#059855",
+            }}
+          >
+            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+          </Button>
+       {/* Pagination component */}
+       <Pagination
+            defaultCurrent={1}
+            total={filteredData.length}
+            pageSize={5}
+            showSizeChanger={false} // Optional: hide size changer if not needed
+          />
+        </div>
       </main>
     </div>
   );
