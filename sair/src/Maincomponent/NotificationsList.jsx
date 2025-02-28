@@ -862,34 +862,37 @@ const NotificationsList = () => {
               : ""
           }
         />
-            {/* Flexbox container for button and pagination */}
-            <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <Button
-            onClick={goBack}
-            style={{
-              height: "60px",
-              fontSize: "15px",
-              color: "#059855",
-              borderColor: "#059855",
-            }}
-          >
-            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
-          </Button>
-       {/* Pagination component */}
-       <Pagination
-            defaultCurrent={1}
-            total={filteredData.length}
-            pageSize={5}
-            showSizeChanger={false} // Optional: hide size changer if not needed
-          />
-        </div>
+       {/* Flexbox container for button and pagination */}
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  }}
+>
+  <Button
+    onClick={goBack}
+    style={{
+      height: "60px",
+      fontSize: "15px",
+      color: "#059855",
+      borderColor: "#059855",
+    }}
+  >
+    <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+  </Button>
+
+  {/* Pagination component */}
+  <div style={{ display: "flex", alignItems: "center" }}>
+    <Pagination
+      defaultCurrent={1}
+      total={filteredData.length}
+      pageSize={5}
+      showSizeChanger={false} // Optional: hide size changer if not needed
+    />
+  </div>
+</div>
       </main>
     </div>
   );
