@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
@@ -17,13 +17,37 @@ const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState("");//j changes
+  const [statusFilter, setStatusFilter] = useState("All");
   const [notReadCrashes, setNotReadCrashes] = useState([]);
   const [notReadViolations, setnotReadViolations] = useState([]);
   const [notReadComplaints, setnotReadComplaints] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [notificationsList, setNotificationsList] = useState([]); //merged list
   const goBack = () => navigate(-1); // Go back to the previous page
+  const statusDropdownRef = useRef(null);
+  const typeDropdownRef = useRef(null);
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target)
+      ) {
+        setIsStatusOpen(false);
+      }
+      if (
+        typeDropdownRef.current &&
+        !typeDropdownRef.current.contains(event.target)
+      ) {
+        setIsTypeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
     const readViolations =
@@ -764,9 +788,6 @@ const NotificationsList = () => {
   ];
 
   const filteredNotifications = notificationsList.filter((record) => {
-    if (statusFilter === "" || statusFilter === "Filter by Status") { //j changes
-      return true; 
-    }
     if (filterType !== "All" && record.Type !== filterType) return false;
     if (statusFilter !== "All" && record.FilterStatus !== statusFilter)
       return false;
@@ -810,7 +831,7 @@ const NotificationsList = () => {
             style={{ display: "flex", gap: "20px" }}
           >
             {/* Type Filter */}
-            <div className={s.searchContainer}>
+            <div className={s.searchContainer} ref={typeDropdownRef}>
               <div className={f.selectWrapper}>
                 <FaFilter className={f.filterIcon} />
                 <div className={f.customSelect} onClick={toggleTypeDropdown}>
@@ -837,7 +858,7 @@ const NotificationsList = () => {
               </div>
             </div>
             {/* Status Filter */}
-            <div className={s.searchContainer}>
+            <div className={s.searchContainer} ref={statusDropdownRef}>
               <div className={f.selectWrapper} style={{ width: "250px" }}>
                 <FaFilter className={f.filterIcon} />
                 <div
@@ -845,26 +866,15 @@ const NotificationsList = () => {
                   onClick={toggleStatusDropdown}
                   style={{ width: "250px" }}
                 >
-                  {/* {statusFilter === "All" ? (
+                  {statusFilter === "All" ? (
                     <span>Filter by Status</span> // Placeholder styling
                   ) : (
                     statusFilter
-                  )} */}
-{/* j changes */}
-       <span>
-        {statusFilter ? statusFilter : "Filter by Status"}
-      </span>
+                  )}
                   <div className={f.customArrow}>▼</div>
                 </div>
                 {isStatusOpen && (
-      <div className={f.dropdownMenu}>
-        <div 
-          className={f.dropdownOption} 
-          onClick={() => handleStatusOptionClick("Filter by Status")} 
-        >
-          Filter by Status
-        </div>
-{/* j changes */}
+                  <div className={f.dropdownMenu}>
                     {statusOptions.map((option) => (
                       <div
                         key={option}
