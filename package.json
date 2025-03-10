@@ -5,6 +5,7 @@
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.3",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@react-google-maps/api": "^2.20.6",
     "axios": "^1.7.9",
     "axois": "^0.0.1-security",
     "cors": "^2.8.5",

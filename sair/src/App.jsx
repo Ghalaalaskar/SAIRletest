@@ -16,7 +16,7 @@ import ViolationGeneral from './Maincomponent/Violationgeneral';
 import AddMotorcycle from './Maincomponent/AddMotorcycle';
 import EditMotorcycle from './Maincomponent/EditMotorcycle';
 import DriverDetails from './Maincomponent/DriverDetails';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { monitorUnits } from './Maincomponent/monitorUnits';
 import VDriver from './Maincomponent/VDriver';
 import CrashGeneral from './Maincomponent/CrashGeneral';
@@ -52,45 +52,91 @@ import GDTAddStaffBatch from"./Maincomponent/GDT/GDTAddStaffBatch";
 import RicklessDrivers from './Maincomponent/ricklessdrives';
 import NotificationsList from './Maincomponent/NotificationsList';
 import GDTNotificationsList from './Maincomponent/GDT/GDTNotificationsList';
+const libraries = ["visualization"];  
+
 function App() {
+  const [locations, setLocations] = useState([]);
+  const fetchInterval = 10000; // Fetch every 10 seconds
+
   useEffect(() => {
+    console.log("📡 Fetching data from Wialon API...");
+
     const sess = window.wialon.core.Session.getInstance();
 
     const initSession = () => {
-     if (!window.wialon) {
-       return;
-     }
-     sess.initSession('https://hst-api.wialon.com');
+      if (!window.wialon) {
+        console.error("Wialon API is not loaded");
+        return;}
+
+      sess.initSession('https://hst-api.wialon.com');
      const token = '8ca297495a6d20aed50815e6f79cdd3b2D6292586C51CF2BE801FC0E4C312A5474C9BB71'; 
-     sess.loginToken(token, '', (code) => {
-     if (code) {
-       return;
-     }
-       // Start monitoring units continuously
-     monitorUnits(sess, 10000); // 10 seconds fetch interval
-     //checkCrash(sess, 10000);// 10 second fetch interval
 
-  });
-};
-   // Initialize session
+      sess.loginToken(token, '', (code) => {
+        if (code) {
+          console.error("Wialon Login Failed! Code:", code);
+          return;
+        }
+
+        console.log("Wialon Login Successful");
+
+        // Start monitoring units continuously
+        monitorUnits(sess);
+      });
+    };
+
+    // Function to fetch unit positions
+    const monitorUnits = async (sess) => {
+      const flags = window.wialon.item.Item.dataFlag.base | window.wialon.item.Unit.dataFlag.lastMessage;
+
+      setInterval(async () => {
+        try {
+          const code = await new Promise((resolve) => {
+            sess.updateDataFlags([{ type: 'type', data: 'avl_unit', flags: flags, mode: 0 }], resolve);
+          });
+
+          if (code) {
+            console.error("Wialon API Error: ", code);
+            return;
+          }          const loadedUnits = sess.getItems('avl_unit');
+
+          if (loadedUnits) {
+            console.log("Fetched Units from Wialon:", loadedUnits);
+
+            const positions = loadedUnits.map(unit => {
+              const pos = unit.getPosition();
+              const gpsNumber= unit.getName();
+              console.log(':::::::::::::::',gpsNumber);
+              return pos ? { lat: pos.y, lng: pos.x , gpsNumber } : null;
+            }).filter(p => p !== null);
+            
+            console.log("Processed Positions:", positions);
+
+            setLocations(positions);
+          }
+        } catch (error) {
+          console.error('Error fetching units:', error);
+        }
+      }, fetchInterval);
+    };
+
     initSession();
- }, []); 
+  }, []);
 
-
-
-
+  
   return (
 <ShortCompanyNameProvider>
 <FirstNameProvider>
     <LoadScript
-    googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc"
-    onError={(e) => console.error('Error loading maps', e)}
+    googleMapsApiKey="AIzaSyBFbAxhllak_ia6wXY5Nidci_cLmUQkVhc" libraries={libraries}
   >
+
     <Router>
     <ScrollToTop /> 
     <CrashNotification />
     <GDTNotification/>
+
       <Routes>
+
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
@@ -121,7 +167,7 @@ function App() {
         <Route path="/gdtcrash/general/:crashId" element={<GDTCrashGeneral />} />
         <Route path="/gdtcomplaints" element={<GDTComplaints />} /> 
         <Route path="/gdtcomplaints/general/:complaintId" element={<GDTComplaintGeneral />} />
-        <Route path="/gdtheatmap" element={<GDTHeatmap />} /> 
+        <Route path="/gdtheatmap" element={<GDTHeatmap locations={locations} />}  /> 
         <Route path="/GDTDashBoard" element={<GDTDashBoard />} /> 
         <Route path="/gdtstafflist" element={<GDTStafflist />} /> 
         <Route path="/gdtdriverlist" element={<GDTDriverlist />} /> 
