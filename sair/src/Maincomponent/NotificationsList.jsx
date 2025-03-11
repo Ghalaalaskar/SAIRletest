@@ -115,7 +115,11 @@ const NotificationsList = () => {
         return notificationDate > oneMonthAgo;
       });
     };
-
+    // Function to filter out notifications unresponse
+    const filterComplaintsdNotifications = (notifications = []) => {
+      return notifications.filter(({ Status }) => String(Status).trim().toLowerCase() === 'pending');
+    };
+    
     const filterCrashesOneDay = (notifications) => {
       const now = new Date();
       const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -145,7 +149,7 @@ const NotificationsList = () => {
       //need to changed
       Object.values(readViolations)
     );
-    const filteredReadComplaints = filterOldNotifications(
+    const filteredReadComplaints = filterComplaintsdNotifications(
       Object.values(readComplaints)
     );
 
