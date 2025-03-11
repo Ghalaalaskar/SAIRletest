@@ -9,6 +9,15 @@ const containerStyle = {
   margin: 'auto',  // Center the map
 };
 
+// const beigeMapStyle = [
+//   { elementType: "geometry", stylers: [{ color: "									#FFFAF0" }] }, // Base Color
+//   { elementType: "labels.text.fill", stylers: [{ color: "#776543" }] }, // Dark Brown Text
+//   { elementType: "labels.text.stroke", stylers: [{ color: "#f3f3f3" }] }, // Light Stroke Around Text
+//   { featureType: "administrative", elementType: "geometry", stylers: [{ visibility: "off" }] }, // Hide Borders
+//   { featureType: "water", stylers: [{ color: "#d4c4b7" }] }, // Light Beige Water
+//   { featureType: "road", stylers: [{ color: "#e6d5c3" }] }, // Light Beige Roads
+// ];
+
 const GDTMap = ({ locations }) => {  
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [heatmapData, setHeatmapData] = useState([]);
@@ -71,6 +80,7 @@ const GDTMap = ({ locations }) => {
         mapContainerStyle={containerStyle} 
         center={center} 
         zoom={14}
+        // options={{ styles: beigeMapStyle }} 
         onClick={() => setSelectedLocation(null)} 
         // onLoad={() => setIsMapLoaded(true)}
       >
