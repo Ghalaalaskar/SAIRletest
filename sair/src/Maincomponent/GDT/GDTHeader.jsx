@@ -68,7 +68,8 @@ const GDTHeader = ({ active }) => {
 
   useEffect(() => {
     const fetchFirstName = async () => {
-       if (!firstName) {
+      console.log(firstName);
+      if (!firstName) {
         // Fetch only if not already set
         const gdtUID = sessionStorage.getItem("gdtUID");
         if (gdtUID) {
@@ -225,10 +226,13 @@ const fetchDrivers = useCallback(async () => {
  // Update crash as read and navigate to details page
  const handleNotificationClick = async (crash) => {
   try {
-     const updatedReadCrashes = { ...readCrashesgdt, [crash.id]: crash };
+    console.log('id:',crash.id);
+    const updatedReadCrashes = { ...readCrashesgdt, [crash.id]: crash };
+    console.log('updated',updatedReadCrashes);
     localStorage.setItem(`readCrashesgdt_${GDTUID}`, JSON.stringify(updatedReadCrashes));
    const r= JSON.parse(localStorage.getItem(`readCrashesgdt_${GDTUID}`)) || {};
-     setReadCrashesgdt(updatedReadCrashes);
+  console.log('r:',r);
+    setReadCrashesgdt(updatedReadCrashes);
     // Move crash to read notifications
     setNotReadCrashes(prev => prev.filter(c => c.id !== crash.id));
 
@@ -313,10 +317,13 @@ const fetchDrivers = useCallback(async () => {
   // Update crash as read and navigate to details page
   const handleviolationNotificationClick = async (violation) => {
     try {
+      console.log('id:',violation.id);
       const updatedReadViolations = { ...readViolationsgdt, [violation.id]: violation };
+      console.log('updated',updatedReadViolations);
       localStorage.setItem(`readViolationsgdt_${GDTUID}`, JSON.stringify(updatedReadViolations));
      const r= JSON.parse(localStorage.getItem(`readViolationsgdt_${GDTUID}`)) || {};
-     setReadViolationsgdt(updatedReadViolations);
+    console.log('r:',r);
+    setReadViolationsgdt(updatedReadViolations);
       // Move crash to read notifications
       setnotReadViolations(prev => prev.filter(c => c.id !== violation.id));
     
@@ -359,6 +366,7 @@ const fetchDrivers = useCallback(async () => {
       const unsubscribeComplaint = onSnapshot(complaintCollection, (snapshot) => {
         
         const storedReadComplaints = JSON.parse(localStorage.getItem(`readComplaintsgdt_${GDTUID}`)) || {}; // Get read crashes from localStorage
+console.log('storedReadComplaints',storedReadComplaints);
         const complaintList = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -400,10 +408,13 @@ const fetchDrivers = useCallback(async () => {
   // Update crash as read and navigate to details page
   const handlecomplaintNotificationClick = async (complaint) => {
     try {
+      console.log('id:',complaint.id);
       const updatedReadComplaint = { ...readComplaintsgdt, [complaint.id]: complaint };
+      console.log('updated',updatedReadComplaint);
       localStorage.setItem(`readComplaintsgdt_${GDTUID}`, JSON.stringify(updatedReadComplaint));
      const r= JSON.parse(localStorage.getItem(`readComplaintsgdt_${GDTUID}`)) || {};
-     setReadComplaintsgdt(updatedReadComplaint);
+    console.log('r:',r);
+    setReadComplaintsgdt(updatedReadComplaint);
       // Move crash to read notifications
       setnotReadComplaints(prev => prev.filter(c => c.id !== complaint.id));
      
@@ -435,6 +446,7 @@ const fetchDrivers = useCallback(async () => {
 
   const handleallreadcrash = async (notReadCrashes) => {
     // Retrieve 'notReadCrashes22' from localStorage once
+    console.log('check',notReadCrashes);
     // Create a new object for updated read crashes
     let updatedReadCrashes = { ...readCrashesgdt};
     let notReadCrashes22 = JSON.parse(localStorage.getItem(`notReadCrashes22gdt_${GDTUID}`)) || {};
@@ -470,6 +482,7 @@ const fetchDrivers = useCallback(async () => {
 
   const handleallreadviolation = async (notReadViolations) => {
     // Retrieve 'notReadCrashes22' from localStorage once
+    console.log('check',notReadViolations);
     // Create a new object for updated read crashes
     let updatedReadViolation = { ...readViolationsgdt};
     let notReadViolations22 = JSON.parse(localStorage.getItem(`notReadViolations22gdt_${GDTUID}`)) || {};
@@ -507,6 +520,7 @@ const fetchDrivers = useCallback(async () => {
 
   const handleallreadcomplaint = async (notReadComplaints) => {
     // Retrieve 'notReadCrashes22' from localStorage once
+    console.log('check',notReadComplaints);
     // Create a new object for updated read crashes
     let updatedReadComplaint = { ...readComplaintsgdt};
     let notReadComplaints22 = JSON.parse(localStorage.getItem(`notReadComplaints22gdt_${GDTUID}`)) || {};
