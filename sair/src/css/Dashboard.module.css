@@ -1,0 +1,8 @@
+.charts {
+    width: 100%;
+    height: 500px; /* Ensure sufficient height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
