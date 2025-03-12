@@ -16,44 +16,44 @@ const GDTDashboard = () => {
       try {
         const querySnapshot = await getDocs(collection(db, "Violation"));
         const counts = {};
-
+  
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          if (!data.timestamp) return; // Skip if timestamp is missing
-
-          const timestamp = new Date(data.timestamp.seconds * 1000); // Convert Firestore timestamp
-          const time = timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-
+          if (!data.time) return;
+  
+          // Convert Unix timestamp to Date
+          const timestamp = new Date(data.time);
+          const time = timestamp.getHours() + ":" + String(timestamp.getMinutes()).padStart(2, "0");
+  
           counts[time] = (counts[time] || 0) + 1;
         });
-
-        // Convert counts object into Nivo-compatible format
-        const formattedData = Object.entries(counts).map(([time, count]) => ({
-          x: time,
-          y: count,
-        }));
-
+  
+        // Convert counts object to array and sort it
+        const formattedData = Object.entries(counts)
+          .map(([time, count]) => ({ x: time, y: count }))
+          .sort((a, b) => a.x.localeCompare(b.x));
+  
         if (formattedData.length === 0) {
           console.warn("No violation data available.");
         }
-
+  
         setViolationData([
           {
             id: "Violations",
-            data: formattedData,
+            color: "hsl(330, 70%, 50%)",
+            data: formattedData.length ? formattedData : [{ x: "00:00", y: 0 }],
           },
         ]);
+        
+  
       } catch (error) {
         console.error("Error fetching violations:", error);
       }
     };
-
+  
     fetchViolations();
   }, []);
-
+  
   return (
     <div
       style={{ backgroundColor: "#80808054", height: "100vh", width: "100%" }}
@@ -73,8 +73,9 @@ const GDTDashboard = () => {
       </div>
 
       <div className="charts">
-        <div className={s.chart} style={{ height: 400 }}>
-          {violationData.length > 0 && violationData[0].data.length > 0 ? (
+      <div className={s.chart} style={{ height: "400px", width: "100%" }}>
+      {console.log("Formatted Data:", violationData)}{
+      violationData.length > 0 && violationData[0].data.length > 0 ? (
             <ResponsiveLine
               data={violationData}
               margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
