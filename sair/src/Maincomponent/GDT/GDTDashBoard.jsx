@@ -4,7 +4,7 @@ import s from "../../css/Dashboard.module.css";
 import "../../css/CustomModal.css";
 import { useNavigate } from "react-router-dom";
 import { ResponsiveLine } from "@nivo/line";
-import { db } from "../../firebase"; // Adjust according to your Firebase setup
+import { db } from "../../firebase"; // Import Firebase
 import { collection, getDocs } from "firebase/firestore";
 
 const GDTDashboard = () => {
@@ -19,39 +19,33 @@ const GDTDashboard = () => {
 
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-      
-          let timestamp;
-          if (data.timestamp && typeof data.timestamp === "object" && data.timestamp.seconds) {
-              // Firestore Timestamp format
-              timestamp = new Date(data.timestamp.seconds * 1000);
-          } else if (data.timestamp && typeof data.timestamp === "number") {
-              // Unix timestamp (stored as seconds)
-              timestamp = new Date(data.timestamp * 1000);
-          } else {
-              console.warn("Invalid timestamp format:", data.timestamp);
-              return; // Skip this entry
-          }
-      
-          const time = timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      
+          if (!data.timestamp) return; // Skip if timestamp is missing
+
+          const timestamp = new Date(data.timestamp.seconds * 1000); // Convert Firestore timestamp
+          const time = timestamp.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
           counts[time] = (counts[time] || 0) + 1;
-      });
-      
+        });
 
         // Convert counts object into Nivo-compatible format
-        const formattedData = [
+        const formattedData = Object.entries(counts).map(([time, count]) => ({
+          x: time,
+          y: count,
+        }));
+
+        if (formattedData.length === 0) {
+          console.warn("No violation data available.");
+        }
+
+        setViolationData([
           {
             id: "Violations",
-            data: Object.keys(counts).map(time => ({
-              x: time,
-              y: counts[time],
-            })),
+            data: formattedData,
           },
-        ];
-        console.log("Fetched data:", querySnapshot.docs.map(doc => doc.data()));
-        console.log("Counts:", counts);
-        console.log("Formatted data:", formattedData);
-        setViolationData(formattedData);
+        ]);
       } catch (error) {
         console.error("Error fetching violations:", error);
       }
@@ -61,42 +55,96 @@ const GDTDashboard = () => {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#80808054", height: "100vh", width: "100%" }}>
+    <div
+      style={{ backgroundColor: "#80808054", height: "100vh", width: "100%" }}
+    >
       <Header active="gdtdashboard" />
       <div className="breadcrumb">
-        <a onClick={() => navigate("/gdthome")} style={{ cursor: "pointer" }}>Home</a>
+        <a onClick={() => navigate("/gdthome")} style={{ cursor: "pointer" }}>
+          Home
+        </a>
         <span> / </span>
-        <a onClick={() => navigate("/GDTDashBoard")} style={{ cursor: "pointer" }}>Dashboard</a>
+        <a
+          onClick={() => navigate("/GDTDashBoard")}
+          style={{ cursor: "pointer" }}
+        >
+          Dashboard
+        </a>
       </div>
 
       <div className="charts">
-<div className={s.chart} style={{ height: 400, border: "1px solid red" }}>          {violationData.length > 0 ? (
+        <div className={s.chart} style={{ height: 400 }}>
+          {violationData.length > 0 && violationData[0].data.length > 0 ? (
             <ResponsiveLine
               data={violationData}
               margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
               xScale={{ type: "point" }}
-              yScale={{ type: "linear", min: "auto", max: "auto", stacked: true, reverse: false }}
-              axisBottom={{ legend: "Time", legendOffset: 36, legendPosition: "middle" }}
-              axisLeft={{ legend: "Number of Violations", legendOffset: -40, legendPosition: "middle" }}
+              yScale={{
+                type: "linear",
+                min: "auto",
+                max: "auto",
+                stacked: true,
+                reverse: false,
+              }}
+              yFormat=" >-.2f"
+              axisTop={null}
+              axisRight={null}
+              axisBottom={{
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: "transportation",
+                legendOffset: 36,
+                legendPosition: "middle",
+                truncateTickAt: 0,
+              }}
+              axisLeft={{
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: "count",
+                legendOffset: -40,
+                legendPosition: "middle",
+                truncateTickAt: 0,
+              }}
               colors={{ scheme: "greens" }}
               pointSize={10}
+              pointColor={{ theme: "background" }}
               pointBorderWidth={2}
               pointBorderColor={{ from: "serieColor" }}
+              pointLabel="data.yFormatted"
+              pointLabelYOffset={-12}
+              enableTouchCrosshair={true}
               useMesh={true}
               legends={[
                 {
                   anchor: "bottom-right",
                   direction: "column",
+                  justify: false,
                   translateX: 100,
+                  translateY: 0,
+                  itemsSpacing: 0,
+                  itemDirection: "left-to-right",
                   itemWidth: 80,
                   itemHeight: 20,
+                  itemOpacity: 0.75,
                   symbolSize: 12,
                   symbolShape: "circle",
+                  symbolBorderColor: "rgba(0, 0, 0, .5)",
+                  effects: [
+                    {
+                      on: "hover",
+                      style: {
+                        itemBackground: "rgba(0, 0, 0, .03)",
+                        itemOpacity: 1,
+                      },
+                    },
+                  ],
                 },
               ]}
             />
           ) : (
-            <p>Loading chart...</p>
+            <p>No violation data available.</p>
           )}
         </div>
       </div>
