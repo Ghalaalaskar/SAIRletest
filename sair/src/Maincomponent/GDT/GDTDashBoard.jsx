@@ -1,32 +1,21 @@
 import React from 'react';
-import homeBackground from '../../images/homebackground7.png';
 import Header from './GDTHeader';
-import '../../css/EmployerHome.module.css';
+import '../../css/Dashboard.module.css';
 import '../../css/CustomModal.css';
 
 const gdtdashboard = () => {
-  const pageStyles = {
-    backgroundImage: `url(${homeBackground})`,
-    backgroundSize: '1000px', 
-    backgroundPosition: 'right', 
+  const contentStyle = {
+    backgroundColor: '#80808054', 
     height: '100vh',
     width: '100%', 
-    backgroundRepeat: 'no-repeat',
-  };
+  }; 
 
-  const h1WrapperStyles = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 'calc(100vh - 50px)', 
-  };
+
 
   return (
-    <div style={pageStyles}>
+    <div style={contentStyle}>
       <Header active="gdtdashboard" />
-      <div style={h1WrapperStyles}>
-      <h1>Dashboard feature currently unavailable. Stay tuned for updates!</h1>
-      </div>
+    
     </div>
   );
 };
