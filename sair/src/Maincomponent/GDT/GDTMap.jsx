@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback  } from 'react';
 import { GoogleMap, InfoWindowF, MarkerF ,HeatmapLayer} from '@react-google-maps/api';
 import motorcycle from '../../images/motorcycle.png';
 import '../../css/CustomModal.css';
-import _debounce from 'lodash.debounce'; 
 
 
 const containerStyle = {
@@ -31,6 +30,7 @@ const GDTMap = ({ locations }) => {
     return storedLocations ? JSON.parse(storedLocations) : []; 
   });
   const [initialLoad, setInitialLoad] = useState(true); // Track if it's the initial load
+  const [zoomLevel, setZoomLevel] = useState(14); // Default zoom level
 
 
   console.log("GDTMap Component");
@@ -54,7 +54,11 @@ const GDTMap = ({ locations }) => {
     updateMapData();
   }, [locations, updateMapData]);
 
-  
+  useEffect(() => {
+    window.gm_authFailure = function() {
+      console.error("Google Maps API authentication failed.");
+    };
+  }, []);
 
   /*useEffect(() => {
     console.log("Locations received:", locations);
@@ -94,6 +98,11 @@ const GDTMap = ({ locations }) => {
     anchor: new window.google.maps.Point(25, 50)
   };
 
+  const handleMapLoad = (mapInstance) => {
+    mapInstance.addListener('zoom_changed', () => {
+      setZoomLevel(mapInstance.getZoom());
+    });
+  };
 
   /* const center = locations.length > 0 ? { lat: locations[0].lat, lng: locations[0].lng } : { lat: 24.7136, lng: 46.6753 };
   const center = lastKnownLocations.length > 0 
@@ -108,7 +117,8 @@ const GDTMap = ({ locations }) => {
       <GoogleMap 
         mapContainerStyle={containerStyle} 
         center={mapCenter} 
-        zoom={14}
+        zoom={zoomLevel}
+        onLoad={handleMapLoad}
         // options={{ styles: beigeMapStyle }} 
         onClick={() => setSelectedLocation(null)} 
         // onLoad={() => setIsMapLoaded(true)}
@@ -132,31 +142,34 @@ const GDTMap = ({ locations }) => {
           />
         )}
 
-{lastKnownLocations.map((location, index) => ( //  {isMapLoaded &&locations.map
+        {/* Render markers only if zoom level is 15 or higher */}
+        {/*lastKnownLocations.map((location, index) =>(    here is the old code without zooming*/}
+        {zoomLevel >= 16 && lastKnownLocations.map((location, index) => (
           <MarkerF
             key={index}
             position={{ lat: location.lat, lng: location.lng }}
-            icon={motorcycleIcon} 
+            icon={motorcycleIcon}
             onClick={() => {
               setSelectedLocation(location);
             }}
           />
         ))}
 
-{selectedLocation &&  (
-  <InfoWindowF
-    position={{ lat: selectedLocation.lat + 0.00012, lng: selectedLocation.lng }} 
-    onCloseClick={() => setSelectedLocation(null)}
-  >
-    <div>
-      <h4>Driver Info</h4>
-      <p><strong>GPS Number:</strong> {selectedLocation.gpsNumber}</p>
-      <p><strong>Latitude:</strong> {selectedLocation.lat}</p>
-      <p><strong>Longitude:</strong> {selectedLocation.lng}</p>
-    </div>
-  </InfoWindowF>
-)}
+        {selectedLocation && (
+          <InfoWindowF
+            position={{ lat: selectedLocation.lat + 0.00012, lng: selectedLocation.lng }}
+            onCloseClick={() => setSelectedLocation(null)}
+          >
+            <div>
+              <h4>Driver Info</h4>
+              <p><strong>GPS Number:</strong> {selectedLocation.gpsNumber}</p>
+              <p><strong>Latitude:</strong> {selectedLocation.lat}</p>
+              <p><strong>Longitude:</strong> {selectedLocation.lng}</p>
+            </div>
+          </InfoWindowF>
+        )}
       </GoogleMap>
+
     </div>
   );
 };
