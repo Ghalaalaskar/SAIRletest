@@ -4,25 +4,22 @@ import Header from './GDTHeader';
 import '../../css/EmployerHome.module.css';
 import '../../css/CustomModal.css';
 import Map from "./GDTMap"; 
-import { useNavigate } from "react-router-dom";
 
-const GDTHeatMap = ({ locations }) => {  
-    const navigate = useNavigate();
-  
+const GDTHeatMap = () => {
   const pageStyles = {
-    height: '100vh',
-    width: '100%', 
+    margin: 10,
   };
 
+  const locations = [
+    { lat: 24.7136, lng: 46.6753, placeName: "Riyadh Center" },
+    { lat: 24.7455, lng: 46.6566, placeName: "Al Olaya District" },
+    { lat: 24.7740, lng: 46.7330, placeName: "King Abdullah Financial District" },
+    { lat: 24.6861, lng: 46.7318, placeName: "Diriyah" },
+  ];
 
   return (
     <div style={pageStyles}>
       <Header active="gdtheatmap" />
-      <div className="breadcrumb" style={{ marginRight: '100px' }}>
-        <a onClick={() => navigate('/gdthome')}>Home</a>
-        <span> / </span>
-        <a onClick={() => navigate('/gdtheatmap')}>Heat-Map</a>
-      </div>
       <Map locations={locations} />
     </div>
   );
