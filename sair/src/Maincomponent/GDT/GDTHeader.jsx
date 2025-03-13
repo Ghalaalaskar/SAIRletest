@@ -979,7 +979,7 @@ notReadCrashes.length > 0 ? (
         <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px', }}>
 
      <button 
-      onClick={() => navigate('/notificationslistgdt')}//we may change the path
+      onClick={() => navigate('/gdtnotificationslist')}//we may change the path
       style={{
         marginTop:'20px',
         padding: '8px 8px',
@@ -1006,7 +1006,7 @@ notReadCrashes.length > 0 ? (
     <p style={{ marginBottom: '141.50px' }}>No new crashes</p>
     
     <button 
-      onClick={() => navigate('/notificationslistgdt')}
+      onClick={() => navigate('/gdtnotificationslist')}
       style={{
         marginTop:'20px',
         padding: '8px 8px',
@@ -1114,7 +1114,7 @@ notReadViolations.length > 0 ? (
         <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px', }}>
 
         <button 
-      onClick={() => navigate('/notificationslistgdt')}
+      onClick={() => navigate('/gdtnotificationslist')}
       style={{
         marginTop:'20px',
         padding: '8px 8px',
@@ -1139,7 +1139,7 @@ notReadViolations.length > 0 ? (
     <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
     <p style={{ marginBottom: '141.50px' }}>No new violations</p>
     <button 
-      onClick={() => navigate('/notificationslistgdt')}
+      onClick={() => navigate('/gdtnotificationslist')}
       style={{
         marginTop:'20px',
         padding: '8px 8px',
@@ -1248,7 +1248,7 @@ notReadViolations.length > 0 ? (
      <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 1, paddingTop: '1px',marginBottom:'5px',}}>
 
      <button 
-      onClick={() => navigate('/notificationslistgdt')}
+      onClick={() => navigate('/gdtnotificationslist')}
       style={{
         marginTop:'20px',
         padding: '8px 8px',
@@ -1273,7 +1273,7 @@ notReadViolations.length > 0 ? (
       <BellOutlined style={{ fontSize: '36px', marginBottom: '10px' }} />
       <p style={{ marginBottom: '141.50px' }}>No new complaints</p>
       <button 
-      onClick={() => navigate('/notificationslistgdt')}
+      onClick={() => navigate('/gdtnotificationslist')}
       style={{
         marginTop:'20px',
         padding: '8px 8px',

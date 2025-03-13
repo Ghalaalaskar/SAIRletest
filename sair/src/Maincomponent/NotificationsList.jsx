@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table } from "antd";
 import EyeIcon from "../images/eye.png";
 import s from "../css/DriverList.module.css";
 import f from "../css/ComplaintList.module.css";
@@ -8,10 +7,12 @@ import { db } from "../firebase";
 import Header from "./Header";
 import { doc, getDoc } from "firebase/firestore";
 import "../css/CustomModal.css";
+import { Button, Table, Pagination } from "antd";
 import { onSnapshot, orderBy } from "firebase/firestore";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { FaFilter } from "react-icons/fa";
 import { useCallback } from "react";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("All");
@@ -22,7 +23,31 @@ const NotificationsList = () => {
   const [notReadComplaints, setnotReadComplaints] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [notificationsList, setNotificationsList] = useState([]); //merged list
+  const goBack = () => navigate(-1); // Go back to the previous page
+  const statusDropdownRef = useRef(null);
+  const typeDropdownRef = useRef(null);
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target)
+      ) {
+        setIsStatusOpen(false);
+      }
+      if (
+        typeDropdownRef.current &&
+        !typeDropdownRef.current.contains(event.target)
+      ) {
+        setIsTypeOpen(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     const readCrashes = JSON.parse(localStorage.getItem("readCrashes")) || {};
     const readViolations =
@@ -35,21 +60,24 @@ const NotificationsList = () => {
         console.warn("Invalid DateTime string:", dateTimeString);
         return new Date(0);
       }
-    
+
       try {
         // Remove 'at', AM/PM, and trim
-        let cleanedString = dateTimeString.replace("at", "").replace(/\s?(AM|PM)/, "").trim();
-    
+        let cleanedString = dateTimeString
+          .replace("at", "")
+          .replace(/\s?(AM|PM)/, "")
+          .trim();
+
         // Handle timezone (removes "UTC+3")
         cleanedString = cleanedString.replace(/UTC[+-]\d+/, "").trim();
-    
+
         const parsedDate = new Date(cleanedString);
-    
+
         if (isNaN(parsedDate.getTime())) {
           console.error("Invalid parsed date:", cleanedString);
           return new Date(0);
         }
-    
+
         return parsedDate;
       } catch (error) {
         console.error("Error parsing DateTime:", error, dateTimeString);
@@ -58,7 +86,10 @@ const NotificationsList = () => {
     };
     const normalizeTimestamp = (notification) => {
       if (notification.DateTime) {
-        if (typeof notification.DateTime === "object" && notification.DateTime.seconds) {
+        if (
+          typeof notification.DateTime === "object" &&
+          notification.DateTime.seconds
+        ) {
           return new Date(notification.DateTime.seconds * 1000); // Firestore Timestamp
         } else if (typeof notification.DateTime === "string") {
           return parseCustomDateTime(notification.DateTime); // Custom DateTime String
@@ -68,42 +99,57 @@ const NotificationsList = () => {
       }
       return new Date(0); // Default fallback
     };
-    
+
     // Function to filter out notifications older than a month
     const filterOldNotifications = (notifications) => {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    
-      return notifications.filter((notification) => {
-        const notificationDate = normalizeTimestamp(notification);
-        console.log(`Checking Notification: ${notification.id || "Unknown"}, Date: ${notificationDate}, One Month Ago: ${oneMonthAgo}`);
-        return notificationDate > oneMonthAgo;
-      });
-    };
 
-    const filterCrashesOneDay = (notifications) => {
-      const now = new Date(); 
-      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000); 
       return notifications.filter((notification) => {
         const notificationDate = normalizeTimestamp(notification);
         console.log(
-          `Checking Notification: ${notification.id || "Unknown"}, Date: ${notificationDate}, 24 Hours Ago: ${twentyFourHoursAgo}`);
-        return notificationDate >= twentyFourHoursAgo; 
+          `Checking Notification: ${
+            notification.id || "Unknown"
+          }, Date: ${notificationDate}, One Month Ago: ${oneMonthAgo}`
+        );
+        return notificationDate > oneMonthAgo;
       });
     };
+    // Function to filter out notifications unresponse
+    const filterComplaintsdNotifications = (notifications = []) => {
+      return notifications.filter(({ Status }) => String(Status).trim().toLowerCase() === 'pending');
+    };
     
-    
-    console.log("All Read Complaints Before Filtering:", Object.values(readComplaints));
-    console.log("Parsed Complaints Before Filtering:", Object.values(readComplaints).map(normalizeTimestamp));
-    
-    // Filter read notifications
-    const filteredReadCrashes = filterCrashesOneDay(
-      Object.values(readCrashes)
+    const filterCrashesOneDay = (notifications) => {
+      const now = new Date();
+      const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      return notifications.filter((notification) => {
+        const notificationDate = normalizeTimestamp(notification);
+        console.log(
+          `Checking Notification: ${
+            notification.id || "Unknown"
+          }, Date: ${notificationDate}, 24 Hours Ago: ${twentyFourHoursAgo}`
+        );
+        return notificationDate >= twentyFourHoursAgo;
+      });
+    };
+
+    console.log(
+      "All Read Complaints Before Filtering:",
+      Object.values(readComplaints)
     );
-    const filteredReadViolations = filterOldNotifications(  //need to changed 
+    console.log(
+      "Parsed Complaints Before Filtering:",
+      Object.values(readComplaints).map(normalizeTimestamp)
+    );
+
+    // Filter read notifications
+    const filteredReadCrashes = filterCrashesOneDay(Object.values(readCrashes));
+    const filteredReadViolations = filterOldNotifications(
+      //need to changed
       Object.values(readViolations)
     );
-    const filteredReadComplaints = filterOldNotifications(
+    const filteredReadComplaints = filterComplaintsdNotifications(
       Object.values(readComplaints)
     );
 
@@ -144,12 +190,12 @@ const NotificationsList = () => {
     console.log("Filtered Read Crashes:", filteredReadCrashes);
     console.log("Filtered Read Violations:", filteredReadViolations);
 
-  // Sort notifications by date (newest first)
-  const sortedNotifications = [...mergedNotifications].sort(
-    (a, b) => normalizeTimestamp(b) - normalizeTimestamp(a)
-  );
+    // Sort notifications by date (newest first)
+    const sortedNotifications = [...mergedNotifications].sort(
+      (a, b) => normalizeTimestamp(b) - normalizeTimestamp(a)
+    );
 
-  setNotificationsList(sortedNotifications);
+    setNotificationsList(sortedNotifications);
   }, [notReadCrashes, notReadViolations, notReadComplaints]);
 
   useEffect(() => {
@@ -198,23 +244,24 @@ const NotificationsList = () => {
 
   // Fetch crash data
   const fetchCrashes = useCallback((driverIds) => {
-    if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+    if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0)
+      return;
 
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
-      if (chunk.length === 0) return; 
+      if (chunk.length === 0) return;
 
-     const now = Math.floor(Date.now() / 1000);
-     const twentyFourHoursAgo = now - 24 * 60 * 60;
-     const crashCollection = query(
-     collection(db, 'Crash'),
-     where('driverID', 'in', chunk),
-     where('Status', '==', 'Emergency SOS'),
-     where('RespondedBy', '==', null),
-     where("time", ">=", twentyFourHoursAgo), 
-     orderBy('time', 'desc') // Order crashes by time in descending order
-       );
+      const now = Math.floor(Date.now() / 1000);
+      const twentyFourHoursAgo = now - 24 * 60 * 60;
+      const crashCollection = query(
+        collection(db, "Crash"),
+        where("driverID", "in", chunk),
+        where("Status", "==", "Emergency SOS"),
+        where("RespondedBy", "==", null),
+        where("time", ">=", twentyFourHoursAgo),
+        orderBy("time", "desc") // Order crashes by time in descending order
+      );
       const unsubscribeCrashes = onSnapshot(crashCollection, (snapshot) => {
         const storedReadCrashes =
           JSON.parse(localStorage.getItem("readCrashes")) || {}; // Get read crashes from localStorage
@@ -256,12 +303,13 @@ const NotificationsList = () => {
 
   // Fetch violation data
   const fetchViolations = useCallback((driverIds) => {
-  if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+    if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0)
+      return;
 
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
-      if (chunk.length === 0) return; 
+      if (chunk.length === 0) return;
 
       const violationCollection = query(
         collection(db, "Violation"),
@@ -316,12 +364,13 @@ const NotificationsList = () => {
 
   // Fetch complaint data
   const fetchComplaints = useCallback((driverIds) => {
-  if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0) return;
+    if (!driverIds || !Array.isArray(driverIds) || driverIds.length === 0)
+      return;
 
     const chunkSize = 10; // Customize as needed
     for (let i = 0; i < driverIds.length; i += chunkSize) {
       const chunk = driverIds.slice(i, i + chunkSize);
-      if (chunk.length === 0) return; 
+      if (chunk.length === 0) return;
 
       const complaintCollection = query(
         collection(db, "Complaint"),
@@ -587,7 +636,7 @@ const NotificationsList = () => {
           ID: item.id || item.ID,
           DriverID: item.driverID || item.DriverID,
           Type: type,
-          Status: details.Status || "Pending",
+          Status: details.Status || null,
           FilterStatus: filterStatus,
           ViolationID: details.violationID || null,
           CrashID: details.crashID || null,
@@ -598,10 +647,11 @@ const NotificationsList = () => {
 
       allNotifications = [...allNotifications, ...formattedData];
     }
-    
-    if (!driverIDs || !Array.isArray(driverIDs) || driverIDs.length === 0) return;
 
-  // Batch fetch drivers
+    if (!driverIDs || !Array.isArray(driverIDs) || driverIDs.length === 0)
+      return;
+
+    // Batch fetch drivers
     const driverQuery = query(
       collection(db, "Driver"),
       where("DriverID", "in", Array.from(driverIDs))
@@ -747,7 +797,28 @@ const NotificationsList = () => {
       return false;
     return true;
   });
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
+  const statusOptions = ["All", "Read", "Unread"];
+  const typeOptions = ["All", "Violation", "Crash", "Complaint"];
 
+  const toggleStatusDropdown = () => {
+    setIsStatusOpen(!isStatusOpen);
+  };
+
+  const toggleTypeDropdown = () => {
+    setIsTypeOpen(!isTypeOpen);
+  };
+
+  const handleStatusOptionClick = (option) => {
+    setStatusFilter(option);
+    setIsStatusOpen(false);
+  };
+
+  const handleTypeOptionClick = (option) => {
+    setFilterType(option);
+    setIsTypeOpen(false);
+  };
   return (
     <div>
       <Header active="notificationslist" />
@@ -764,41 +835,61 @@ const NotificationsList = () => {
             style={{ display: "flex", gap: "20px" }}
           >
             {/* Type Filter */}
-            <div className={s.searchContainer}>
+            <div className={s.searchContainer} ref={typeDropdownRef}>
               <div className={f.selectWrapper}>
                 <FaFilter className={f.filterIcon} />
-                <select
-                  className={f.customSelect}
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                >
-                  <option value="All" disabled>
-                    Filter by Type
-                  </option>
-                  <option value="All">All</option>
-                  <option value="Violation">Violation</option>
-                  <option value="Crash">Crash</option>
-                  <option value="Complaint">Complaint</option>
-                </select>
+                <div className={f.customSelect} onClick={toggleTypeDropdown}>
+                  {filterType === "All" ? (
+                    <span>Filter by Type</span> // Placeholder styling
+                  ) : (
+                    filterType
+                  )}
+                  <div className={f.customArrow}>▼</div>
+                </div>
+                {isTypeOpen && (
+                  <div className={f.dropdownMenu}>
+                    {typeOptions.map((option) => (
+                      <div
+                        key={option}
+                        className={f.dropdownOption}
+                        onClick={() => handleTypeOptionClick(option)}
+                      >
+                        {option}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-
             {/* Status Filter */}
-            <div className={s.searchContainer}>
-              <div className={f.selectWrapper}>
+            <div className={s.searchContainer} ref={statusDropdownRef}>
+              <div className={f.selectWrapper} style={{ width: "250px" }}>
                 <FaFilter className={f.filterIcon} />
-                <select
+                <div
                   className={f.customSelect}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onClick={toggleStatusDropdown}
+                  style={{ width: "250px" }}
                 >
-                  <option value="All" disabled>
-                    Filter by Status
-                  </option>
-                  <option value="All">All</option>
-                  <option value="Read">Read</option>
-                  <option value="Unread">Unread</option>
-                </select>
+                  {statusFilter === "All" ? (
+                    <span>Filter by Status</span> // Placeholder styling
+                  ) : (
+                    statusFilter
+                  )}
+                  <div className={f.customArrow}>▼</div>
+                </div>
+                {isStatusOpen && (
+                  <div className={f.dropdownMenu}>
+                    {statusOptions.map((option) => (
+                      <div
+                        key={option}
+                        className={f.dropdownOption}
+                        onClick={() => handleStatusOptionClick(option)}
+                      >
+                        {option}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -816,17 +907,66 @@ const NotificationsList = () => {
           columns={columns}
           dataSource={filteredNotifications}
           rowKey={(record) => record.ID || record.id}
-          pagination={{
-            pageSize: 5,
-            showSizeChanger: false,
-          }}
-          style={{ width: "1200px", margin: "0 auto" }}
+          pagination={false} // Disable default pagination
+          style={{ width: "1200px", margin: "0 auto", marginBottom: "20px" }}
           rowClassName={(record) =>
             (record.FilterStatus || "").toLowerCase() === "unread"
               ? "unread-row"
               : ""
           }
         />
+        {/* Flexbox container for button and pagination */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <Button
+            onClick={goBack}
+            style={{
+              height: "60px",
+              fontSize: "15px",
+              color: "#059855",
+              borderColor: "#059855",
+            }}
+          >
+            <ArrowLeftOutlined style={{ marginRight: "8px" }} /> Go Back
+          </Button>
+
+          {/* Pagination component with custom style */}
+          <Pagination
+            defaultCurrent={1}
+            total={filteredData.length}
+            pageSize={5}
+            showSizeChanger={false}
+            itemRender={(page, type, originalElement) => {
+              if (type === "page") {
+                return (
+                  <div
+                    style={{
+                      border: "1px solid #059855",
+                      borderRadius: "4px",
+                      padding: "8px",
+                      margin: "0 4px",
+                      cursor: "pointer",
+                      color: "#059855",
+                      height: "29px",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {page}
+                  </div>
+                );
+              }
+              return originalElement; // Return default for other types (e.g., prev, next)
+            }}
+          />
+        </div>
       </main>
     </div>
   );
